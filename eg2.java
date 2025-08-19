@@ -3,6 +3,7 @@ import java.io.*;
 import java.util.*;
 class eg2psp
 {
+
 private static String  getFieldType(String type,int size)
 {
 if(type.equalsIgnoreCase("INT")) return "int";
@@ -34,6 +35,8 @@ File file;
 RandomAccessFile randomAccessFile;
 Set<String> primaryKeyColumns=new HashSet<>();
 List<String> importLines=new ArrayList<>();
+Map<String,ForeignKeyInfo> foreignKeyColumnsMap=new HashMap<>();
+ForeignKeyInfo foreignKeyInfo;
 while(tables.next())
 {
 String tableName=tables.getString("TABLE_NAME");
@@ -68,6 +71,24 @@ while(k.next())
 primaryKeyColumns.add(k.getString("COLUMN_NAME"));
 }
 k.close();
+
+k=meta.getImportedKeys(connection.getCatalog(),null,tableName);
+while(k.next())
+{
+String fkCol= k.getString("FKCOLUMN_NAME");
+String pkTbl=k.getString("PKTABLE_NAME");
+String pkCol=k.getString("PKCOLUMN_NAME");
+foreignKeyInfo=new ForeignKeyInfo();
+foreignKeyInfo.fkColumnName=fkCol;
+foreignKeyInfo.parentTable=pkTbl;
+foreignKeyInfo.parentColumnName=pkCol;
+foreignKeyColumnsMap.put(fkCol,foreignKeyInfo);
+System.out.println(" FK: " + fkCol + " -> " + pkTbl + "(" + pkCol + ")");
+
+}
+
+k.close();
+
 
 
 ResultSet columns=meta.getColumns(connection.getCatalog(),null,tableName,"%");
@@ -108,6 +129,11 @@ if(autoIncrement.equalsIgnoreCase("YES"))
 classSourceCode=classSourceCode+"@AutoIncrement\r\n";
 }
 
+if(foreignKeyColumnsMap.containsKey(columnName))
+{
+foreignKeyInfo=foreignKeyColumnsMap.get(columnName);
+classSourceCode=classSourceCode+"@ForeignKey(parent=\"" + foreignKeyInfo.parentTable + "\",column=\"" + foreignKeyInfo.parentColumnName + "\")\r\n" ;
+}
 
 // check which type
 
@@ -115,7 +141,7 @@ String fieldType=getFieldType(type,Integer.parseInt(size));
 if(fieldType.equalsIgnoreCase("Date")) importLines.add("import java.util.Date;");
 else if(fieldType.equalsIgnoreCase("BigDecimal")) importLines.add("import java.math.BigDecimal");
 
-classSourceCode=classSourceCode+fieldType+" "+fieldName+";"+"\r\n\r\n";
+classSourceCode=classSourceCode+"public "+fieldType+" "+fieldName+";"+"\r\n\r\n";
 
 
 
@@ -128,16 +154,6 @@ columns.close();
 
 classSourceCode=classSourceCode+"}";
 
-k=meta.getImportedKeys(connection.getCatalog(),null,tableName);
-while(k.next())
-{
-String fkCol= k.getString("FKCOLUMN_NAME");
-String pkTbl=k.getString("PKTABLE_NAME");
-String pkCol=k.getString("PKCOLUMN_NAME");
-//System.out.println(" FK: " + fkCol + " -> " + pkTbl + "(" + pkCol + ")");
-}
-
-k.close();
 
 ResultSet idx=meta.getIndexInfo(connection.getCatalog(), null, tableName, false, false);
 while(idx.next()) 
@@ -156,6 +172,8 @@ randomAccessFile.writeBytes(importLine+"\r\n");
 
 randomAccessFile.writeBytes(classSourceCode);
 randomAccessFile.close();
+primaryKeyColumns.clear();
+foreignKeyColumnsMap.clear();
 }
 
 tables.close();
