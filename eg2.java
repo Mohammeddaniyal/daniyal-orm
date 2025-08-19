@@ -1,0 +1,168 @@
+import java.sql.*;
+import java.io.*;
+import java.util.*;
+class eg2psp
+{
+private static String  getFieldType(String type,int size)
+{
+if(type.equalsIgnoreCase("INT")) return "int";
+if(type.equalsIgnoreCase("BIGINT")) return "long";
+if(type.equalsIgnoreCase("TINYINT") && size==1) return "boolean";
+if(type.equalsIgnoreCase("TINYINT") && size>1) return "byte";
+if(type.equalsIgnoreCase("SMALLINT")) return "short";
+if(type.equalsIgnoreCase("FLOAT")) return "float";
+if(type.equalsIgnoreCase("double")) return "double";
+if(type.equalsIgnoreCase("DECIMAL")) return "BigDecimal";
+if(type.equalsIgnoreCase("NUMERIC")) return "BigDecimal";
+if(type.equalsIgnoreCase("CHAR") && size==1) return "char";
+if(type.equalsIgnoreCase("CHAR") || type.equalsIgnoreCase("VARCHAR") || type.equalsIgnoreCase("TEXT")) return "String";
+if(type.equalsIgnoreCase("DATE")) return "Date";
+//if(type.equalsIgnoreCase("TIME")) return "Time";
+//if(type.equalsIgnoreCase("TIMESTAMP")  || type.equalsIgnoreCase("DATETIME")) return "TimeStamp";
+return "Object";
+}
+public static void main(String []args)
+{
+try
+{
+Connection connection=DAOConnection.getConnection();
+
+DatabaseMetaData meta=connection.getMetaData();
+ResultSet tables=meta.getTables(connection.getCatalog(),null,"%",new String[]{"TABLE"});
+
+File file;
+RandomAccessFile randomAccessFile;
+Set<String> primaryKeyColumns=new HashSet<>();
+List<String> importLines=new ArrayList<>();
+while(tables.next())
+{
+String tableName=tables.getString("TABLE_NAME");
+//System.out.println("Table : "+tableName);
+System.out.println("\n=== " + tableName + " ===");
+
+String classSourceCode="@Table(name=\""+tableName+"\")\r\n";
+classSourceCode=classSourceCode+"public class ";
+String className=tableName.substring(0,1).toUpperCase()+tableName.substring(1);
+classSourceCode=classSourceCode+className+"\r\n{\r\n";
+
+file=new File(className+".java");
+if(file==null)
+{
+System.out.println("Unable to create file for "+className);
+return;
+}
+
+
+randomAccessFile=new RandomAccessFile(file,"rw");
+if(randomAccessFile==null)
+{
+System.out.println("Unable to create file for "+className);
+return;
+}
+
+
+
+ResultSet k=meta.getPrimaryKeys(connection.getCatalog(),null,tableName);
+while(k.next())
+{
+primaryKeyColumns.add(k.getString("COLUMN_NAME"));
+}
+k.close();
+
+
+ResultSet columns=meta.getColumns(connection.getCatalog(),null,tableName,"%");
+
+
+
+while(columns.next())
+{
+String columnName=columns.getString("COLUMN_NAME");
+String type=columns.getString("TYPE_NAME");
+String size=columns.getString("COLUMN_SIZE");
+String isNull=columns.getString("IS_NULLABLE");
+String autoIncrement=columns.getString("IS_AUTOINCREMENT");
+boolean isPrimaryKey=primaryKeyColumns.contains(columnName);
+String fieldName=columnName;
+if(columnName.contains("_"))
+{
+// remove _ for class field name
+// roll_number -> rollNumber
+String[] parts=columnName.split("_");
+
+fieldName=parts[0];
+for(int i=1;i<parts.length;++i)
+{
+parts[i]=parts[i].substring(0,1).toUpperCase()+parts[i].substring(1);
+fieldName=fieldName+parts[i];
+}
+}
+classSourceCode=classSourceCode+"@Column(name=\""+columnName+"\")\r\n";
+
+if(isPrimaryKey)
+{
+classSourceCode=classSourceCode+"@PrimaryKey\r\n";
+}
+
+if(autoIncrement.equalsIgnoreCase("YES"))
+{
+classSourceCode=classSourceCode+"@AutoIncrement\r\n";
+}
+
+
+// check which type
+
+String fieldType=getFieldType(type,Integer.parseInt(size));
+if(fieldType.equalsIgnoreCase("Date")) importLines.add("import java.util.Date;");
+else if(fieldType.equalsIgnoreCase("BigDecimal")) importLines.add("import java.math.BigDecimal");
+
+classSourceCode=classSourceCode+fieldType+" "+fieldName+";"+"\r\n\r\n";
+
+
+
+
+
+System.out.println(" - " + columnName + " : " + type + "(" + size + ")" +" | nullable=" + isNull +" | autoincrement=" + autoIncrement);
+
+}
+columns.close();
+
+classSourceCode=classSourceCode+"}";
+
+k=meta.getImportedKeys(connection.getCatalog(),null,tableName);
+while(k.next())
+{
+String fkCol= k.getString("FKCOLUMN_NAME");
+String pkTbl=k.getString("PKTABLE_NAME");
+String pkCol=k.getString("PKCOLUMN_NAME");
+//System.out.println(" FK: " + fkCol + " -> " + pkTbl + "(" + pkCol + ")");
+}
+
+k.close();
+
+ResultSet idx=meta.getIndexInfo(connection.getCatalog(), null, tableName, false, false);
+while(idx.next()) 
+{
+String idxName = idx.getString("INDEX_NAME");
+String colName = idx.getString("COLUMN_NAME");
+boolean nonUnique = idx.getBoolean("NON_UNIQUE");
+//System.out.println(" IDX: " + idxName + " on " + colName + " | unique=" + !nonUnique);
+}
+idx.close();
+
+for(String importLine:importLines)
+{
+randomAccessFile.writeBytes(importLine+"\r\n");
+}
+
+randomAccessFile.writeBytes(classSourceCode);
+randomAccessFile.close();
+}
+
+tables.close();
+connection.close();
+}catch(IOException | SQLException ex)
+{
+System.out.println(ex.getMessage());
+}
+}
+}
