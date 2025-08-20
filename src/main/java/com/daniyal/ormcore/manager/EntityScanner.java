@@ -1,7 +1,6 @@
 package com.daniyal.ormcore.manager;
 import java.lang.reflect.*;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.*;
 import com.daniyal.ormcore.pojo.*;
 class EntityScanner
 {
