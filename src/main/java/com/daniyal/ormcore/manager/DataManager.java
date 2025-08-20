@@ -3,19 +3,23 @@ import java.sql.*;
 import com.daniyal.ormcore.config.*;
 import com.daniyal.ormcore.connection.*;
 import com.daniyal.ormcore.exceptions.*;
+import com.daniyal.ormcore.pojo.*;
 public class DataManager
 {
 private static DataManager dataManager;
 private ConfigLoader configLoader;
 private Connection connection;
+private Map<String,EntityMeta> entitiesMetaMap;
 private DataManager() throws ORMException
 {
 this.configLoader=new ConfigLoader();
 this.connection=null;
+this.entitiesMetaMap=null;
 populateDataStructures();
 }
 private void populateDataStructures()
 {
+this.entitiesMetaMap=EntityScanner.scanBasePackage(this.configLoader.getBasePackage());
 }
 public static DataManager getDataManager() throws ORMException
 {
