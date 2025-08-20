@@ -6,6 +6,7 @@ class EntityScanner
 {
 public static Map<String,EntityMeta> scanBasePackage(String basePackage)
 {
-
+Map<String,EntityMeta> entitiesMetaMap=new HashMap<>();
+return entitiesMetaMap;
 }
 }
