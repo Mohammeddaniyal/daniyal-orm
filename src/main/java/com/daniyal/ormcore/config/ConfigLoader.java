@@ -7,7 +7,7 @@ private String driver;
 private String connectionURL;
 private String username;
 private String password;
-
+private String basePackage;
 public ConfigLoader() throws ORMException
 {
 try
@@ -46,6 +46,9 @@ this.username=value;
 }else if(key.equalsIgnoreCase("password"))
 {
 this.password=value;
+}else if(key.equalsIgnoreCase("base-package"))
+{
+this.basePackage=value.replace(".","/");
 }
 }
 randomAccessFile.close();
@@ -70,5 +73,9 @@ return this.username;
 public String getPassword()
 {
 return this.password;
+}
+public String getBasePackage()
+{
+return this.basePackage;
 }
 }
