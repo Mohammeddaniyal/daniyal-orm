@@ -18,8 +18,35 @@ if(resource==null)
 {
 throw new ORMException("Invalid base-package : "+basePackage);
 }
-String fullPath=resource.getPath().substring(1);
-System.out.println("Full path : " +fullPath);
+String absolutePath=resource.getPath();
+if(absolutePath==null)
+{
+throw new ORMException("Invalid base-package : "+basePackage);
+}
+absolutePath=absolutePath.substring(1);
+try
+{
+File rootFolder=new File(absolutePath);
+if(!rootFolder.exists() || !root.isDirectory())
+{
+throw new ORMException("Invalid base-package : "+basePackage);
+}
+loadMeta(rootFolder);
+// now we have the absolutePath of the base package
+// now we'll traverse on all directories and it's sub folder
+// and identity each file and analyze classes using reflectionApi
+// and classes with @Entity tag will become the part of datastructure
+}catch(IOException ioException)
+{
+throw new ORMException(ioExeption.getMessage());
+}
+
+private void loadMeta(File rootFolder)
+{
+
+}
+
+
 return entitiesMetaMap;
 }
 }
