@@ -26,7 +26,7 @@ json=json+randomAccessFile.readLine().trim();
 
 if(!(json.startsWith("{") && json.endsWith("}")))
 {
-throw ORMException("Invalid conf.json file");
+throw new ORMException("Invalid conf.json file");
 }
 
 String content=json.trim().replaceAll("[\\{\\}\"]","");
@@ -55,7 +55,7 @@ this.username=value;
 this.password=value;
 }else if(key.equalsIgnoreCase("base-package"))
 {
-this.basePackage=value.replace(".","/");
+this.basePackage=value;
 }
 }
 randomAccessFile.close();
