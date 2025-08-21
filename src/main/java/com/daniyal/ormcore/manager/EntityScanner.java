@@ -38,6 +38,9 @@ if(file.getName().endsWith(".class"))
 {
 String className=basePackage+"."+file.getName().replace(".class","");
 System.out.println("Discovered class : "+className);	
+
+Class clazz=Class.forName(className);
+System.out.println("Class loaded : "+clazz.getName());
 }
 }// for loop ends on directory files list
 }// folder on disk condition ends
@@ -60,6 +63,9 @@ if(name.startsWith(path) && name.endsWith(".class"))
 {
 String className=name.replace("/",".").replace(".class","");
 System.out.println("Discovered class : "+className);	
+
+Class clazz=Class.forName(className);
+System.out.println("Class loaded : "+clazz.getName());
 }
 } // for loop on jar entries ends here
 
