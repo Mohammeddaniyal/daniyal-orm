@@ -21,10 +21,17 @@ throw new ORMException("Configuration file not found\n");
 String json="";
 while(randomAccessFile.getFilePointer()<randomAccessFile.length())
 {
-json=json+randomAccessFile.readLine();
+json=json+randomAccessFile.readLine().trim();
+}
+
+if(!(json.startsWith("{") && json.endsWith("}")))
+{
+throw ORMException("Invalid conf.json file");
 }
 
 String content=json.trim().replaceAll("[\\{\\}\"]","");
+
+
 
 String pairs[]=content.split(",");
 
