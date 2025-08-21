@@ -1,5 +1,6 @@
 package com.daniyal.ormcore.manager;
 import com.daniyal.ormcore.pojo.*;
+import com.daniyal.ormcore.utils.*;
 import com.daniyal.ormcore.exceptions.*;
 import java.lang.reflect.*;
 import java.util.*;
@@ -8,9 +9,9 @@ import java.net.*;
 import java.util.jar.*;
 class EntityScanner
 {
-public static Map<String,EntityMeta> scanBasePackage(String basePackage) throws ORMException
+public static Map<Class,EntityMeta> scanBasePackage(String basePackage) throws ORMException
 {
-Map<String,EntityMeta> entitiesMetaMap=new HashMap<>();
+Map<Class,EntityMeta> entitiesMetaMap=new HashMap<>();
 ClassLoader classLoader=Thread.currentThread().getContextClassLoader();
 System.out.println("Base package "+basePackage);
 
@@ -41,6 +42,7 @@ System.out.println("Discovered class : "+className);
 
 Class clazz=Class.forName(className);
 System.out.println("Class loaded : "+clazz.getName());
+handleClassMetaData(clazz,entitiesMetaMap);
 }
 }// for loop ends on directory files list
 }// folder on disk condition ends
@@ -66,13 +68,14 @@ System.out.println("Discovered class : "+className);
 
 Class clazz=Class.forName(className);
 System.out.println("Class loaded : "+clazz.getName());
+handleClassMetaData(clazz,entitiesMetaMap);
 }
 } // for loop on jar entries ends here
 
 }// jar part ends here
 
 }// loop ends on resources
-}catch(IOException | URISyntaxException exception)
+}catch(ClassNotFoundException | IOException | URISyntaxException exception)
 {
 throw new ORMException(exception.getMessage());
 }
@@ -80,6 +83,27 @@ return entitiesMetaMap;
 
 }// function ends
 
+private String snakeCaseBuilder
+
+private void handleClassMetaData(Class clazz,Map<Class,EntityMeta> entitiesMetaMap)
+{
+Annotation tableAnnotation=clazz.getAnnotation(Table.class);
+if(tableAnnotation==null) return;
+
+String tableName=tableAnnotation.name().trim();
+if(tableName==null || tableName.length()==0)
+{
+tableName=clazz.getSimpleName();
+tableName=CaseConvertor.toSnakeCase(tableName);
+}
+
+System.out.println(" Checking for : "+tableName+" table exists in mysql or not");
+// we'll use map of TableMetaData
+
+Field []fields=clazz.getFields();
+for(Field
+
+}
 
 }
 
