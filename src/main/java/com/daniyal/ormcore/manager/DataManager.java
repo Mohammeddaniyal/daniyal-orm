@@ -18,7 +18,7 @@ this.connection=null;
 this.entitiesMetaMap=null;
 populateDataStructures();
 }
-private void populateDataStructures()
+private void populateDataStructures() throws ORMException
 {
 this.entitiesMetaMap=EntityScanner.scanBasePackage(this.configLoader.getBasePackage());
 }
