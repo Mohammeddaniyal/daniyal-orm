@@ -2,7 +2,9 @@ package com.daniyal.ormcore.manager;
 import com.daniyal.ormcore.pojo.*;
 import com.daniyal.ormcore.utils.*;
 import com.daniyal.ormcore.exceptions.*;
+import com.daniyal.ormcore.annotations.*;
 import java.lang.reflect.*;
+import java.lang.annotation.*;
 import java.util.*;
 import java.io.*;
 import java.net.*;
@@ -83,11 +85,10 @@ return entitiesMetaMap;
 
 }// function ends
 
-private String snakeCaseBuilder
 
-private void handleClassMetaData(Class clazz,Map<Class,EntityMeta> entitiesMetaMap)
+private static void handleClassMetaData(Class clazz,Map<Class,EntityMeta> entitiesMetaMap)
 {
-Annotation tableAnnotation=clazz.getAnnotation(Table.class);
+Table tableAnnotation=(Table)clazz.getAnnotation(Table.class);
 if(tableAnnotation==null) return;
 
 String tableName=tableAnnotation.name().trim();
@@ -99,10 +100,10 @@ tableName=CaseConvertor.toSnakeCase(tableName);
 
 System.out.println(" Checking for : "+tableName+" table exists in mysql or not");
 // we'll use map of TableMetaData
-
+/*
 Field []fields=clazz.getFields();
 for(Field
-
+*/
 }
 
 }
