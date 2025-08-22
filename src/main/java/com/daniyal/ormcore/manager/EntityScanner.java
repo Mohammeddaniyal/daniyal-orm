@@ -11,11 +11,12 @@ import java.net.*;
 import java.util.jar.*;
 class EntityScanner
 {
-public static Map<Class,EntityMeta> scanBasePackage(String basePackage) throws ORMException
+public static Map<Class,EntityMeta> scanBasePackage(String basePackage,Map<String,TableMetaData> tableMetaDataMap) throws ORMException
 {
 Map<Class,EntityMeta> entitiesMetaMap=new HashMap<>();
 ClassLoader classLoader=Thread.currentThread().getContextClassLoader();
 System.out.println("Base package "+basePackage);
+
 
 try
 {
@@ -44,7 +45,8 @@ System.out.println("Discovered class : "+className);
 
 Class clazz=Class.forName(className);
 System.out.println("Class loaded : "+clazz.getName());
-handleClassMetaData(clazz,entitiesMetaMap);
+
+handleClassMetaData(clazz,entitiesMetaMap,tableMetaDataMap);
 }
 }// for loop ends on directory files list
 }// folder on disk condition ends
@@ -70,7 +72,7 @@ System.out.println("Discovered class : "+className);
 
 Class clazz=Class.forName(className);
 System.out.println("Class loaded : "+clazz.getName());
-handleClassMetaData(clazz,entitiesMetaMap);
+handleClassMetaData(clazz,entitiesMetaMap,tableMetaDataMap);
 }
 } // for loop on jar entries ends here
 
@@ -86,7 +88,7 @@ return entitiesMetaMap;
 }// function ends
 
 
-private static void handleClassMetaData(Class clazz,Map<Class,EntityMeta> entitiesMetaMap)
+private static void handleClassMetaData(Class clazz,Map<Class,EntityMeta> entitiesMetaMap,Map<String,TableMetaData> tableMetaDataMap) throws ORMException
 {
 Table tableAnnotation=(Table)clazz.getAnnotation(Table.class);
 if(tableAnnotation==null) return;
@@ -98,13 +100,121 @@ tableName=clazz.getSimpleName();
 tableName=CaseConvertor.toSnakeCase(tableName);
 }
 
-System.out.println(" Checking for : "+tableName+" table exists in mysql or not");
-// we'll use map of TableMetaData
-/*
-Field []fields=clazz.getFields();
-for(Field
-*/
+TableMetaData tableMetaData=tableMetaDataMap.get(tableName);
+if(tableMetaData==null)
+{
+throw new ORMException("No table exists with name "+tableName);
 }
 
+System.out.println(" Checking for : "+tableName+" table exists in mysql or not");
+// we'll use map of TableMetaData
+Field []fields=clazz.getFields();
+Map<String,ColumnMetaData> columnMetaDataMap=tableMetaData.getColumns();
+int columnMetaDataMapSize=columnMetaDataMap.size();
+int fieldsSize=fields.length;
+int fieldsWithColumnAnnotation=field.length;
+AutoIncrement autoIncrementAnnotation;
+Column columnAnnotation;
+ForeignKey foreignKeyAnnotation;
+PrimaryKey primaryKeyAnnotation;
+
+String columnAnnotationValue;
+ColumnMetaData columnMetaData;
+String foreignKeyAnnotationFKColumn;
+String foreignKeyAnnnotationPKTable;
+String foreignKeyAnnotationPKColumn;
+
+ForeignKeyInfo foreignKeyInfo;
+String fkColumn;
+String pkTable;
+String fkColumn;
+
+
+for(Field field:fields)
+{
+columnAnnotation=(Column)field.getAnnotation(Column.class);
+if(columnAnnotation==null)
+{
+// not part of sql table column so ignore this
+
+if(field.isAnnotationPresent(PrimaryKey.class) || field.isAnnotationPresent(AutoIncrement.class) || field.isAnnotationPresent(ForeignKey.class))
+{
+throw new ORMException("Entity class " + clazz.getSimpleName() +" property " + field.getName() +" has @PrimaryKey/@AutoIncrement/@ForeignKey annotation but is missing @Column");
 }
+continue;
+fieldsWithColumnAnnotation--;
+}
+columnAnnotationValue=columnAnnotation.name();
+columnMetaData=columnMetaDataMap.get(columnAnnotationValue);
+if(columnMetaData==null)
+{
+throw new ORMException("Entity class " + clazz.getSimpleName() +" property " + field.getName() +" declares @Column(name=\"" + columnName + "\") but no such column exists in table '" + tableName + "'");
+}
+
+if(field.isAnnotationPresent(PrimaryKey.class) && columnMetaData.getIsPrimaryKey()==false)
+{
+throw new ORMException("Entity class " + clazz.getSimpleName() +" property '" + field.getName() + "' is annotated @PrimaryKey but corresponding column '" +columnAnnotationValue + "' is not a primary key column in table '" + tableName + "'");
+}
+
+if(!field.isAnnotationPresent(PrimaryKey.class) && columnMetaData.getIsPrimaryKey())
+{
+throw new ORMException("Entity class " + clazz.getSimpleName() +" property '" + field.getName() + "' is missing @PrimaryKey annotation but column '" +columnAnnotationValue + "' is a primary key column in table '" + tableName + "'");
+}
+
+
+if(field.isAnnotationPresent(AutoIncrement.class) && columnMetaData.getIsAutoIncrement()==false)
+{
+throw new ORMException("Entity class " + clazz.getSimpleName() +" property '" + field.getName() + "' annotated @AutoIncrement but column '" +columnAnnotationValue + "' is not auto-increment in table '" + tableName + "'");
+}
+
+if(!field.isAnnotationPresent(AutoIncrement.class) && columnMetaData.getIsAutoIncrement())
+{
+throw new ORMException("Entity class " + clazz.getSimpleName() +" property '" + field.getName() + "' missing @AutoIncrement annotation but column '" +columnAnnotationValue + "' is auto-increment in table '" + tableName + "'");
+}
+
+if(field.isAnnotationPresent(ForeignKey.class))
+{
+if(columnMetaData.getIsForeignKey()==false)
+{
+throw new ORMException("Entity class " + clazz.getSimpleName() +" property '" + field.getName() + "' annotated @ForeignKey but column '" +columnAnnotationValue + "' is not a foreign key in table '" + tableName + "'");
+}
+foreginKeyAnnotation=(ForeignKey)field.getAnnotation(ForeignKey.class);
+foreignKeyAnnotationFKColumn=columnAnnotatioValue;
+foreignKeyAnnotationPKTable=foreignKeyAnnotation.parent();
+foreignKeyAnnotationPKColumn=foreignKeyAnnotation.column();
+
+foreignKeyInfo=columnMetaData.getForeignKeyInfo();
+
+if(foreignKeyInfo.getFKColumn().equals(foreignKeyAnnotationFKColumn)==false)
+{
+throw new ORMException("Entity class " + clazz.getSimpleName() +" property '" + field.getName() + "' @ForeignKey FK column mismatch: annotation '" +fkColumn + "' vs DB '" + foreignKeyInfo.getFKColumn() + "'");
+}
+if(foreignKeyInfo.getPKTable().equals(foreignKeyAnnotationPKTable)==false)
+{
+throw new ORMException("Entity class " + clazz.getSimpleName() +" property '" + field.getName() + "' @ForeignKey parent table mismatch: annotation '" +fkParentTable + "' vs DB '" + foreignKeyInfo.getPKTable() + "'");
+}
+if(foreignKeyInfo.getPKColumn().equals(foreignKeyAnnotationPKColumn)==false)
+{
+throw new ORMException("Entity class " + clazz.getSimpleName() +" property '" + field.getName() + "' @ForeignKey parent column mismatch: annotation '" +fkParentColumn + "' vs DB '" + foreignKeyInfo.getPKColumn() + "'");
+}
+}
+
+if(!field.isAnnotationPresent(ForeignKey.class) && columnMetaData.getIsForeignKey())
+{
+throw new ORMException("Entity class " + clazz.getSimpleName() +" property '" + field.getName() + "' missing @ForeignKey annotation but column '" +columnAnnotationValue + "' is a foreign key in table '" + tableName + "'");
+}
+
+
+ // TODO: Add data type compatibility validation here (future improvement).
+
+} // for loop ends
+// means there are missing fields to that didn't represents some table columns
+if(fieldsWithColumnAnnotation!=columnMetaDataMapSize)
+{
+throw new ORMException();
+}
+
+}// function ends
+
+}// class ends 
 
