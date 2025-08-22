@@ -246,6 +246,7 @@ field.setAccessible(true);
 
 fieldMeta=new FieldMeta();
 fieldMeta.setField(field);
+fieldMeta.setColumnName(columnName);
 fieldMeta.setIsPrimaryKey(isPrimaryKey);
 fieldMeta.setIsAutoIncrement(isAutoIncrement);
 fieldMeta.setIsForeignKey(isForeignKey);
