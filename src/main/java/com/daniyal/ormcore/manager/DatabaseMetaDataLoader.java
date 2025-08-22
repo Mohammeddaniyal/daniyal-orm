@@ -12,23 +12,93 @@ try
 Map<String,TableMetaData> tableMetaDataMap=new HashMap<>();
 TableMetaData tableMetaData;
 ColumnMetaData columnMetaData;
+ForeignKeyInfo foreignKeyInfo;
 DatabaseMetaData databaseMetaData=connection.getMetaData();
+Set<String> primaryKeyColumns=new HashSet<>();
+Map<String,ForeignKeyInfo> foreignKeyColumnsMap=new HashMap<>();
 
 ResultSet tablesResultSet=databaseMetaData.getTables(connection.getCatalog(),null,"%",new String[]{"TABLE"});
-
+String tableName;
+ResultSet keysResultSet;
+String fkCol;
+String pkTbl;
+String pkCol;
+ResultSet columnsResultSet;
+String columnName;
+String type;
+String size;
+String isNull;
+String autoIncrement;
+boolean isPrimaryKey;
+List<ColumnMetaData> columnMetaDataList;
 while(tablesResultSet.next())
 {
 tableMetaData=new TableMetaData();
+tableName=tablesResultSet.getString("TABLE_NAME");
+tableMetaData.setTableName(tableName);
+
+keysResultSet=databaseMetaData.getPrimaryKeys(connection.getCatalog(),null,tableName);
+while(keysResultSet.next())
+{
+primaryKeyColumns.add(keysResultSet.getString("COLUMN_NAME"));
+} 
+keysResultSet.close();
+
+keysResultSet=databaseMetaData.getImportedKeys(connection.getCatalog(),null,tableName);
+while(keysResultSet.next())
+{
+fkCol= keysResultSet.getString("FKCOLUMN_NAME");
+pkTbl=keysResultSet.getString("PKTABLE_NAME");
+pkCol=keysResultSet.getString("PKCOLUMN_NAME");
+foreignKeyInfo=new ForeignKeyInfo();
+foreignKeyInfo.setFKColumn(fkCol);
+foreignKeyInfo.setPKTable(pkTbl);
+foreignKeyInfo.setPKColumn(pkCol);
+foreignKeyColumnsMap.put(fkCol,foreignKeyInfo);
+//System.out.println(" FK: " + fkCol + " -> " + pkTbl + "(" + pkCol + ")");
+} // on foregn keys loop ends
+keysResultSet.close();
+
+columnsResultSet=databaseMetaData.getColumns(connection.getCatalog(),null,tableName,"%");
+columnMetaDataList=new ArrayList<>();
+while(columnsResultSet.next())
+{
+columnMetaData=new ColumnMetaData();
+columnName=columnsResultSet.getString("COLUMN_NAME");
+type=columnsResultSet.getString("TYPE_NAME");
+size=columnsResultSet.getString("COLUMN_SIZE");
+isNull=columnsResultSet.getString("IS_NULLABLE");
+autoIncrement=columnsResultSet.getString("IS_AUTOINCREMENT");
+isPrimaryKey=primaryKeyColumns.contains(columnName);
+if(foreignKeyColumnsMap.containsKey(columnName))
+{
+foreignKeyInfo=foreignKeyColumnsMap.get(columnName);
+columnMetaData.setIsForeignKey(true);
+columnMetaData.setForeignKeyInfo(foreignKeyInfo);
 }
+columnMetaData.setColumnName(columnName);
+columnMetaData.setType(type);
+columnMetaData.setSize(Integer.parseInt(size));
+columnMetaData.setIsPrimaryKey(isPrimaryKey);
+columnMetaData.setIsAutoIncrement(autoIncrement.equalsIgnoreCase("YES"));
+columnMetaData.setIsNull(autoIncrement.equalsIgnoreCase("YES"));
+columnMetaDataList.add(columnMetaData);
+} // on columns loop ends
 
+columnsResultSet.close();
+tableMetaData.setColumns(columnMetaDataList);
+tableMetaDataMap.put(tableName,tableMetaData);
+primaryKeyColumns.clear();
+foreignKeyColumnsMap.clear();
+} // on tables loop ends
 
-
-
-
-
+tablesResultSet.close();
+connection.close();
+return tableMetaDataMap;
 }catch(SQLException sqlException)
 {
 throw new ORMException(sqlException.getMessage());
 }
-}
-}
+
+} // statuic function ends
+}// class ends
