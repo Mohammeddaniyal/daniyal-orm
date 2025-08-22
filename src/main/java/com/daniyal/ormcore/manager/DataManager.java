@@ -5,6 +5,7 @@ import com.daniyal.ormcore.connection.*;
 import com.daniyal.ormcore.exceptions.*;
 import com.daniyal.ormcore.pojo.*;
 import java.util.*;
+import java.lang.reflect.*;
 public class DataManager
 {
 private static DataManager dataManager;
@@ -58,6 +59,8 @@ for (Map.Entry<String, TableMetaData> entry : tablesMetaMap.entrySet()) {
 
 private void printEntityMetaData()
 {
+System.out.println("----------------------------------------------------------------------------------");
+System.out.println("EntityMetaData");
 for (Map.Entry<Class, EntityMeta> entry : entitiesMetaMap.entrySet()) {
     Class entityClass = entry.getKey();
     EntityMeta entityMeta = entry.getValue();
@@ -89,14 +92,14 @@ for (Map.Entry<Class, EntityMeta> entry : entitiesMetaMap.entrySet()) {
     }
     System.out.println("-------------------------------------");
 }
-
+System.out.println("--------------------------------------------------------------------------");
 }
 private void populateDataStructures() throws ORMException
 {
 this.tablesMetaMap=DatabaseMetaDataLoader.loadTableMetaData(ConnectionManager.getConnection(configLoader));
 this.entitiesMetaMap=EntityScanner.scanBasePackage(this.configLoader.getBasePackage(),tablesMetaMap);
 //printTableMetaData(tablesMetaMap);
-//printEntityMetaData();
+printEntityMetaData();
 }
 public static DataManager getDataManager() throws ORMException
 {
@@ -136,5 +139,83 @@ public Connection getConnection()
 {
 return dataManager.connection;
 }
+
+
+public Object save(Object entity)throws ORMException
+{
+if(connection==null)
+{
+throw new ORMException("Connection is closed, can't perform save");
+}
+Class entityClass=entity.getClass();
+
+EntityMeta entityMeta=entitiesMetaMap.get(entityClass);
+if(entityMeta==null)
+{
+throw new ORMException("Entity class '" + entityClass.getName() + "' is not registered. " +"Make sure it is annotated with @Table and included in the base package defined in conf.json.");
+}
+
+String tableName=entityMeta.getTableName();
+Map<String,FieldMeta> fields=entityMeta.getFields();
+List<Object> values=new ArrayList<>();
+Field field;
+Object value;
+String columnTitlesSQL="(";
+String columnValuesSQL="values(";
+boolean firstTime=true;
+FieldMeta fieldMeta;
+for(Map.Entry<String,FieldMeta> entry:fields.entrySet())
+{
+fieldMeta=entry.getValue();
+field=fieldMeta.getField();
+if(fieldMeta.getIsAutoIncrement()) continue;
+if(!firstTime) 
+{
+columnTitlesSQL=columnTitlesSQL+",";
+columnValuesSQL=columnValuesSQL+",";
+}
+columnTitlesSQL=columnTitlesSQL+fieldMeta.getColumnName();
+columnValuesSQL=columnValuesSQL+"?";
+try
+{
+value=field.get(entity);
+if(value.getClass().getName().equals("java.lang.Character"))
+{
+value=String.valueOf(value);
+}
+}catch(IllegalAccessException e)
+{
+throw new ORMException("Cannot read value of field '" + field.getName() +"' in entity '" + entity.getClass().getSimpleName() +"'. Ensure the field is accessible (e.g., use @Column and allow access).");
+}
+//System.out.println("Value : "+value+" class : "+value.getClass().getName());
+
+values.add(value);
+firstTime=false;
+}
+columnTitlesSQL=columnTitlesSQL+")";
+columnValuesSQL=columnValuesSQL+")";
+
+
+String sql="insert into "+tableName+" "+columnTitlesSQL+" "+columnValuesSQL;
+System.out.println("SQL statement for insert : "+sql);
+try
+{
+PreparedStatement preparedStatement=connection.prepareStatement(sql);
+int x=1;
+System.out.println("%10VALUES");
+for(Object v:values)
+{
+//System.out.println(v);
+preparedStatement.setObject(x++,v);
+}
+preparedStatement.executeUpdate();
+preparedStatement.close();
+}catch(SQLException sqlException)
+{
+throw new ORMException(sqlException.getMessage());
+}
+return entity;
+}
+
 
 }
