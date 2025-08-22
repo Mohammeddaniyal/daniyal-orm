@@ -27,13 +27,13 @@ public static String toCamelCase(String snakeCase)
 {
 if(snakeCase==null || snakeCase.isEmpty()) return snakeCase;
 snakeCase=snakeCase.trim();
-String camelCaseBuilder=new StringBuilder();
+StringBuilder camelCaseBuilder=new StringBuilder();
 boolean isNextCharCapital=false;
 char c;
 for(int i=0;i<snakeCase.length();++i)
 {
 c=snakeCase.charAt(i);
-if(c=="_")
+if(c=='_')
 {
 isNextCharCapital=true;
 }
