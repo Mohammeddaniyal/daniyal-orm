@@ -9,8 +9,7 @@ private Method getterMethod;
 private boolean isPrimaryKey;
 private boolean isAutoIncrement;
 private boolean isForeignKey;
-private String parentTableName;
-private String parentColumnName;
+private ForeignKeyInfo foreignKeyInfo;
 public FieldMeta()
 {
 this.field=null;
@@ -20,8 +19,7 @@ this.getterMethod=null;
 this.isPrimaryKey=false;
 this.isAutoIncrement=false;
 this.isForeignKey=false;
-this.parentTableName="";
-this.parentColumnName="";
+this.foreignKeyInfo=null;
 }
 public void setField(java.lang.reflect.Field field)
 {
@@ -79,21 +77,13 @@ public boolean getIsForeignKey()
 {
 return this.isForeignKey;
 }
-public void setParentTableName(java.lang.String parentTableName)
+public void setForeignKeyInfo(ForeignKeyInfo foreignKeyInfo)
 {
-this.parentTableName=parentTableName;
+this.foreignKeyInfo=foreignKeyInfo;
 }
-public java.lang.String getParentTableName()
+public ForeignKeyInfo getForeignKeyInfo()
 {
-return this.parentTableName;
-}
-public void setParentColumnName(java.lang.String parentColumnName)
-{
-this.parentColumnName=parentColumnName;
-}
-public java.lang.String getParentColumnName()
-{
-return this.parentColumnName;
+return this.foreignKeyInfo;
 }
 
 }
