@@ -125,9 +125,6 @@ String foreignKeyAnnnotationPKTable;
 String foreignKeyAnnotationPKColumn;
 
 ForeignKeyInfo foreignKeyInfo;
-String fkColumn;
-String pkTable;
-String fkColumn;
 
 EntityMeta entityMeta;
 FieldMeta fieldMeta;
