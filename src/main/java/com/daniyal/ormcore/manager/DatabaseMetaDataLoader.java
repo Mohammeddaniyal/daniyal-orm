@@ -30,7 +30,7 @@ String size;
 String isNull;
 String autoIncrement;
 boolean isPrimaryKey;
-List<ColumnMetaData> columnMetaDataList;
+Map<String,ColumnMetaData> columnMetaDataMap;
 while(tablesResultSet.next())
 {
 tableMetaData=new TableMetaData();
@@ -60,7 +60,7 @@ foreignKeyColumnsMap.put(fkCol,foreignKeyInfo);
 keysResultSet.close();
 
 columnsResultSet=databaseMetaData.getColumns(connection.getCatalog(),null,tableName,"%");
-columnMetaDataList=new ArrayList<>();
+columnMetaDataMap=new HashMap<>();
 while(columnsResultSet.next())
 {
 columnMetaData=new ColumnMetaData();
@@ -82,11 +82,11 @@ columnMetaData.setSize(Integer.parseInt(size));
 columnMetaData.setIsPrimaryKey(isPrimaryKey);
 columnMetaData.setIsAutoIncrement(autoIncrement.equalsIgnoreCase("YES"));
 columnMetaData.setIsNull(autoIncrement.equalsIgnoreCase("YES"));
-columnMetaDataList.add(columnMetaData);
+columnMetaDataMap.put(columnName,columnMetaData);
 } // on columns loop ends
 
 columnsResultSet.close();
-tableMetaData.setColumns(columnMetaDataList);
+tableMetaData.setColumns(columnMetaDataMap);
 tableMetaDataMap.put(tableName,tableMetaData);
 primaryKeyColumns.clear();
 foreignKeyColumnsMap.clear();
