@@ -11,6 +11,28 @@ import java.net.*;
 import java.util.jar.*;
 class EntityScanner
 {
+private static void scanDirectory(File directory,String packageName,Map<Class,EntityMeta> entitiesMetaMap,Map<String,TableMetaData> tableMetaDataMap) throws Exception 
+{
+for(File file:directory.listFiles())
+{
+if(file.isDirectory())
+{
+scanDirectory(file,packageName+"."+file.getName(),entitiesMetaMap,tableMetaDataMap);
+}
+else if(file.getName().endsWith(".class"))
+{
+String className=packageName+"."+file.getName().replace(".class","");
+System.out.println("Discovered class : "+className);	
+
+Class clazz=Class.forName(className);
+System.out.println("Class loaded : "+clazz.getName());
+
+handleClassMetaData(clazz,entitiesMetaMap,tableMetaDataMap);
+}
+}// for loop ends on directory files list
+
+}
+
 public static Map<Class,EntityMeta> scanBasePackage(String basePackage,Map<String,TableMetaData> tableMetaDataMap) throws ORMException
 {
 Map<Class,EntityMeta> entitiesMetaMap=new HashMap<>();
@@ -36,19 +58,8 @@ System.out.println("Found resource : "+resource);
 if(resource.getProtocol().equals("file"))
 {
 File directory=new File(resource.toURI());
-for(File file:directory.listFiles())
-{
-if(file.getName().endsWith(".class"))
-{
-String className=basePackage+"."+file.getName().replace(".class","");
-System.out.println("Discovered class : "+className);	
+scanDirectory(directory,basePackage,entitiesMetaMap,tableMetaDataMap);
 
-Class clazz=Class.forName(className);
-System.out.println("Class loaded : "+clazz.getName());
-
-handleClassMetaData(clazz,entitiesMetaMap,tableMetaDataMap);
-}
-}// for loop ends on directory files list
 }// folder on disk condition ends
 else if(resource.getProtocol().equals("jar"))
 {
@@ -80,6 +91,9 @@ handleClassMetaData(clazz,entitiesMetaMap,tableMetaDataMap);
 
 }// loop ends on resources
 }catch(ClassNotFoundException | IOException | URISyntaxException exception)
+{
+throw new ORMException(exception.getMessage());
+}catch(Exception exception)
 {
 throw new ORMException(exception.getMessage());
 }
@@ -121,10 +135,13 @@ PrimaryKey primaryKeyAnnotation;
 String columnAnnotationValue;
 ColumnMetaData columnMetaData;
 String foreignKeyAnnotationFKColumn;
-String foreignKeyAnnnotationPKTable;
+String foreignKeyAnnotationPKTable;
 String foreignKeyAnnotationPKColumn;
 
 ForeignKeyInfo foreignKeyInfo;
+String fkColumn;
+String pkTable;
+String pkColumn;
 
 EntityMeta entityMeta;
 FieldMeta fieldMeta;
@@ -146,16 +163,16 @@ if(field.isAnnotationPresent(PrimaryKey.class) || field.isAnnotationPresent(Auto
 {
 throw new ORMException("Entity class " + clazz.getSimpleName() +" property " + field.getName() +" has @PrimaryKey/@AutoIncrement/@ForeignKey annotation but is missing @Column");
 }
-continue;
 fieldsWithColumnAnnotation--;
+continue;
 }
 columnAnnotationValue=columnAnnotation.name();
 columnMetaData=columnMetaDataMap.get(columnAnnotationValue);
+columnName=columnAnnotationValue;
 if(columnMetaData==null)
 {
 throw new ORMException("Entity class " + clazz.getSimpleName() +" property " + field.getName() +" declares @Column(name=\"" + columnName + "\") but no such column exists in table '" + tableName + "'");
 }
-columnName=columnAnnotationValue;
 
 isPrimaryKey=field.isAnnotationPresent(PrimaryKey.class);
 
@@ -190,23 +207,26 @@ if(columnMetaData.getIsForeignKey()==false)
 throw new ORMException("Entity class " + clazz.getSimpleName() +" property '" + field.getName() + "' annotated @ForeignKey but column '" +columnAnnotationValue + "' is not a foreign key in table '" + tableName + "'");
 }
 foreignKeyAnnotation=(ForeignKey)field.getAnnotation(ForeignKey.class);
-foreignKeyAnnotationFKColumn=columnAnnotatioValue;
+foreignKeyAnnotationFKColumn=columnAnnotationValue;
 foreignKeyAnnotationPKTable=foreignKeyAnnotation.parent();
 foreignKeyAnnotationPKColumn=foreignKeyAnnotation.column();
 
 foreignKeyInfo=columnMetaData.getForeignKeyInfo();
 
-if(foreignKeyInfo.getFKColumn().equals(foreignKeyAnnotationFKColumn)==false)
+fkColumn=foreignKeyInfo.getFKColumn();
+pkTable=foreignKeyInfo.getPKTable();
+pkColumn=foreignKeyInfo.getPKColumn();
+if(fkColumn.equals(foreignKeyAnnotationFKColumn)==false)
 {
 throw new ORMException("Entity class " + clazz.getSimpleName() +" property '" + field.getName() + "' @ForeignKey FK column mismatch: annotation '" +fkColumn + "' vs DB '" + foreignKeyInfo.getFKColumn() + "'");
 }
-if(foreignKeyInfo.getPKTable().equals(foreignKeyAnnotationPKTable)==false)
+if(pkTable.equals(foreignKeyAnnotationPKTable)==false)
 {
-throw new ORMException("Entity class " + clazz.getSimpleName() +" property '" + field.getName() + "' @ForeignKey parent table mismatch: annotation '" +fkParentTable + "' vs DB '" + foreignKeyInfo.getPKTable() + "'");
+throw new ORMException("Entity class " + clazz.getSimpleName() +" property '" + field.getName() + "' @ForeignKey parent table mismatch: annotation '" +pkTable + "' vs DB '" + foreignKeyInfo.getPKTable() + "'");
 }
-if(foreignKeyInfo.getPKColumn().equals(foreignKeyAnnotationPKColumn)==false)
+if(pkColumn.equals(foreignKeyAnnotationPKColumn)==false)
 {
-throw new ORMException("Entity class " + clazz.getSimpleName() +" property '" + field.getName() + "' @ForeignKey parent column mismatch: annotation '" +fkParentColumn + "' vs DB '" + foreignKeyInfo.getPKColumn() + "'");
+throw new ORMException("Entity class " + clazz.getSimpleName() +" property '" + field.getName() + "' @ForeignKey parent column mismatch: annotation '" +pkColumn + "' vs DB '" + foreignKeyInfo.getPKColumn() + "'");
 }
 foreignKeyInfo1=new ForeignKeyInfo();
 foreignKeyInfo1.setFKColumn(foreignKeyAnnotationFKColumn);
@@ -228,7 +248,7 @@ fieldMeta.setIsAutoIncrement(isAutoIncrement);
 fieldMeta.setIsForeignKey(isForeignKey);
 if(isForeignKey)
 {
-fieldMeta.setForeignKeyInfo(foreignKeyInfo);
+fieldMeta.setForeignKeyInfo(foreignKeyInfo1);
 }
 
 fieldMetaMap.put(columnName,fieldMeta);
@@ -241,8 +261,9 @@ throw new ORMException("Entity class " + clazz.getSimpleName() +" has missing fi
 }
 
 entityMeta=new EntityMeta();
-entityMeta.setClass(clazz);
-entityMeta.fields(fieldMetaMap);
+entityMeta.setEntityClass(clazz);
+entityMeta.setTableName(tableName);
+entityMeta.setFields(fieldMetaMap);
 
 }// function ends
 
