@@ -18,7 +18,7 @@ public java.lang.String getFKColumn()
 {
 return this.fkColumn;
 }
-public void setParentTable(java.lang.String pkTable)
+public void setPKTable(java.lang.String pkTable)
 {
 this.pkTable=pkTable;
 }
