@@ -6,7 +6,7 @@ public static String toSnakeCase(String camelCase)
 if(camelCase==null || camelCase.isEmpty()) return camelCase;
 camelCase=camelCase.trim();
 StringBuilder snakeCaseBuilder=new StringBuilder();
-snakeCaseBuilder.append(camelCase.charAt(0).toLowerCase());
+snakeCaseBuilder.append(Character.toLowerCase(camelCase.charAt(0)));
 char c;
 for(int i=1;i<camelCase.length();++i)
 {
@@ -49,6 +49,6 @@ camelCaseBuilder.append(c);
 }
 }
 } // loop ends
-return camelCaseBuilder.toString()
-} toCamelCase
+return camelCaseBuilder.toString();
+} //toCamelCase
 }// class ends
