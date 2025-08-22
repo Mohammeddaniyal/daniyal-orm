@@ -218,15 +218,15 @@ pkTable=foreignKeyInfo.getPKTable();
 pkColumn=foreignKeyInfo.getPKColumn();
 if(fkColumn.equals(foreignKeyAnnotationFKColumn)==false)
 {
-throw new ORMException("Entity class " + clazz.getSimpleName() +" property '" + field.getName() + "' @ForeignKey FK column mismatch: annotation '" +fkColumn + "' vs DB '" + foreignKeyInfo.getFKColumn() + "'");
+throw new ORMException("Entity class " + clazz.getSimpleName() +" property '" + field.getName() + "' @ForeignKey FK column mismatch: annotation '" +foreignKeyAnnotationFKColumn + "' vs DB '" + foreignKeyInfo.getFKColumn() + "'");
 }
 if(pkTable.equals(foreignKeyAnnotationPKTable)==false)
 {
-throw new ORMException("Entity class " + clazz.getSimpleName() +" property '" + field.getName() + "' @ForeignKey parent table mismatch: annotation '" +pkTable + "' vs DB '" + foreignKeyInfo.getPKTable() + "'");
+throw new ORMException("Entity class " + clazz.getSimpleName() +" property '" + field.getName() + "' @ForeignKey parent table mismatch: annotation '" +foreignKeyAnnotationPKTable + "' vs DB '" + foreignKeyInfo.getPKTable() + "'");
 }
 if(pkColumn.equals(foreignKeyAnnotationPKColumn)==false)
 {
-throw new ORMException("Entity class " + clazz.getSimpleName() +" property '" + field.getName() + "' @ForeignKey parent column mismatch: annotation '" +pkColumn + "' vs DB '" + foreignKeyInfo.getPKColumn() + "'");
+throw new ORMException("Entity class " + clazz.getSimpleName() +" property '" + field.getName() + "' @ForeignKey parent column mismatch: annotation '" +foreignKeyAnnotationPKColumn + "' vs DB '" + foreignKeyInfo.getPKColumn() + "'");
 }
 foreignKeyInfo1=new ForeignKeyInfo();
 foreignKeyInfo1.setFKColumn(foreignKeyAnnotationFKColumn);
