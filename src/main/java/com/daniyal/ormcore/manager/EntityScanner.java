@@ -189,7 +189,7 @@ if(columnMetaData.getIsForeignKey()==false)
 {
 throw new ORMException("Entity class " + clazz.getSimpleName() +" property '" + field.getName() + "' annotated @ForeignKey but column '" +columnAnnotationValue + "' is not a foreign key in table '" + tableName + "'");
 }
-foreginKeyAnnotation=(ForeignKey)field.getAnnotation(ForeignKey.class);
+foreignKeyAnnotation=(ForeignKey)field.getAnnotation(ForeignKey.class);
 foreignKeyAnnotationFKColumn=columnAnnotatioValue;
 foreignKeyAnnotationPKTable=foreignKeyAnnotation.parent();
 foreignKeyAnnotationPKColumn=foreignKeyAnnotation.column();
