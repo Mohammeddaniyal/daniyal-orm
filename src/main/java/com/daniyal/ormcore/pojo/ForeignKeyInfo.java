@@ -1,37 +1,37 @@
 package com.daniyal.ormcore.pojo;
 public class ForeignKeyInfo
 {
-private String fkColumnName;
-private  String parentTable;
-private String parentColumnName;
+private String fkColumn;
+private  String pkTable;
+private String pkColumn;
 public ForeignKeyInfo()
 {
-this.fkColumnName="";
-this.parentTable="";
-this.parentColumnName="";
+this.fkColumn="";
+this.pkTable="";
+this.fkColumn="";
 }
-public void setFkColumnName(java.lang.String fkColumnName)
+public void setFKColumn(java.lang.String fkColumn)
 {
-this.fkColumnName=fkColumnName;
+this.fkColumn=fkColumn;
 }
-public java.lang.String getFkColumnName()
+public java.lang.String getFKColumn()
 {
-return this.fkColumnName;
+return this.fkColumn;
 }
-public void setParentTable(java.lang.String parentTable)
+public void setParentTable(java.lang.String pkTable)
 {
-this.parentTable=parentTable;
+this.pkTable=pkTable;
 }
-public java.lang.String getParentTable()
+public java.lang.String getPKTable()
 {
-return this.parentTable;
+return this.pkTable;
 }
-public void setParentColumnName(java.lang.String parentColumnName)
+public void setPKColumn(java.lang.String pkColumn)
 {
-this.parentColumnName=parentColumnName;
+this.pkColumn=pkColumn;
 }
-public java.lang.String getParentColumnName()
+public java.lang.String getPKColumn()
 {
-return this.parentColumnName;
+return this.pkColumn;
 }
 }
