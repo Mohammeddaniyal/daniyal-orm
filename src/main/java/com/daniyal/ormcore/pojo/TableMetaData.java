@@ -1,5 +1,5 @@
 package com.daniyal.ormcore.pojo;
-import java.util.*;
+import java.util.*;		
 public class TableMetaData
 {
 private String tableName;
