@@ -129,7 +129,15 @@ String fkColumn;
 String pkTable;
 String fkColumn;
 
+EntityMeta entityMeta;
+FieldMeta fieldMeta;
+String columnName;
+boolean isPrimaryKey;
+boolean isAutoIncrement;
+boolean isForeignKey;
+ForeignKeyInfo foreignKeyInfo1=null;
 
+Map<String,FieldMeta> fieldMetaMap=new HashMap<>();
 for(Field field:fields)
 {
 columnAnnotation=(Column)field.getAnnotation(Column.class);
@@ -150,29 +158,35 @@ if(columnMetaData==null)
 {
 throw new ORMException("Entity class " + clazz.getSimpleName() +" property " + field.getName() +" declares @Column(name=\"" + columnName + "\") but no such column exists in table '" + tableName + "'");
 }
+columnName=columnAnnotationValue;
 
-if(field.isAnnotationPresent(PrimaryKey.class) && columnMetaData.getIsPrimaryKey()==false)
+isPrimaryKey=field.isAnnotationPresent(PrimaryKey.class);
+
+if(isPrimaryKey && columnMetaData.getIsPrimaryKey()==false)
 {
 throw new ORMException("Entity class " + clazz.getSimpleName() +" property '" + field.getName() + "' is annotated @PrimaryKey but corresponding column '" +columnAnnotationValue + "' is not a primary key column in table '" + tableName + "'");
 }
 
-if(!field.isAnnotationPresent(PrimaryKey.class) && columnMetaData.getIsPrimaryKey())
+if(!isPrimaryKey && columnMetaData.getIsPrimaryKey())
 {
 throw new ORMException("Entity class " + clazz.getSimpleName() +" property '" + field.getName() + "' is missing @PrimaryKey annotation but column '" +columnAnnotationValue + "' is a primary key column in table '" + tableName + "'");
 }
 
+isAutoIncrement=field.isAnnotationPresent(AutoIncrement.class);
 
-if(field.isAnnotationPresent(AutoIncrement.class) && columnMetaData.getIsAutoIncrement()==false)
+if(isAutoIncrement && columnMetaData.getIsAutoIncrement()==false)
 {
 throw new ORMException("Entity class " + clazz.getSimpleName() +" property '" + field.getName() + "' annotated @AutoIncrement but column '" +columnAnnotationValue + "' is not auto-increment in table '" + tableName + "'");
 }
 
-if(!field.isAnnotationPresent(AutoIncrement.class) && columnMetaData.getIsAutoIncrement())
+if(!isAutoIncrement && columnMetaData.getIsAutoIncrement())
 {
 throw new ORMException("Entity class " + clazz.getSimpleName() +" property '" + field.getName() + "' missing @AutoIncrement annotation but column '" +columnAnnotationValue + "' is auto-increment in table '" + tableName + "'");
 }
 
-if(field.isAnnotationPresent(ForeignKey.class))
+isForeignKey=field.isAnnotationPresent(ForeignKey.class);
+
+if(isForeignKey)
 {
 if(columnMetaData.getIsForeignKey()==false)
 {
@@ -197,22 +211,41 @@ if(foreignKeyInfo.getPKColumn().equals(foreignKeyAnnotationPKColumn)==false)
 {
 throw new ORMException("Entity class " + clazz.getSimpleName() +" property '" + field.getName() + "' @ForeignKey parent column mismatch: annotation '" +fkParentColumn + "' vs DB '" + foreignKeyInfo.getPKColumn() + "'");
 }
+foreignKeyInfo1=new ForeignKeyInfo();
+foreignKeyInfo1.setFKColumn(foreignKeyAnnotationFKColumn);
+foreignKeyInfo1.setPKTable(foreignKeyAnnotationPKTable);
+foreignKeyInfo1.setPKColumn(foreignKeyAnnotationPKColumn);
 }
 
-if(!field.isAnnotationPresent(ForeignKey.class) && columnMetaData.getIsForeignKey())
+if(!isForeignKey && columnMetaData.getIsForeignKey())
 {
 throw new ORMException("Entity class " + clazz.getSimpleName() +" property '" + field.getName() + "' missing @ForeignKey annotation but column '" +columnAnnotationValue + "' is a foreign key in table '" + tableName + "'");
 }
 
-
  // TODO: Add data type compatibility validation here (future improvement).
 
+fieldMeta=new FieldMeta();
+fieldMeta.setField(field);
+fieldMeta.setIsPrimaryKey(isPrimaryKey);
+fieldMeta.setIsAutoIncrement(isAutoIncrement);
+fieldMeta.setIsForeignKey(isForeignKey);
+if(isForeignKey)
+{
+fieldMeta.setForeignKeyInfo(foreignKeyInfo);
+}
+
+fieldMetaMap.put(columnName,fieldMeta);
 } // for loop ends
 // means there are missing fields to that didn't represents some table columns
 if(fieldsWithColumnAnnotation!=columnMetaDataMapSize)
 {
-throw new ORMException();
+fieldMetaMap.clear();
+throw new ORMException("Entity class " + clazz.getSimpleName() +" has missing fields for some columns in the table '" + tableName + "'");
 }
+
+entityMeta=new EntityMeta();
+entityMeta.setClass(clazz);
+entityMeta.fields(fieldMetaMap);
 
 }// function ends
 
