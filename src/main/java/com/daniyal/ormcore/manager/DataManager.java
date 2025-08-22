@@ -10,16 +10,16 @@ public class DataManager
 private static DataManager dataManager;
 private ConfigLoader configLoader;
 private Connection connection;
-//private Map<String,EntityMeta> entitiesMetaMap;
+private Map<Class,EntityMeta> entitiesMetaMap;
 private Map<String,TableMetaData> tablesMetaMap;
 private DataManager() throws ORMException
 {
 this.configLoader=new ConfigLoader();
 this.connection=null;
-//this.entitiesMetaMap=null;
+this.entitiesMetaMap=null;
 populateDataStructures();
 }
-private void printData(Map<String,TableMetaData> tablesMetaMap)
+private void printTableMetaData(Map<String,TableMetaData> tablesMetaMap)
 {
 for (Map.Entry<String, TableMetaData> entry : tablesMetaMap.entrySet()) {
     String tableKey = entry.getKey();
@@ -28,9 +28,13 @@ for (Map.Entry<String, TableMetaData> entry : tablesMetaMap.entrySet()) {
     System.out.println("Table Key: " + tableKey);
     System.out.println("Table Name: " + table.getTableName());
 
-    List<ColumnMetaData> columns = table.getColumns();
+    Map<String, ColumnMetaData> columns = table.getColumns();
     if (columns != null) {
-        for (ColumnMetaData column : columns) {
+        for (Map.Entry<String, ColumnMetaData> colEntry : columns.entrySet()) {
+            String columnKey = colEntry.getKey();
+            ColumnMetaData column = colEntry.getValue();
+
+            System.out.println("   Column Key: " + columnKey);
             System.out.println("   Column Name: " + column.getColumnName());
             System.out.println("   Type: " + column.getType() + "(" + column.getSize() + ")");
             System.out.println("   Primary Key: " + column.getIsPrimaryKey());
@@ -51,11 +55,48 @@ for (Map.Entry<String, TableMetaData> entry : tablesMetaMap.entrySet()) {
 }
 
 }
+
+private void printEntityMetaData()
+{
+for (Map.Entry<Class, EntityMeta> entry : entitiesMetaMap.entrySet()) {
+    Class entityClass = entry.getKey();
+    EntityMeta entityMeta = entry.getValue();
+
+    System.out.println("Entity Class: " + entityClass.getName());
+    System.out.println("Table Name: " + entityMeta.getTableName());
+
+    Map<String, FieldMeta> fields = entityMeta.getFields();
+    if (fields != null) {
+        for (Map.Entry<String, FieldMeta> fieldEntry : fields.entrySet()) {
+            String fieldKey = fieldEntry.getKey();
+            FieldMeta fieldMeta = fieldEntry.getValue();
+
+            System.out.println("   Field Key: " + fieldKey);
+            System.out.println("   Field Name: " + fieldMeta.getField().getName());
+            System.out.println("   Column Name: " + fieldMeta.getColumnName());
+            System.out.println("   Primary Key: " + fieldMeta.getIsPrimaryKey());
+            System.out.println("   Auto Increment: " + fieldMeta.getIsAutoIncrement());
+            System.out.println("   Foreign Key: " + fieldMeta.getIsForeignKey());
+
+            if (fieldMeta.getIsForeignKey() && fieldMeta.getForeignKeyInfo() != null) {
+                ForeignKeyInfo fk = fieldMeta.getForeignKeyInfo();
+                System.out.println("      FK Column: " + fk.getFKColumn());
+                System.out.println("      References Table: " + fk.getPKTable());
+                System.out.println("      References Column: " + fk.getPKColumn());
+            }
+            System.out.println();
+        }
+    }
+    System.out.println("-------------------------------------");
+}
+
+}
 private void populateDataStructures() throws ORMException
 {
-//this.entitiesMetaMap=EntityScanner.scanBasePackage(this.configLoader.getBasePackage());
 this.tablesMetaMap=DatabaseMetaDataLoader.loadTableMetaData(ConnectionManager.getConnection(configLoader));
-printData(tablesMetaMap);
+this.entitiesMetaMap=EntityScanner.scanBasePackage(this.configLoader.getBasePackage(),tablesMetaMap);
+//printTableMetaData(tablesMetaMap);
+//printEntityMetaData();
 }
 public static DataManager getDataManager() throws ORMException
 {
