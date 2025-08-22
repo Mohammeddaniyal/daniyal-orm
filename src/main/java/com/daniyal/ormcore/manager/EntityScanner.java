@@ -112,7 +112,7 @@ Field []fields=clazz.getFields();
 Map<String,ColumnMetaData> columnMetaDataMap=tableMetaData.getColumns();
 int columnMetaDataMapSize=columnMetaDataMap.size();
 int fieldsSize=fields.length;
-int fieldsWithColumnAnnotation=field.length;
+int fieldsWithColumnAnnotation=fields.length;
 AutoIncrement autoIncrementAnnotation;
 Column columnAnnotation;
 ForeignKey foreignKeyAnnotation;
