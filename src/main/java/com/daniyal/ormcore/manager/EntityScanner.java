@@ -267,7 +267,7 @@ entityMeta=new EntityMeta();
 entityMeta.setEntityClass(clazz);
 entityMeta.setTableName(tableName);
 entityMeta.setFields(fieldMetaMap);
-
+entitiesMetaMap.put(clazz,entityMeta);
 }// function ends
 
 }// class ends 
