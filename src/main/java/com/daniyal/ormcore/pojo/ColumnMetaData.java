@@ -4,7 +4,7 @@ public class ColumnMetaData
 private String columnName;
 private boolean isPrimaryKey;
 private boolean isAutoIncrement;
-private boolean isNotNull;
+private boolean isNull;
 private boolean isForeignKey;
 private ForeignKeyInfo foreignKeyInfo;
 private String type;
@@ -14,7 +14,7 @@ public ColumnMetaData()
 this.columnName="";
 this.isPrimaryKey=false;
 this.isAutoIncrement=false;
-this.isNotNull=false;
+this.isNull=false;
 this.isForeignKey=false;
 this.foreignKeyInfo=null;
 this.type="";
@@ -44,13 +44,13 @@ public boolean getIsAutoIncrement()
 {
 return this.isAutoIncrement;
 }
-public void setIsNotNull(boolean isNotNull)
+public void setIsNull(boolean isNull)
 {
-this.isNotNull=isNotNull;
+this.isNull=isNull;
 }
-public boolean getIsNotNull()
+public boolean getIsNull()
 {
-return this.isNotNull;
+return this.isNull;
 }
 public void setIsForeignKey(boolean isForeignKey)
 {
