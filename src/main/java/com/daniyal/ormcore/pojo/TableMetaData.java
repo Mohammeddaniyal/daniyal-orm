@@ -3,7 +3,7 @@ import java.util.*;
 public class TableMetaData
 {
 private String tableName;
-private List<ColumnMetaData> columns;
+private Map<String,ColumnMetaData> columns;
 public TableMetaData()
 {
 this.tableName="";
@@ -17,11 +17,11 @@ public java.lang.String getTableName()
 {
 return this.tableName;
 }
-public void setColumns(java.util.List columns)
+public void setColumns(java.util.Map<String,ColumnMetaData> columns)
 {
 this.columns=columns;
 }
-public java.util.List getColumns()
+public java.util.Map<String,ColumnMetaData> getColumns()
 {
 return this.columns;
 }
