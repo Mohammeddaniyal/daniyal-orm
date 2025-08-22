@@ -241,6 +241,9 @@ throw new ORMException("Entity class " + clazz.getSimpleName() +" property '" + 
 
  // TODO: Add data type compatibility validation here (future improvement).
 
+
+field.setAccessible(true);
+
 fieldMeta=new FieldMeta();
 fieldMeta.setField(field);
 fieldMeta.setIsPrimaryKey(isPrimaryKey);
