@@ -4,7 +4,7 @@ public class EntityMeta
 {
 private Class entityClass;
 private String tableName;
-private List<FieldMeta> fields;
+private Map<String,FieldMeta> fields;
 
 public EntityMeta()
 {
@@ -21,7 +21,7 @@ public void setTableName(String tableName)
 {
 this.tableName=tableName;
 }
-public void setFields(List<FieldMeta> fields)
+public void setFields(Map<String,FieldMeta> fields)
 {
 this.fields=fields;
 }
@@ -33,7 +33,7 @@ public String getTableName()
 {
 return this.tableName;
 }
-public List<FieldMeta> getFields()
+public Map<String,FieldMeta> getFields()
 {
 return this.fields;
 }
