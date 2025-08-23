@@ -212,7 +212,7 @@ columnValuesSQLBuilder.append(")");
 
 String sql="insert into "+tableName+" "+columnTitlesSQLBuilder.toString()+" "+columnValuesSQLBuilder.toString();
 */
-QueryBuilder queryBuilder=new QueryBuilder(entity,tableName,fieldMetaMap,columnMetaMap);
+QueryBuilder queryBuilder=new QueryBuilder(entity,tableName,fieldMetaMap,columnMetaDataMap);
 Query query=queryBuilder.buildInsertQuery();
 params=query.getParameters();
 sql=query.getSQL();
