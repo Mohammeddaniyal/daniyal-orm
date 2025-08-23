@@ -45,8 +45,8 @@ public class EntityValidator
 				}
 			}else if(value instanceof BigDecimal)
 			{
-				value=(BigDecimal)value;
-				BigDecimal normalized=value.stripTrailingZeros();
+				BigDecimal v=(java.math.BigDecimal)value;
+				BigDecimal normalized=v.stripTrailingZeros();
 				
 				int valuePrecision=normalized.precision();
 				int valueScale=normalized.scale();
@@ -55,12 +55,12 @@ public class EntityValidator
 				int scale=columnMetaData.getScale();
 				if (valuePrecision > precision) 
 				{
-				throw new ORMException("BigDecimal value for field '" + fieldName +
+				throw new ORMException("BigDecimal value for field '" + fieldMeta.getField().getName() +
                 "' exceeds the maximum precision allowed (" + precision + "). Actual: " + valuePrecision);
 				}
 				if (valueScale > scale) 
 				{
-				throw new ORMException("BigDecimal value for field '" + fieldName +
+				throw new ORMException("BigDecimal value for field '" + fieldMeta.getField().getName() +
                 "' exceeds the maximum scale allowed (" + scale + "). Actual: " + valueScale);
 				}
 			}
