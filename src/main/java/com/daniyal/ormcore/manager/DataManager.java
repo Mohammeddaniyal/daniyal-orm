@@ -158,11 +158,11 @@ throw new ORMException("Entity class '" + entityClass.getName() + "' is not regi
 
 String tableName=entityMeta.getTableName();
 Map<String,FieldMeta> fields=entityMeta.getFields();
+TableMetaData tableMetaData=tablesMetaMap.get(tableName);
 Map<String,ColumnMetaData> columnMetaDataMap=tableMetaData.getColumns();
 List<Object> params=new ArrayList<>();
 String sql;
 /*
-TableMetaData tableMetaData=tablesMetaMap.get(tableName);
 Field field;
 Object value;
 Object validatedValue;
