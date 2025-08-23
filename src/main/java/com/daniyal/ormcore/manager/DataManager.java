@@ -3,6 +3,7 @@ import java.sql.*;
 import com.daniyal.ormcore.config.*;
 import com.daniyal.ormcore.connection.*;
 import com.daniyal.ormcore.exceptions.*;
+import com.daniyal.ormcore.validation.*;
 import com.daniyal.ormcore.pojo.*;
 import java.util.*;
 import java.lang.reflect.*;
@@ -158,8 +159,11 @@ throw new ORMException("Entity class '" + entityClass.getName() + "' is not regi
 String tableName=entityMeta.getTableName();
 Map<String,FieldMeta> fields=entityMeta.getFields();
 List<Object> values=new ArrayList<>();
+TableMetaData tableMetaData=tablesMetaMap.get(tableName);
+Map<String,ColumnMetaData> columnMetaDataMap=tableMetaData.getColumns();
 Field field;
 Object value;
+Object validatedValue;
 StringBuilder columnTitlesSQLBuilder=new StringBuilder();
 columnTitlesSQLBuilder.append("(");
 StringBuilder columnValuesSQLBuilder=new StringBuilder();
@@ -170,7 +174,10 @@ for(Map.Entry<String,FieldMeta> entry:fields.entrySet())
 {
 fieldMeta=entry.getValue();
 field=fieldMeta.getField();
-if(fieldMeta.getIsAutoIncrement()) continue;
+if(fieldMeta.getIsAutoIncrement())
+{
+	continue;
+}
 if(!firstTime) 
 {
 columnTitlesSQLBuilder.append(",");
@@ -181,17 +188,19 @@ columnValuesSQLBuilder.append("?");
 try
 {
 value=field.get(entity);
-if(value.getClass().getName().equals("java.lang.Character"))
-{
-value=String.valueOf(value);
-}
+
+// need to validate values 
+// like no String overflow case, e.g in column it's char(20) but string.length()>20 then invalid case
+validatedValue=EntityValidator.validateAndConvert(value,fieldMeta,columnMetaDataMap.get(fieldMeta.getColumnName));
+
+
 }catch(IllegalAccessException e)
 {
 throw new ORMException("Cannot read value of field '" + field.getName() +"' in entity '" + entity.getClass().getSimpleName() +"'. Ensure the field is accessible (e.g., use @Column and allow access).");
 }
 //System.out.println("Value : "+value+" class : "+value.getClass().getName());
 
-values.add(value);
+values.add(validatedValue);
 firstTime=false;
 }
 columnTitlesSQLBuilder.append(")");
