@@ -158,9 +158,11 @@ throw new ORMException("Entity class '" + entityClass.getName() + "' is not regi
 
 String tableName=entityMeta.getTableName();
 Map<String,FieldMeta> fields=entityMeta.getFields();
-List<Object> values=new ArrayList<>();
-TableMetaData tableMetaData=tablesMetaMap.get(tableName);
 Map<String,ColumnMetaData> columnMetaDataMap=tableMetaData.getColumns();
+List<Object> params=new ArrayList<>();
+String sql;
+/*
+TableMetaData tableMetaData=tablesMetaMap.get(tableName);
 Field field;
 Object value;
 Object validatedValue;
@@ -208,16 +210,21 @@ columnValuesSQLBuilder.append(")");
 
 
 String sql="insert into "+tableName+" "+columnTitlesSQLBuilder.toString()+" "+columnValuesSQLBuilder.toString();
+*/
+QueryBuilder queryBuilder=new QueryBuilder(entity,tableName,fieldMetaMap,columnMetaMap);
+Query query=queryBuilder.buildInsertQuery();
+params=query.getParameters();
+sql=query.getSQL();
 System.out.println("SQL statement for insert : "+sql);
 try
 {
 PreparedStatement preparedStatement=connection.prepareStatement(sql);
 int x=1;
-System.out.println("%10VALUES");
-for(Object v:values)
+System.out.printf("%10s\n","VALUES");
+for(Object param:params)
 {
 //System.out.println(v);
-preparedStatement.setObject(x++,v);
+preparedStatement.setObject(x++,param);
 }
 preparedStatement.executeUpdate();
 preparedStatement.close();
