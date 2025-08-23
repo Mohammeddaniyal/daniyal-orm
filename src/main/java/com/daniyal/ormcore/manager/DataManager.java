@@ -162,7 +162,7 @@ Field field;
 Object value;
 StringBuilder columnTitlesSQLBuilder=new StringBuilder();
 columnTitlesSQLBuilder.append("(");
-String columnValuesSQLBuilder=new StringBuilder();
+StringBuilder columnValuesSQLBuilder=new StringBuilder();
 columnValuesSQLBuilder.append("values(");
 boolean firstTime=true;
 FieldMeta fieldMeta;
