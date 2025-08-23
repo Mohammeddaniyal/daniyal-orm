@@ -1,60 +1,109 @@
 # Daniyal ORM Framework
 
-A lightweight Java ORM framework that simplifies database interaction by using annotations to map your Java classes to MySQL tables.  
-It automatically loads database metadata, validates mappings, and provides core data management functionalities with reflection and JDBC under the hood.
+A lightweight Java ORM I built to cut down on JDBC boilerplate when working with MySQL.  
+Instead of writing endless SQL and mapping results by hand, you just annotate your classes and let the framework handle the rest.  
+It scans your DB, validates that your entities match the schema, and gives you basic CRUD functionality through reflection.
 
-***
+Think of it as a simplified Hibernate — without the heavy learning curve.
+
+---
 
 ## ✨ Features
 
-- **Annotation-Based Mapping:** Define your entities with `@Table` and annotate fields with `@Column`, `@PrimaryKey`, `@AutoIncrement`, and `@ForeignKey`.  
-- **Automatic Metadata Loading:** Scans database schema via JDBC and caches table/column metadata for runtime efficiency.  
-- **Entity Scanning & Validation:** Automatically finds entity classes in a user-defined base package, validates consistency with the database schema, and builds metadata mappings.  
-- **Transaction Management:** Start and end database connection sessions easily through `DataManager`.  
-- **Reflection-Driven CRUD:** Uses reflection with optimized access to read and write entity fields.  
-- **Configurable via JSON:** Externalize configurations like JDBC connection details and base package in a `conf.json` file.
+- **Annotation mapping**  
+  Use `@Table`, `@Column`, `@PrimaryKey`, `@AutoIncrement`, and `@ForeignKey` to map your entities.
 
-***
+- **Schema-aware**  
+  It actually scans the DB schema on startup and keeps metadata cached, so you don’t have to maintain duplicate configs.
 
-## 📂 Project Structure
+- **Entity validation**  
+  Your Java class structure is checked against the DB (PKs, FKs, nullability, etc.) so issues show up early.
 
-- **annotations/** → Java annotations like `@Table`, `@Column`, `@PrimaryKey`, etc.  
-- **config/** → `ConfigLoader` loads settings from `conf.json`.  
-- **connection/** → Manages database connections via `ConnectionManager`.  
-- **exceptions/** → Custom exception types such as `ORMException`.  
-- **manager/** → Core management classes:  
-  - `DataManager` – Singleton managing lifecycle, connection, and metadata.  
-  - `EntityScanner` – Scans the base package for entity classes and validates schema.  
-  - `DatabaseMetaDataLoader` – Loads and caches schema metadata from MySQL.  
-- **pojo/** → Metadata containers (`EntityMeta`, `FieldMeta`, `TableMetaData`, etc.).  
-- **utils/** → Helpers like case converters and type mappers.
+- **Simple session management**  
+  Open a session with `begin()`, do your work, then close it with `end()`.
 
-***
+- **Reflection-based CRUD**  
+  Reflection is used for reading/writing entity fields, with caching so performance doesn’t tank.
+
+- **Config file**  
+  All DB details and base package live in `conf.json`.
+
+---
+
+## 📂 Project Layout
+
+```
+
+├───annotations
+│       AutoIncrement.java
+│       Column.java
+│       ForeignKey.java
+│       PrimaryKey.java
+│       Table.java
+│
+├───config
+│       ConfigLoader.java
+│
+├───connection
+│       ConnectionManager.java
+│
+├───exceptions
+│       ORMException.java
+│
+├───generator        # placeholder for future features
+│
+├───manager
+│       DatabaseMetaDataLoader.java
+│       DataManager.java
+│       EntityScanner.java
+│
+├───pojo
+│       ColumnMetaData.java
+│       EntityMeta.java
+│       FieldMeta.java
+│       ForeignKeyInfo.java
+│       TableMetaData.java
+│
+├───query
+│       FieldProcessor.java
+│       Query.java
+│       QueryBuilder.java
+│
+├───utils
+│       CaseConvertor.java
+│       TypeMapper.java
+│
+└───validation
+EntityValidator.java
+
+````
+
+---
 
 ## ⚙️ How It Works
 
-### 1. Initialization (`DataManager`)
+1. **Initialization**  
+   When you start the app, `DataManager` loads the DB schema, scans your entity package, and matches classes against actual tables.
 
-- Loads DB schema metadata via `DatabaseMetaDataLoader` on startup.  
-- Scans the user’s classes in the configured base package for entities.  
-- Validates entity fields (annotations vs DB columns) with detailed checks on primary keys, foreign keys, and auto-increment fields.  
-- Builds in-memory metadata maps representing entities and their DB counterparts.
+2. **Session lifecycle**  
+   - Call `begin()` → opens a connection  
+   - Run CRUD ops (`save()`, `update()`, etc.)  
+   - Call `end()` → closes the connection
 
-### 2. Transaction Lifecycle
+3. **Reflection under the hood**  
+   Entities are read/written using reflection. Fields are cached after the first lookup for efficiency.
 
-- Call `begin()` to open a DB connection.  
-- Use `save()`, `update()`, or other CRUD operations (future) on entity objects.  
-- Call `end()` to close the connection gracefully.
+4. **Validation & conversion**  
+   Before hitting the DB, values are validated (size, nulls, etc.) and converted into proper SQL-friendly types.
 
-### 3. Reflection-Based Data Access
+5. **Dynamic query building**  
+   Queries are built automatically (parameterized). Right now `INSERT` works; `UPDATE`, `DELETE`, and `SELECT` are planned.
 
-- Reflection is used to get/set entity field values efficiently via cached accessible `Field` objects.
-
-***
+---
 
 ## 🛠 Configuration (`conf.json`)
 
-Create a JSON file named `conf.json` in your project root or working directory:
+Drop a `conf.json` in the project root:
 
 ```json
 {
@@ -64,21 +113,11 @@ Create a JSON file named `conf.json` in your project root or working directory:
   "password": "tmschool",
   "base-package": "com.daniyal.test.ormcore"
 }
-```
+````
 
-**Config Fields:**
+---
 
-- `jdbc-driver`: Fully qualified class name of your JDBC driver.  
-- `connection-url`: JDBC URL for your database.  
-- `username`: DB username.  
-- `password`: DB password.  
-- `base-package`: Java package where all entity classes reside (framework scans this package).
-
-***
-
-## 🚀 Usage Example
-
-Minimal example (`com.daniyal.test.ormcore`):
+## 🚀 Example Usage
 
 ```java
 package com.daniyal.test.ormcore;
@@ -96,8 +135,9 @@ public class Eg1 {
 
             Connection connection = dm.getConnection();
             System.out.println("Connected as: " + connection.getMetaData().getUserName());
-
-            Course c = new Course(1, "Java");
+			
+			// id is AutoIncremented
+            Course c = new Course("Java");
             dm.save(c);
 
             dm.end();
@@ -108,11 +148,9 @@ public class Eg1 {
 }
 ```
 
-***
+---
 
-## 🏗 How to Define Entities
-
-Example of an entity class:
+## 🏗 Defining an Entity
 
 ```java
 import com.daniyal.ormcore.annotations.*;
@@ -131,28 +169,32 @@ public class Course {
 }
 ```
 
-***
+---
 
-## 📌 Key Notes
+## 📌 Notes
 
-- Entity fields must be annotated with `@Column` to be mapped.  
-- `@PrimaryKey`, `@AutoIncrement`, and `@ForeignKey` require `@Column`.  
-- The framework verifies each entity's class structure against actual DB tables and raises `ORMException` on mismatch.  
-- Reflection uses `setAccessible(true)` once on entity fields to optimize get/set calls.  
-- Metadata loading scans the database schema dynamically at startup—no manual syncing needed beyond annotations.  
-- Currently supports MySQL; extension to other DBs is possible with minor changes.
+* Every mapped field needs a `@Column`.
+* `@PrimaryKey`, `@AutoIncrement`, and `@ForeignKey` must be used together with `@Column`.
+* Validation runs both at startup (entity vs DB) and before persisting data.
+* Reflection calls are cached internally for speed.
+* Right now it’s MySQL-only, but adding other databases should be straightforward.
 
-***
+---
 
-## 🔮 Next Steps
+## 🔮 Roadmap
 
-- Implement save, update, delete, and query operations.  
-- Add advanced validation: type compatibility, nullability.  
-- Expand transaction management and connection pooling.  
-- Add logging and improved error messages.
+* Add support for `UPDATE`, `DELETE`, and `SELECT`.
+* Better validation and error messages.
+* Connection pooling + improved transaction handling.
+* Logging, tests, and CI pipeline.
 
-***
+---
 
-## 🤝 Contribution
+## 🤝 Contributing
 
-Feel free to clone, extend, and customize. For bug reports or feature requests, open issues or pull requests on the repository.
+If you’d like to improve it, feel free to fork and open a PR.
+Bug reports and feature requests are welcome via GitHub Issues.
+
+```
+
+---
