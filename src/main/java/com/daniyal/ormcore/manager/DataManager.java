@@ -177,7 +177,7 @@ columnTitlesSQLBuilder.append(",");
 columnValuesSQLBuilder.append(",");
 }
 columnTitlesSQLBuilder.append(fieldMeta.getColumnName());
-columnValuesSQLBuilder.append("/");
+columnValuesSQLBuilder.append("?");
 try
 {
 value=field.get(entity);
