@@ -99,7 +99,7 @@ private void populateDataStructures() throws ORMException
 this.tablesMetaMap=DatabaseMetaDataLoader.loadTableMetaData(ConnectionManager.getConnection(configLoader));
 this.entitiesMetaMap=EntityScanner.scanBasePackage(this.configLoader.getBasePackage(),tablesMetaMap);
 //printTableMetaData(tablesMetaMap);
-printEntityMetaData();
+//printEntityMetaData();
 }
 public static DataManager getDataManager() throws ORMException
 {
@@ -160,8 +160,10 @@ Map<String,FieldMeta> fields=entityMeta.getFields();
 List<Object> values=new ArrayList<>();
 Field field;
 Object value;
-String columnTitlesSQL="(";
-String columnValuesSQL="values(";
+StringBuilder columnTitlesSQLBuilder=new StringBuilder();
+columnTitlesSQLBuilder.append("(");
+String columnValuesSQLBuilder=new StringBuilder();
+columnValuesSQLBuilder.append("values(");
 boolean firstTime=true;
 FieldMeta fieldMeta;
 for(Map.Entry<String,FieldMeta> entry:fields.entrySet())
@@ -171,11 +173,11 @@ field=fieldMeta.getField();
 if(fieldMeta.getIsAutoIncrement()) continue;
 if(!firstTime) 
 {
-columnTitlesSQL=columnTitlesSQL+",";
-columnValuesSQL=columnValuesSQL+",";
+columnTitlesSQLBuilder.append(",");
+columnValuesSQLBuilder.append(",");
 }
-columnTitlesSQL=columnTitlesSQL+fieldMeta.getColumnName();
-columnValuesSQL=columnValuesSQL+"?";
+columnTitlesSQLBuilder.append(fieldMeta.getColumnName());
+columnValuesSQLBuilder.append("/");
 try
 {
 value=field.get(entity);
@@ -192,11 +194,11 @@ throw new ORMException("Cannot read value of field '" + field.getName() +"' in e
 values.add(value);
 firstTime=false;
 }
-columnTitlesSQL=columnTitlesSQL+")";
-columnValuesSQL=columnValuesSQL+")";
+columnTitlesSQLBuilder.append(")");
+columnValuesSQLBuilder.append(")");
 
 
-String sql="insert into "+tableName+" "+columnTitlesSQL+" "+columnValuesSQL;
+String sql="insert into "+tableName+" "+columnTitlesSQLBuilder.toString()+" "+columnValuesSQLBuilder.toString();
 System.out.println("SQL statement for insert : "+sql);
 try
 {
