@@ -37,7 +37,7 @@ public class EntityValidator
 				if("DATE".equals(sqlType))
 				{
 					return new java.sql.Date(utilDate.getTime());
-				}else if("TIMESTAMP",equals(sqlType) || "DATETIME".equals(sqlType))
+				}else if("TIMESTAMP".equals(sqlType) || "DATETIME".equals(sqlType))
 				{
 					return new java.sql.Timestamp(utilDate.getTime());
 				}else{
@@ -45,21 +45,22 @@ public class EntityValidator
 				}
 			}else if(value instanceof BigDecimal)
 			{
+				value=(BigDecimal)value;
 				BigDecimal normalized=value.stripTrailingZeros();
 				
-				int precision=normalized.precision();
+				int valuePrecision=normalized.precision();
 				int valueScale=normalized.scale();
 				
-				int maxDigits=	columnMetaData.getSize();
-				int scale= columnMetaData.getScale();
+				int precision=columnMetaData.getSize();
+				int scale=columnMetaData.getScale();
 				if (valuePrecision > precision) 
 				{
-            throw new ORMException("BigDecimal value for field '" + fieldName +
+				throw new ORMException("BigDecimal value for field '" + fieldName +
                 "' exceeds the maximum precision allowed (" + precision + "). Actual: " + valuePrecision);
 				}
-			if (valueScale > scale) 
+				if (valueScale > scale) 
 				{
-            throw new ORMException("BigDecimal value for field '" + fieldName +
+				throw new ORMException("BigDecimal value for field '" + fieldName +
                 "' exceeds the maximum scale allowed (" + scale + "). Actual: " + valueScale);
 				}
 			}
