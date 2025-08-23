@@ -1,6 +1,7 @@
 package com.daniyal.ormcore.query;
 import com.daniyal.ormcore.pojo.*;
 import com.daniyal.ormcore.exceptions.*;
+import java.util.*;
 public class QueryBuilder
 {
 	private final String tableName;
