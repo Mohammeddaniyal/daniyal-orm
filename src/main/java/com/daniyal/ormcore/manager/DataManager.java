@@ -191,7 +191,7 @@ value=field.get(entity);
 
 // need to validate values 
 // like no String overflow case, e.g in column it's char(20) but string.length()>20 then invalid case
-validatedValue=EntityValidator.validateAndConvert(value,fieldMeta,columnMetaDataMap.get(fieldMeta.getColumnName));
+validatedValue=EntityValidator.validateAndConvert(value,fieldMeta,columnMetaDataMap.get(fieldMeta.getColumnName()));
 
 
 }catch(IllegalAccessException e)
