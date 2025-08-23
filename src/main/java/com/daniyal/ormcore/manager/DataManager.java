@@ -5,6 +5,7 @@ import com.daniyal.ormcore.connection.*;
 import com.daniyal.ormcore.exceptions.*;
 import com.daniyal.ormcore.validation.*;
 import com.daniyal.ormcore.pojo.*;
+import com.daniyal.ormcore.query.*;
 import java.util.*;
 import java.lang.reflect.*;
 public class DataManager
