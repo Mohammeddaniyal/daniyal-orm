@@ -137,6 +137,7 @@ ColumnMetaData columnMetaData;
 String foreignKeyAnnotationFKColumn;
 String foreignKeyAnnotationPKTable;
 String foreignKeyAnnotationPKColumn;
+int columnVarSize;
 
 ForeignKeyInfo foreignKeyInfo;
 String fkColumn;
@@ -240,6 +241,13 @@ throw new ORMException("Entity class " + clazz.getSimpleName() +" property '" + 
 }
 
  // TODO: Add data type compatibility validation here (future improvement).
+
+if(!TypeMapper.isCompatible(field.getType(),columnMetaData.getType(),columnMetaData.getSize()))
+{
+	 throw new ORMException("Type mismatch for field '" + field.getName() +"' in entity '" + clazz.getSimpleName() +
+        "': Java type '" + field.getType().getSimpleName() +
+        "' is not compatible with SQL type '" + columnMetaData.getType() + "'");
+}
 
 
 field.setAccessible(true);
