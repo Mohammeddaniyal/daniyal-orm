@@ -20,7 +20,7 @@ this.isForeignKey=false;
 this.foreignKeyInfo=null;
 this.type="";
 this.size=0;
-this.scale=-1;
+this.scale=0;
 }
 public void setColumnName(java.lang.String columnName)
 {
