@@ -19,41 +19,41 @@ if(type.equalsIgnoreCase("DATE")) return "Date";
 //if(type.equalsIgnoreCase("TIMESTAMP")  || type.equalsIgnoreCase("DATETIME")) return "TimeStamp";
 return "Object";
 }
-public static boolean isCompatible(String entityFieldType,String tableFieldType,int size)
+public static boolean isCompatible(Class entityFieldType,String tableFieldType,int size)
 {
 switch(tableFieldType.toUpperCase())
 {
 	case "INT":
-	return entityFieldType.equals("int") || entityFieldType.equals("java.lang.Integer");
-	case "BIGINT"
-	return entityFieldType.equals("long") || entityFieldType.equals("java.lang.Long");
-	case "DOUBLE"
-	return entityFieldType.equals("double") || entityFieldType.equals("java.lang.Double");
+	return entityFieldType==int.class || entityFieldType.equals(Integer.class);
+	case "BIGINT":
+	return entityFieldType==long.class || entityFieldType.equals(Long.class);
+	case "DOUBLE":
+	return entityFieldType==double.class || entityFieldType.equals(Double.class);
 	case "FLOAT":
-	return entityFieldType.equals("float") || entityFieldType.equals("java.lang.Float");
+	return entityFieldType==float.class || entityFieldType.equals(Float.class);
 	case "BOOLEAN":
-	caee "BIT":
-	return entityFieldType.equals("boolean") || entityFieldType.equals("java.lang.Boolean");
+	case "BIT":
+	return entityFieldType==boolean.class || entityFieldType.equals(Boolean.class);
 	
 	case "VARCHAR":
 	case "TEXT":
-	return entityFieldType.equals("java.lang.String");
+	return entityFieldType.equals(String.class);
 	case "CHAR":
 	if(size==1)
 	{
-		return entityFieldType.equals("char") || entityFieldType.equals("java.lang.Character");
+		return entityFieldType==char.class || entityFieldType.equals(Character.class);
 	}
 	else
 	{
-		return entityFieldType.equals("java.lang.String");
+		return entityFieldType.equals(String.class);
 	}
 	case "DATE":
-	return entityFieldType.equals("java.util.Date") || entityFieldType.equals("java.sql.Date");
+	return entityFieldType.equals(java.util.Date.class) || entityFieldType.equals(java.sql.Date.class);
 	case "TIMESTAMP":
-	return entityFieldType.equals("java.sql.TimeStamp") || entityFieldType.equals("java.util.Date");
+	return entityFieldType.equals(java.sql.Timestamp.class) || entityFieldType.equals(java.util.Date.class);
 	case "DECIMAL":
 	case "NUMERIC":
-	return entityFieldType.equals("double") || entityFieldType.equals("java.lang.Double") || entityFieldType.equals("java.math.BigDecimal");
+	return entityFieldType==double.class || entityFieldType.equals(java.lang.Double.class) || entityFieldType.equals(java.math.BigDecimal.class);
 	default:
 	return false;
 }
