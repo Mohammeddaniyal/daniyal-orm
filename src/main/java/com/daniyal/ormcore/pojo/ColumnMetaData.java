@@ -1,4 +1,4 @@
-package com.daniyal.ormcore.pojo;
+ package com.daniyal.ormcore.pojo;
 public class ColumnMetaData
 {
 private String columnName;
@@ -9,6 +9,8 @@ private boolean isForeignKey;
 private ForeignKeyInfo foreignKeyInfo;
 private String type;
 private int size;
+private int precision;
+private int scale;
 public ColumnMetaData()
 {
 this.columnName="";
@@ -19,6 +21,8 @@ this.isForeignKey=false;
 this.foreignKeyInfo=null;
 this.type="";
 this.size=0;
+this.precision=-1;
+this.scale=-1;
 }
 public void setColumnName(java.lang.String columnName)
 {
@@ -84,4 +88,21 @@ public int getSize()
 {
 return this.size;
 }
+public void setPrecision(int precision)
+{
+	this.precision=precision;
+}
+public int getPrecision()
+{
+	return this.precision;
+}
+public void setScale(int Scale)
+{
+	this.scale=scale;
+}
+public int getScale()
+{
+	return this.scale;
+}
+
 }
