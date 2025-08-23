@@ -158,7 +158,7 @@ throw new ORMException("Entity class '" + entityClass.getName() + "' is not regi
 }
 
 String tableName=entityMeta.getTableName();
-Map<String,FieldMeta> fields=entityMeta.getFields();
+Map<String,FieldMeta> fieldMetaMap=entityMeta.getFields();
 TableMetaData tableMetaData=tablesMetaMap.get(tableName);
 Map<String,ColumnMetaData> columnMetaDataMap=tableMetaData.getColumns();
 List<Object> params=new ArrayList<>();
