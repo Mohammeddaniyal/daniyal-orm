@@ -35,18 +35,18 @@ for (Map.Entry<String, TableMetaData> entry : tablesMetaMap.entrySet()) {
     if (columns != null) {
         for (Map.Entry<String, ColumnMetaData> colEntry : columns.entrySet()) {
             String columnKey = colEntry.getKey();
-            ColumnMetaData column = colEntry.getValue();
+            ColumnMetaData columnMetaData = colEntry.getValue();
 
             System.out.println("   Column Key: " + columnKey);
-            System.out.println("   Column Name: " + column.getColumnName());
-            System.out.println("   Type: " + column.getType() + "(" + column.getSize() + ")");
-            System.out.println("   Primary Key: " + column.isPrimaryKey());
-            System.out.println("   Auto Increment: " + column.isAutoIncrement());
-            System.out.println("   Nullable: " + column.isNull());
-            System.out.println("   Foreign Key: " + column.isForeignKey());
+            System.out.println("   Column Name: " + columnMetaData.getColumnName());
+            System.out.println("   Type: " + columnMetaData.getDataType() + "(" + columnMetaData.getSize() + ")");
+            System.out.println("   Primary Key: " + columnMetaData.isPrimaryKey());
+            System.out.println("   Auto Increment: " + columnMetaData.isAutoIncrement());
+            System.out.println("   Nullable: " + columnMetaData.isNullable());
+            System.out.println("   Foreign Key: " + columnMetaData.isForeignKey());
 
-            if (column.isForeignKey() && column.getForeignKeyInfo() != null) {
-                ForeignKeyInfo fk = column.getForeignKeyInfo();
+            if (columnMetaData.isForeignKey() && columnMetaData.getForeignKeyInfo() != null) {
+                ForeignKeyInfo fk = columnMetaData.getForeignKeyInfo();
                 System.out.println("      FK Column: " + fk.getFKColumn());
                 System.out.println("      References Table: " + fk.getPKTable());
                 System.out.println("      References Column: " + fk.getPKColumn());
