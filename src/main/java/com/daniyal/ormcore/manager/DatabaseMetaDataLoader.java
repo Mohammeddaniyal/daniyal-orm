@@ -12,10 +12,10 @@ try
 Map<String,TableMetaData> tableMetaDataMap=new HashMap<>();
 TableMetaData tableMetaData;
 ColumnMetaData columnMetaData;
-ForeignKeyInfo foreignKeyInfo;
+ForeignKeyMetaData foreignKeyMetaData;
 DatabaseMetaData databaseMetaData=connection.getMetaData();
 Set<String> primaryKeyColumns=new HashSet<>();
-Map<String,ForeignKeyInfo> foreignKeyColumnsMap=new HashMap<>();
+Map<String,ForeignKeyMetaData> foreignKeyColumnsMap=new HashMap<>();
 
 ResultSet tablesResultSet=databaseMetaData.getTables(connection.getCatalog(),null,"%",new String[]{"TABLE"});
 String tableName;
@@ -51,11 +51,11 @@ while(keysResultSet.next())
 fkCol= keysResultSet.getString("FKCOLUMN_NAME");
 pkTbl=keysResultSet.getString("PKTABLE_NAME");
 pkCol=keysResultSet.getString("PKCOLUMN_NAME");
-foreignKeyInfo=new ForeignKeyInfo();
-foreignKeyInfo.setFKColumn(fkCol);
-foreignKeyInfo.setPKTable(pkTbl);
-foreignKeyInfo.setPKColumn(pkCol);
-foreignKeyColumnsMap.put(fkCol,foreignKeyInfo);
+foreignKeyMetaData=new ForeignKeyMetaData();
+foreignKeyMetaData.setFKColumn(fkCol);
+foreignKeyMetaData.setPKTable(pkTbl);
+foreignKeyMetaData.setPKColumn(pkCol);
+foreignKeyColumnsMap.put(fkCol,foreignKeyMetaData);
 //System.out.println(" FK: " + fkCol + " -> " + pkTbl + "(" + pkCol + ")");
 } // on foregn keys loop ends
 keysResultSet.close();
@@ -74,9 +74,9 @@ autoIncrement=columnsResultSet.getString("IS_AUTOINCREMENT");
 isPrimaryKey=primaryKeyColumns.contains(columnName);
 if(foreignKeyColumnsMap.containsKey(columnName))
 {
-foreignKeyInfo=foreignKeyColumnsMap.get(columnName);
+foreignKeyMetaData=foreignKeyColumnsMap.get(columnName);
 columnMetaData.setForeignKey(true);
-columnMetaData.setForeignKeyInfo(foreignKeyInfo);
+columnMetaData.setForeignKeyMetaData(foreignKeyMetaData);
 }
 columnMetaData.setColumnName(columnName);
 columnMetaData.setDataType(type);
