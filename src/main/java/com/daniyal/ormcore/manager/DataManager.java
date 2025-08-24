@@ -163,55 +163,6 @@ TableMetaData tableMetaData=tablesMetaMap.get(tableName);
 Map<String,ColumnMetaData> columnMetaDataMap=tableMetaData.getColumnMetaDataMap();
 List<Object> params=new ArrayList<>();
 String sql;
-/*
-Field field;
-Object value;
-Object validatedValue;
-StringBuilder columnTitlesSQLBuilder=new StringBuilder();
-columnTitlesSQLBuilder.append("(");
-StringBuilder columnValuesSQLBuilder=new StringBuilder();
-columnValuesSQLBuilder.append("values(");
-boolean firstTime=true;
-FieldMeta fieldMeta;
-for(Map.Entry<String,FieldMeta> entry:fields.entrySet())
-{
-fieldMeta=entry.getValue();
-field=fieldMeta.getField();
-if(fieldMeta.getIsAutoIncrement())
-{
-	continue;
-}
-if(!firstTime) 
-{
-columnTitlesSQLBuilder.append(",");
-columnValuesSQLBuilder.append(",");
-}
-columnTitlesSQLBuilder.append(fieldMeta.getColumnName());
-columnValuesSQLBuilder.append("?");
-try
-{
-value=field.get(entity);
-
-// need to validate values 
-// like no String overflow case, e.g in column it's char(20) but string.length()>20 then invalid case
-validatedValue=EntityValidator.validateAndConvert(value,fieldMeta,columnMetaDataMap.get(fieldMeta.getColumnName()));
-
-
-}catch(IllegalAccessException e)
-{
-throw new ORMException("Cannot read value of field '" + field.getName() +"' in entity '" + entity.getClass().getSimpleName() +"'. Ensure the field is accessible (e.g., use @Column and allow access).");
-}
-//System.out.println("Value : "+value+" class : "+value.getClass().getName());
-
-values.add(validatedValue);
-firstTime=false;
-}
-columnTitlesSQLBuilder.append(")");
-columnValuesSQLBuilder.append(")");
-
-
-String sql="insert into "+tableName+" "+columnTitlesSQLBuilder.toString()+" "+columnValuesSQLBuilder.toString();
-*/
 QueryBuilder queryBuilder=new QueryBuilder(entity,tableName,fieldMetaMap,columnMetaDataMap);
 Query query=queryBuilder.buildInsertQuery();
 params=query.getParameters();
