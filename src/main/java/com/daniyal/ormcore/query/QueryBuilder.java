@@ -40,14 +40,18 @@ public class QueryBuilder
 				processor.process(fieldMetaData,validatedValue,columns,params,placeholders);
 			}
 	}
-	public Query buildInsertQuery() throws ORMException
+	public Query buildInsertQuery(List<Field> fieldWithAutoIncrementList) throws ORMException
 	{
 		List<String> columns=new ArrayList<>();
 		List<Object> params=new ArrayList<>();
 		StringBuilder placeholders=new StringBuilder();
+		
 		FieldProcessor insertProcessor=(fieldMetaData,validatedValue,cols,paramList,ph)->{
 			if(fieldMetaData.isAutoIncrement()) 
+			{
+				fieldWithAutoIncrementList.add(field);
 				return;
+			}
 			columns.add(fieldMetaData.getColumnName());
 			params.add(validatedValue);
 			if(ph.length()>0) 
