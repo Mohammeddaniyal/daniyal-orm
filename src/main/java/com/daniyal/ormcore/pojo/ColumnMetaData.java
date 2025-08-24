@@ -50,7 +50,7 @@ public void setNullable(boolean isNullable)
 {
 this.isNullable=isNullable;
 }
-public boolean getisNullable()
+public boolean isNullable()
 {
 return this.isNullable;
 }
