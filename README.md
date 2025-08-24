@@ -8,25 +8,29 @@ Think of it as a simplified Hibernate — without the heavy learning curve.
 
 ---
 
-## ✨ Features
+## ✨ Features (Updated)
 
-- **Annotation mapping**  
-  Use `@Table`, `@Column`, `@PrimaryKey`, `@AutoIncrement`, and `@ForeignKey` to map your entities.
+- **Annotation Mapping**  
+  Use `@Table`, `@Column`, `@PrimaryKey`, `@AutoIncrement`, and `@ForeignKey` annotations to declaratively map your Java classes and their fields to MySQL tables and columns. The framework processes these at runtime via reflection to generate queries and manage data.
 
-- **Schema-aware**  
-  It actually scans the DB schema on startup and keeps metadata cached, so you don’t have to maintain duplicate configs.
+- **Schema-Aware Metadata Loading**  
+  On startup, Daniyal-ORM scans the connected database schema via JDBC metadata APIs, caching table, column, primary key, and foreign key info. This eliminates redundant manual schema configuration and keeps your entity classes in sync with the database.
 
-- **Entity validation**  
-  Your Java class structure is checked against the DB (PKs, FKs, nullability, etc.) so issues show up early.
+- **Entity Validation**  
+  Before runtime operations, the framework validates entity class structures against the actual database schema. Checks include primary key presence, foreign key relations, column nullability, and data types. This early validation prevents common runtime errors.
 
-- **Simple session management**  
-  Open a session with `begin()`, do your work, then close it with `end()`.
+- **Auto-Increment Primary Key Support**  
+  Insert operations request generated keys from the database, and Daniyal-ORM automatically retrieves these values, type-converts them, and sets them on the applicable entity fields using reflection. This keeps entity state consistent with database state seamlessly.
 
-- **Reflection-based CRUD**  
-  Reflection is used for reading/writing entity fields, with caching so performance doesn’t tank.
+- **Simple Session Management**  
+  Open and close database connection sessions explicitly with `begin()` and `end()`, ensuring controlled transactional operations.
 
-- **Config file**  
-  All DB details and base package live in `conf.json`.
+- **Reflection-Driven CRUD Operations**  
+  Reflection with cached field lookups is used to read and write entity attributes efficiently, minimizing overhead and boilerplate code in CRUD methods like `save()`.
+
+- **Config File Based Setup**  
+  Database connection parameters, including JDBC driver class, connection URL, username/password, and entity base package, are configured in a `conf.json` file for easy customization without code changes.
+
 
 ---
 
