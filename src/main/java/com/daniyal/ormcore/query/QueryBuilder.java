@@ -46,7 +46,7 @@ public class QueryBuilder
 		List<Object> params=new ArrayList<>();
 		StringBuilder placeholders=new StringBuilder();
 		FieldProcessor insertProcessor=(fieldMetaData,validatedValue,cols,paramList,ph)->{
-			if(fieldMetaData.getIsAutoIncrement()) 
+			if(fieldMetaData.isAutoIncrement()) 
 				return;
 			columns.add(fieldMetaData.getColumnName());
 			params.add(validatedValue);
