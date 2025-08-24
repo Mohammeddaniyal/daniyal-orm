@@ -70,21 +70,21 @@ for (Map.Entry<Class, EntityMetaData> entry : entityMetaDataMap.entrySet()) {
     System.out.println("Entity Class: " + entityClass.getName());
     System.out.println("Table Name: " + entityMetaData.getTableName());
 
-    Map<String, FieldMeta> fields = entityMetaData.getFields();
+    Map<String, FieldMetaData> fields = entityMetaData.getFieldMetaDataMap();
     if (fields != null) {
-        for (Map.Entry<String, FieldMeta> fieldEntry : fields.entrySet()) {
+        for (Map.Entry<String, FieldMetaData> fieldEntry : fields.entrySet()) {
             String fieldKey = fieldEntry.getKey();
-            FieldMeta fieldMeta = fieldEntry.getValue();
+            FieldMetaData fieldMetaData = fieldEntry.getValue();
 
             System.out.println("   Field Key: " + fieldKey);
-            System.out.println("   Field Name: " + fieldMeta.getField().getName());
-            System.out.println("   Column Name: " + fieldMeta.getColumnName());
-            System.out.println("   Primary Key: " + fieldMeta.isPrimaryKey());
-            System.out.println("   Auto Increment: " + fieldMeta.isAutoIncrement());
-            System.out.println("   Foreign Key: " + fieldMeta.isForeignKey());
+            System.out.println("   Field Name: " + fieldMetaData.getField().getName());
+            System.out.println("   Column Name: " + fieldMetaData.getColumnName());
+            System.out.println("   Primary Key: " + fieldMetaData.isPrimaryKey());
+            System.out.println("   Auto Increment: " + fieldMetaData.isAutoIncrement());
+            System.out.println("   Foreign Key: " + fieldMetaData.isForeignKey());
 
-            if (fieldMeta.isForeignKey() && fieldMeta.getForeignKeyMetaData() != null) {
-                ForeignKeyMetaData fk = fieldMeta.getForeignKeyMetaData();
+            if (fieldMetaData.isForeignKey() && fieldMetaData.getForeignKeyMetaData() != null) {
+                ForeignKeyMetaData fk = fieldMetaData.getForeignKeyMetaData();
                 System.out.println("      FK Column: " + fk.getFKColumn());
                 System.out.println("      References Table: " + fk.getPKTable());
                 System.out.println("      References Column: " + fk.getPKColumn());
@@ -158,12 +158,12 @@ throw new ORMException("Entity class '" + entityClass.getName() + "' is not regi
 }
 
 String tableName=entityMetaData.getTableName();
-Map<String,FieldMeta> fieldMetaMap=entityMetaData.getFields();
+Map<String,FieldMetaData> fieldMetaDataMap=entityMetaData.getFieldMetaDataMap();
 TableMetaData tableMetaData=tablesMetaMap.get(tableName);
 Map<String,ColumnMetaData> columnMetaDataMap=tableMetaData.getColumnMetaDataMap();
 List<Object> params=new ArrayList<>();
 String sql;
-QueryBuilder queryBuilder=new QueryBuilder(entity,tableName,fieldMetaMap,columnMetaDataMap);
+QueryBuilder queryBuilder=new QueryBuilder(entity,tableName,fieldMetaDataMap,columnMetaDataMap);
 Query query=queryBuilder.buildInsertQuery();
 params=query.getParameters();
 sql=query.getSQL();
