@@ -89,7 +89,7 @@ columnMetaDataMap.put(columnName,columnMetaData);
 } // on columns loop ends
 
 columnsResultSet.close();
-tableMetaData.setColumns(columnMetaDataMap);
+tableMetaData.setColumnMetaDataMap(columnMetaDataMap);
 tableMetaDataMap.put(tableName,tableMetaData);
 primaryKeyColumns.clear();
 foreignKeyColumnsMap.clear();
