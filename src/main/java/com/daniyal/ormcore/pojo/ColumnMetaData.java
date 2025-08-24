@@ -72,7 +72,7 @@ return this.foreignKeyInfo;
 }
 public void setDataType(java.lang.String dataType)
 {
-this.dataTypeype=dataType;
+this.dataType=dataType;
 }
 public java.lang.String getDataType()
 {
