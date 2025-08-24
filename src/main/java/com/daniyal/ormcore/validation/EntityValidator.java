@@ -11,7 +11,7 @@ public class EntityValidator
 	{
 		if(value==null)
 		{
-			if(!columnMetaData.getIsNull())
+			if(!columnMetaData.isNullable())
 			{
 				throw new ORMException("Field '" + fieldMeta.getField().getName() + "' cannot be null.");
 			}
