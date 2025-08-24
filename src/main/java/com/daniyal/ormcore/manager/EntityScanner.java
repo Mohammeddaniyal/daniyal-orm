@@ -177,24 +177,24 @@ throw new ORMException("Entity class " + clazz.getSimpleName() +" property " + f
 
 isPrimaryKey=field.isAnnotationPresent(PrimaryKey.class);
 
-if(isPrimaryKey && columnMetaData.getIsPrimaryKey()==false)
+if(isPrimaryKey && columnMetaData.isPrimaryKey()==false)
 {
 throw new ORMException("Entity class " + clazz.getSimpleName() +" property '" + field.getName() + "' is annotated @PrimaryKey but corresponding column '" +columnAnnotationValue + "' is not a primary key column in table '" + tableName + "'");
 }
 
-if(!isPrimaryKey && columnMetaData.getIsPrimaryKey())
+if(!isPrimaryKey && columnMetaData.isPrimaryKey())
 {
 throw new ORMException("Entity class " + clazz.getSimpleName() +" property '" + field.getName() + "' is missing @PrimaryKey annotation but column '" +columnAnnotationValue + "' is a primary key column in table '" + tableName + "'");
 }
 
 isAutoIncrement=field.isAnnotationPresent(AutoIncrement.class);
 
-if(isAutoIncrement && columnMetaData.getIsAutoIncrement()==false)
+if(isAutoIncrement && columnMetaData.isAutoIncrement()==false)
 {
 throw new ORMException("Entity class " + clazz.getSimpleName() +" property '" + field.getName() + "' annotated @AutoIncrement but column '" +columnAnnotationValue + "' is not auto-increment in table '" + tableName + "'");
 }
 
-if(!isAutoIncrement && columnMetaData.getIsAutoIncrement())
+if(!isAutoIncrement && columnMetaData.isAutoIncrement())
 {
 throw new ORMException("Entity class " + clazz.getSimpleName() +" property '" + field.getName() + "' missing @AutoIncrement annotation but column '" +columnAnnotationValue + "' is auto-increment in table '" + tableName + "'");
 }
@@ -203,7 +203,7 @@ isForeignKey=field.isAnnotationPresent(ForeignKey.class);
 
 if(isForeignKey)
 {
-if(columnMetaData.getIsForeignKey()==false)
+if(columnMetaData.isForeignKey()==false)
 {
 throw new ORMException("Entity class " + clazz.getSimpleName() +" property '" + field.getName() + "' annotated @ForeignKey but column '" +columnAnnotationValue + "' is not a foreign key in table '" + tableName + "'");
 }
@@ -235,7 +235,7 @@ foreignKeyInfo1.setPKTable(foreignKeyAnnotationPKTable);
 foreignKeyInfo1.setPKColumn(foreignKeyAnnotationPKColumn);
 }
 
-if(!isForeignKey && columnMetaData.getIsForeignKey())
+if(!isForeignKey && columnMetaData.isForeignKey())
 {
 throw new ORMException("Entity class " + clazz.getSimpleName() +" property '" + field.getName() + "' missing @ForeignKey annotation but column '" +columnAnnotationValue + "' is a foreign key in table '" + tableName + "'");
 }
@@ -255,9 +255,9 @@ field.setAccessible(true);
 fieldMeta=new FieldMeta();
 fieldMeta.setField(field);
 fieldMeta.setColumnName(columnName);
-fieldMeta.setIsPrimaryKey(isPrimaryKey);
-fieldMeta.setIsAutoIncrement(isAutoIncrement);
-fieldMeta.setIsForeignKey(isForeignKey);
+fieldMeta.setPrimaryKey(isPrimaryKey);
+fieldMeta.setAutoIncrement(isAutoIncrement);
+fieldMeta.setForeignKey(isForeignKey);
 if(isForeignKey)
 {
 fieldMeta.setForeignKeyInfo(foreignKeyInfo1);
