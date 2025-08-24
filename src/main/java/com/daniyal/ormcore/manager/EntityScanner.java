@@ -11,7 +11,7 @@ import java.net.*;
 import java.util.jar.*;
 class EntityScanner
 {
-private static void scanDirectory(File directory,String packageName,Map<Class,EntityMeta> entitiesMetaMap,Map<String,TableMetaData> tableMetaDataMap) throws Exception 
+private static void scanDirectory(File directory,String packageName,Map<Class,EntityMetaData> entitiesMetaMap,Map<String,TableMetaData> tableMetaDataMap) throws Exception 
 {
 for(File file:directory.listFiles())
 {
@@ -33,9 +33,9 @@ handleClassMetaData(clazz,entitiesMetaMap,tableMetaDataMap);
 
 }
 
-public static Map<Class,EntityMeta> scanBasePackage(String basePackage,Map<String,TableMetaData> tableMetaDataMap) throws ORMException
+public static Map<Class,EntityMetaData> scanBasePackage(String basePackage,Map<String,TableMetaData> tableMetaDataMap) throws ORMException
 {
-Map<Class,EntityMeta> entitiesMetaMap=new HashMap<>();
+Map<Class,EntityMetaData> entitiesMetaMap=new HashMap<>();
 ClassLoader classLoader=Thread.currentThread().getContextClassLoader();
 System.out.println("Base package "+basePackage);
 
@@ -102,7 +102,7 @@ return entitiesMetaMap;
 }// function ends
 
 
-private static void handleClassMetaData(Class clazz,Map<Class,EntityMeta> entitiesMetaMap,Map<String,TableMetaData> tableMetaDataMap) throws ORMException
+private static void handleClassMetaData(Class clazz,Map<Class,EntityMetaData> entitiesMetaMap,Map<String,TableMetaData> tableMetaDataMap) throws ORMException
 {
 Table tableAnnotation=(Table)clazz.getAnnotation(Table.class);
 if(tableAnnotation==null) return;
@@ -139,20 +139,20 @@ String foreignKeyAnnotationPKTable;
 String foreignKeyAnnotationPKColumn;
 int columnVarSize;
 
-ForeignKeyInfo foreignKeyInfo;
+ForeignKeyMetaData foreignKeyMetaData;
 String fkColumn;
 String pkTable;
 String pkColumn;
 
-EntityMeta entityMeta;
-FieldMeta fieldMeta;
+EntityMetaData entityMetaData;
+FieldMetaData fieldMetaData;
 String columnName;
 boolean isPrimaryKey;
 boolean isAutoIncrement;
 boolean isForeignKey;
-ForeignKeyInfo foreignKeyInfo1=null;
+ForeignKeyMetaData foreignKeyMetaData1=null;
 
-Map<String,FieldMeta> fieldMetaMap=new HashMap<>();
+Map<String,FieldMetaData> fieldMetaDataMap=new HashMap<>();
 for(Field field:fields)
 {
 columnAnnotation=(Column)field.getAnnotation(Column.class);
@@ -212,27 +212,27 @@ foreignKeyAnnotationFKColumn=columnAnnotationValue;
 foreignKeyAnnotationPKTable=foreignKeyAnnotation.parent();
 foreignKeyAnnotationPKColumn=foreignKeyAnnotation.column();
 
-foreignKeyInfo=columnMetaData.getForeignKeyInfo();
+foreignKeyMetaData=columnMetaData.getForeignKeyMetaData();
 
-fkColumn=foreignKeyInfo.getFKColumn();
-pkTable=foreignKeyInfo.getPKTable();
-pkColumn=foreignKeyInfo.getPKColumn();
+fkColumn=foreignKeyMetaData.getFKColumn();
+pkTable=foreignKeyMetaData.getPKTable();
+pkColumn=foreignKeyMetaData.getPKColumn();
 if(fkColumn.equals(foreignKeyAnnotationFKColumn)==false)
 {
-throw new ORMException("Entity class " + clazz.getSimpleName() +" property '" + field.getName() + "' @ForeignKey FK column mismatch: annotation '" +foreignKeyAnnotationFKColumn + "' vs DB '" + foreignKeyInfo.getFKColumn() + "'");
+throw new ORMException("Entity class " + clazz.getSimpleName() +" property '" + field.getName() + "' @ForeignKey FK column mismatch: annotation '" +foreignKeyAnnotationFKColumn + "' vs DB '" + foreignKeyMetaData.getFKColumn() + "'");
 }
 if(pkTable.equals(foreignKeyAnnotationPKTable)==false)
 {
-throw new ORMException("Entity class " + clazz.getSimpleName() +" property '" + field.getName() + "' @ForeignKey parent table mismatch: annotation '" +foreignKeyAnnotationPKTable + "' vs DB '" + foreignKeyInfo.getPKTable() + "'");
+throw new ORMException("Entity class " + clazz.getSimpleName() +" property '" + field.getName() + "' @ForeignKey parent table mismatch: annotation '" +foreignKeyAnnotationPKTable + "' vs DB '" + foreignKeyMetaData.getPKTable() + "'");
 }
 if(pkColumn.equals(foreignKeyAnnotationPKColumn)==false)
 {
-throw new ORMException("Entity class " + clazz.getSimpleName() +" property '" + field.getName() + "' @ForeignKey parent column mismatch: annotation '" +foreignKeyAnnotationPKColumn + "' vs DB '" + foreignKeyInfo.getPKColumn() + "'");
+throw new ORMException("Entity class " + clazz.getSimpleName() +" property '" + field.getName() + "' @ForeignKey parent column mismatch: annotation '" +foreignKeyAnnotationPKColumn + "' vs DB '" + foreignKeyMetaData.getPKColumn() + "'");
 }
-foreignKeyInfo1=new ForeignKeyInfo();
-foreignKeyInfo1.setFKColumn(foreignKeyAnnotationFKColumn);
-foreignKeyInfo1.setPKTable(foreignKeyAnnotationPKTable);
-foreignKeyInfo1.setPKColumn(foreignKeyAnnotationPKColumn);
+foreignKeyMetaData1=new ForeignKeyMetaData();
+foreignKeyMetaData1.setFKColumn(foreignKeyAnnotationFKColumn);
+foreignKeyMetaData1.setPKTable(foreignKeyAnnotationPKTable);
+foreignKeyMetaData1.setPKColumn(foreignKeyAnnotationPKColumn);
 }
 
 if(!isForeignKey && columnMetaData.isForeignKey())
@@ -252,31 +252,31 @@ if(!TypeMapper.isCompatible(field.getDataType(),columnMetaData.getDataType(),col
 
 field.setAccessible(true);
 
-fieldMeta=new FieldMeta();
-fieldMeta.setField(field);
-fieldMeta.setColumnName(columnName);
-fieldMeta.setPrimaryKey(isPrimaryKey);
-fieldMeta.setAutoIncrement(isAutoIncrement);
-fieldMeta.setForeignKey(isForeignKey);
+fieldMetaData=new FieldMetaData();
+fieldMetaData.setField(field);
+fieldMetaData.setColumnName(columnName);
+fieldMetaData.setPrimaryKey(isPrimaryKey);
+fieldMetaData.setAutoIncrement(isAutoIncrement);
+fieldMetaData.setForeignKey(isForeignKey);
 if(isForeignKey)
 {
-fieldMeta.setForeignKeyInfo(foreignKeyInfo1);
+fieldMetaData.setForeignKeyMetaData(foreignKeyMetaData1);
 }
 
-fieldMetaMap.put(columnName,fieldMeta);
+fieldMetaDataMap.put(columnName,fieldMetaData);
 } // for loop ends
 // means there are missing fields to that didn't represents some table columns
 if(fieldsWithColumnAnnotation!=columnMetaDataMapSize)
 {
-fieldMetaMap.clear();
+fieldMetaDataMap.clear();
 throw new ORMException("Entity class " + clazz.getSimpleName() +" has missing fields for some columns in the table '" + tableName + "'");
 }
 
-entityMeta=new EntityMeta();
-entityMeta.setEntityClass(clazz);
-entityMeta.setTableName(tableName);
-entityMeta.setFields(fieldMetaMap);
-entitiesMetaMap.put(clazz,entityMeta);
+entityMetaData=new EntityMetaData();
+entityMetaData.setEntityClass(clazz);
+entityMetaData.setTableName(tableName);
+entityMetaData.setFields(fieldMetaDataMap);
+entitiesMetaMap.put(clazz,entityMetaData);
 }// function ends
 
 }// class ends 
