@@ -4,8 +4,6 @@ public class FieldMetaData
 {
 private Field field;
 private String columnName;
-private Method setterMethod;
-private Method getterMethod;
 private boolean isPrimaryKey;
 private boolean isAutoIncrement;
 private boolean isForeignKey;
@@ -37,22 +35,7 @@ public java.lang.String getColumnName()
 {
 return this.columnName;
 }
-public void setSetterMethod(java.lang.reflect.Method setterMethod)
-{
-this.setterMethod=setterMethod;
-}
-public java.lang.reflect.Method getSetterMethod()
-{
-return this.setterMethod;
-}
-public void setGetterMethod(java.lang.reflect.Method getterMethod)
-{
-this.getterMethod=getterMethod;
-}
-public java.lang.reflect.Method getGetterMethod()
-{
-return this.getterMethod;
-}
+
 public void setPrimaryKey(boolean isPrimaryKey)
 {
 this.isPrimaryKey=isPrimaryKey;
