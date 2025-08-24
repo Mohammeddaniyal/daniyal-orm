@@ -160,7 +160,7 @@ throw new ORMException("Entity class '" + entityClass.getName() + "' is not regi
 String tableName=entityMeta.getTableName();
 Map<String,FieldMeta> fieldMetaMap=entityMeta.getFields();
 TableMetaData tableMetaData=tablesMetaMap.get(tableName);
-Map<String,ColumnMetaData> columnMetaDataMap=tableMetaData.getColumns();
+Map<String,ColumnMetaData> columnMetaDataMap=tableMetaData.getColumnMetaDataMap();
 List<Object> params=new ArrayList<>();
 String sql;
 /*
