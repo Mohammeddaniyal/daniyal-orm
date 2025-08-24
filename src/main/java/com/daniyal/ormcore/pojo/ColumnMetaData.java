@@ -6,7 +6,7 @@ private boolean isPrimaryKey;
 private boolean isAutoIncrement;
 private boolean isNullable;
 private boolean isForeignKey;
-private ForeignKeyInfo foreignKeyInfo;
+private ForeignKeyMetaData foreignKeyMetaData;
 private String dataType;
 private int size;
 private int scale;
@@ -17,7 +17,7 @@ this.isPrimaryKey=false;
 this.isAutoIncrement=false;
 this.isNullable=false;
 this.isForeignKey=false;
-this.foreignKeyInfo=null;
+this.foreignKeyMetaData=null;
 this.dataType="";
 this.size=0;
 this.scale=0;
@@ -62,13 +62,13 @@ public boolean isForeignKey()
 {
 return this.isForeignKey;
 }
-public void setForeignKeyInfo(ForeignKeyInfo foreignKeyInfo)
+public void setForeignKeyMetaData(ForeignKeyMetaData foreignKeyMetaData)
 {
-this.foreignKeyInfo=foreignKeyInfo;
+this.foreignKeyMetaData=foreignKeyMetaData;
 }
-public ForeignKeyInfo getForeignKeyInfo()
+public ForeignKeyMetaData getForeignKeyMetaData()
 {
-return this.foreignKeyInfo;
+return this.foreignKeyMetaData;
 }
 public void setDataType(java.lang.String dataType)
 {
