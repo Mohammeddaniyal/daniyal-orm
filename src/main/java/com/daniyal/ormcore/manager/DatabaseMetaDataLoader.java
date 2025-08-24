@@ -75,16 +75,16 @@ isPrimaryKey=primaryKeyColumns.contains(columnName);
 if(foreignKeyColumnsMap.containsKey(columnName))
 {
 foreignKeyInfo=foreignKeyColumnsMap.get(columnName);
-columnMetaData.setIsForeignKey(true);
+columnMetaData.setForeignKey(true);
 columnMetaData.setForeignKeyInfo(foreignKeyInfo);
 }
 columnMetaData.setColumnName(columnName);
 columnMetaData.setType(type);
 columnMetaData.setSize(size);
 columnMetaData.setScale(scale);
-columnMetaData.setIsPrimaryKey(isPrimaryKey);
-columnMetaData.setIsAutoIncrement(autoIncrement.equalsIgnoreCase("YES"));
-columnMetaData.setIsNull(autoIncrement.equalsIgnoreCase("YES"));
+columnMetaData.setPrimaryKey(isPrimaryKey);
+columnMetaData.setAutoIncrement(autoIncrement.equalsIgnoreCase("YES"));
+columnMetaData.setNull(autoIncrement.equalsIgnoreCase("YES"));
 columnMetaDataMap.put(columnName,columnMetaData);
 } // on columns loop ends
 
