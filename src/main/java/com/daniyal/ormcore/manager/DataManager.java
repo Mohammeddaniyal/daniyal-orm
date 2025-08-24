@@ -8,6 +8,7 @@ import com.daniyal.ormcore.pojo.*;
 import com.daniyal.ormcore.query.*;
 import java.util.*;
 import java.lang.reflect.*;
+import java.math.BigDecimal;
 public class DataManager
 {
 private static DataManager dataManager;
@@ -162,15 +163,16 @@ Map<String,FieldMetaData> fieldMetaDataMap=entityMetaData.getFieldMetaDataMap();
 TableMetaData tableMetaData=tablesMetaMap.get(tableName);
 Map<String,ColumnMetaData> columnMetaDataMap=tableMetaData.getColumnMetaDataMap();
 List<Object> params=new ArrayList<>();
+FieldMetaData fieldMetaData=new FieldMetaData();
 String sql;
 QueryBuilder queryBuilder=new QueryBuilder(entity,tableName,fieldMetaDataMap,columnMetaDataMap);
-Query query=queryBuilder.buildInsertQuery();
+Query query=queryBuilder.buildInsertQuery(fieldMetaData);
 params=query.getParameters();
 sql=query.getSQL();
 System.out.println("SQL statement for insert : "+sql);
 try
 {
-PreparedStatement preparedStatement=connection.prepareStatement(sql);
+PreparedStatement preparedStatement=connection.prepareStatement(sql,Statement.RETURN_GENERATED_KEYS);
 int x=1;
 System.out.printf("%10s\n","VALUES");
 for(Object param:params)
@@ -178,7 +180,66 @@ for(Object param:params)
 //System.out.println(v);
 preparedStatement.setObject(x++,param);
 }
-preparedStatement.executeUpdate();
+int affectedRow=preparedStatement.executeUpdate();
+
+if(affectedRow==0)
+{
+	throw new ORMException("Save failed");
+}
+
+// set generated keys in user object
+ResultSet generatedKeysResultSet=preparedStatement.getGeneratedKeys();
+if(generatedKeysResultSet.next())
+{
+	Field fieldWithAutoIncrement=fieldMetaData.getField();
+	
+	Class fieldType=fieldWithAutoIncrement.getType();
+	try
+	{
+		if(fieldType==int.class || fieldType==Integer.class)
+		{
+			Integer generatedKey=generatedKeysResultSet.getObject(1,Integer.class);
+			fieldWithAutoIncrement.set(entity,generatedKey);
+		}else if(fieldType==long.class || fieldType==Long.class)
+		{
+			Long generatedKey=generatedKeysResultSet.getObject(1,Long.class);
+			fieldWithAutoIncrement.set(entity,generatedKey);
+		}else if(fieldType==double.class || fieldType==Double.class)
+		{
+			Double generatedKey=generatedKeysResultSet.getObject(1,Double.class);
+			fieldWithAutoIncrement.set(entity,generatedKey);
+		}else if(fieldType==float.class || fieldType==Float.class)
+		{
+			Float generatedKey=generatedKeysResultSet.getObject(1,Float.class);
+			fieldWithAutoIncrement.set(entity,generatedKey);
+		}else if(fieldType==boolean.class || fieldType==Boolean.class)
+		{
+			Boolean generatedKey=generatedKeysResultSet.getObject(1,Boolean.class);
+			fieldWithAutoIncrement.set(entity,generatedKey);
+		}else if(fieldType==BigDecimal.class)
+		{
+			BigDecimal generatedKey=generatedKeysResultSet.getObject(1,BigDecimal.class);
+			fieldWithAutoIncrement.set(entity,generatedKey);
+		}else if(fieldType==String.class)
+		{
+			String generatedKey=generatedKeysResultSet.getObject(1,String.class);
+			fieldWithAutoIncrement.set(entity,generatedKey);
+		}else if(fieldType==java.util.Date.class)
+		{
+			java.sql.Timestamp generatedKey=generatedKeysResultSet.getObject(1,java.sql.Timestamp.class);
+			java.util.Date dateVal= generatedKey==null?null:new java.util.Date(generatedKey.getTime()); 
+			fieldWithAutoIncrement.set(entity,dateVal);
+		}else
+		{
+			Object generatedKey=generatedKeysResultSet.getObject(1);
+			fieldWithAutoIncrement.set(entity,generatedKey);
+		}
+	}catch(IllegalAccessException exception)
+	{
+		throw new ORMException("Cannot write value of field " + fieldWithAutoIncrement.getName() +"' in entity '" + entity.getClass().getSimpleName() +"'. Ensure the field is accessible (e.g., use @Column and allow access).");
+	}
+}
+
 preparedStatement.close();
 }catch(SQLException sqlException)
 {
