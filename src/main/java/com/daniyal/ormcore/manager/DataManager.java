@@ -13,13 +13,13 @@ public class DataManager
 private static DataManager dataManager;
 private ConfigLoader configLoader;
 private Connection connection;
-private Map<Class,EntityMeta> entitiesMetaMap;
+private Map<Class,EntityMetaData> entityMetaDataMap;
 private Map<String,TableMetaData> tablesMetaMap;
 private DataManager() throws ORMException
 {
 this.configLoader=new ConfigLoader();
 this.connection=null;
-this.entitiesMetaMap=null;
+this.entityMetaDataMap=null;
 populateDataStructures();
 }
 private void printTableMetaData(Map<String,TableMetaData> tablesMetaMap)
@@ -59,18 +59,18 @@ for (Map.Entry<String, TableMetaData> entry : tablesMetaMap.entrySet()) {
 
 }
 
-private void printEntityMetaData()
+private void printEntityMetaDataData()
 {
 System.out.println("----------------------------------------------------------------------------------");
-System.out.println("EntityMetaData");
-for (Map.Entry<Class, EntityMeta> entry : entitiesMetaMap.entrySet()) {
+System.out.println("EntityMetaDataData");
+for (Map.Entry<Class, EntityMetaData> entry : entityMetaDataMap.entrySet()) {
     Class entityClass = entry.getKey();
-    EntityMeta entityMeta = entry.getValue();
+    EntityMetaData entityMetaData = entry.getValue();
 
     System.out.println("Entity Class: " + entityClass.getName());
-    System.out.println("Table Name: " + entityMeta.getTableName());
+    System.out.println("Table Name: " + entityMetaData.getTableName());
 
-    Map<String, FieldMeta> fields = entityMeta.getFields();
+    Map<String, FieldMeta> fields = entityMetaData.getFields();
     if (fields != null) {
         for (Map.Entry<String, FieldMeta> fieldEntry : fields.entrySet()) {
             String fieldKey = fieldEntry.getKey();
@@ -99,9 +99,9 @@ System.out.println("------------------------------------------------------------
 private void populateDataStructures() throws ORMException
 {
 this.tablesMetaMap=DatabaseMetaDataLoader.loadTableMetaData(ConnectionManager.getConnection(configLoader));
-this.entitiesMetaMap=EntityScanner.scanBasePackage(this.configLoader.getBasePackage(),tablesMetaMap);
+this.entityMetaDataMap=EntityScanner.scanBasePackage(this.configLoader.getBasePackage(),tablesMetaMap);
 //printTableMetaData(tablesMetaMap);
-//printEntityMetaData();
+//printEntityMetaDataData();
 }
 public static DataManager getDataManager() throws ORMException
 {
@@ -151,14 +151,14 @@ throw new ORMException("Connection is closed, can't perform save");
 }
 Class entityClass=entity.getClass();
 
-EntityMeta entityMeta=entitiesMetaMap.get(entityClass);
-if(entityMeta==null)
+EntityMetaData entityMetaData=entityMetaDataMap.get(entityClass);
+if(entityMetaData==null)
 {
 throw new ORMException("Entity class '" + entityClass.getName() + "' is not registered. " +"Make sure it is annotated with @Table and included in the base package defined in conf.json.");
 }
 
-String tableName=entityMeta.getTableName();
-Map<String,FieldMeta> fieldMetaMap=entityMeta.getFields();
+String tableName=entityMetaData.getTableName();
+Map<String,FieldMeta> fieldMetaMap=entityMetaData.getFields();
 TableMetaData tableMetaData=tablesMetaMap.get(tableName);
 Map<String,ColumnMetaData> columnMetaDataMap=tableMetaData.getColumnMetaDataMap();
 List<Object> params=new ArrayList<>();
