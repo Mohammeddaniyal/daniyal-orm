@@ -7,28 +7,28 @@ import java.lang.reflect.*;
 public class QueryBuilder
 {
 	private final String tableName;
-	private final Map<String,FieldMeta> fieldMetaMap;
-	private final Map<String,ColumnMetaData> columnMetaMap;
+	private final Map<String,FieldMetaData> fieldMetaDataDataMap;
+	private final Map<String,ColumnMetaData> columnMetaDataMap;
 	private final Object entityInstance;
-	public QueryBuilder(Object entityInstance,String tableName,Map<String,FieldMeta> fieldMetaMap,Map<String,ColumnMetaData> columnMetaMap)
+	public QueryBuilder(Object entityInstance,String tableName,Map<String,FieldMetaData> fieldMetaDataDataMap,Map<String,ColumnMetaData> columnMetaDataMap)
 	{
 		this.entityInstance=entityInstance;
 		this.tableName=tableName;
-		this.fieldMetaMap=fieldMetaMap;
-		this.columnMetaMap=columnMetaMap;
+		this.fieldMetaDataDataMap=fieldMetaDataDataMap;
+		this.columnMetaDataMap=columnMetaDataMap;
 	}
 	private void processFields(FieldProcessor processor,List<String> columns,List<Object> params,StringBuilder placeholders) throws ORMException
 	{
 		
-			FieldMeta fieldMeta;
+			FieldMetaData fieldMetaData;
 			Field field;
 			Object rawValue=null;
 			Object validatedValue;
 			ColumnMetaData columnMetaData;
-			for(Map.Entry<String,FieldMeta> entry:fieldMetaMap.entrySet())
+			for(Map.Entry<String,FieldMetaData> entry:fieldMetaDataDataMap.entrySet())
 			{
-				fieldMeta=entry.getValue();
-				field=fieldMeta.getField();
+				fieldMetaData=entry.getValue();
+				field=fieldMetaData.getField();
 				try
 				{
 				rawValue=field.get(this.entityInstance);
@@ -36,8 +36,8 @@ public class QueryBuilder
 				{
 					throw new ORMException("Cannot read value of field '" + field.getName() +"' in entity '" + entityInstance.getClass().getSimpleName() +"'. Ensure the field is accessible (e.g., use @Column and allow access).");		
 				}
-				validatedValue=EntityValidator.validateAndConvert(rawValue,fieldMeta,columnMetaMap.get(fieldMeta.getColumnName()));
-				processor.process(fieldMeta,validatedValue,columns,params,placeholders);
+				validatedValue=EntityValidator.validateAndConvert(rawValue,fieldMetaData,columnMetaDataMap.get(fieldMetaData.getColumnName()));
+				processor.process(fieldMetaData,validatedValue,columns,params,placeholders);
 			}
 	}
 	public Query buildInsertQuery() throws ORMException
@@ -45,10 +45,10 @@ public class QueryBuilder
 		List<String> columns=new ArrayList<>();
 		List<Object> params=new ArrayList<>();
 		StringBuilder placeholders=new StringBuilder();
-		FieldProcessor insertProcessor=(fieldMeta,validatedValue,cols,paramList,ph)->{
-			if(fieldMeta.getIsAutoIncrement()) 
+		FieldProcessor insertProcessor=(fieldMetaData,validatedValue,cols,paramList,ph)->{
+			if(fieldMetaData.getIsAutoIncrement()) 
 				return;
-			columns.add(fieldMeta.getColumnName());
+			columns.add(fieldMetaData.getColumnName());
 			params.add(validatedValue);
 			if(ph.length()>0) 
 				ph.append(",");
