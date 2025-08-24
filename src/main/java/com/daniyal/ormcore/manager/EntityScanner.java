@@ -242,10 +242,10 @@ throw new ORMException("Entity class " + clazz.getSimpleName() +" property '" + 
 
  // TODO: Add data type compatibility validation here (future improvement).
 
-if(!TypeMapper.isCompatible(field.getDataType(),columnMetaData.getDataType(),columnMetaData.getSize()))
+if(!TypeMapper.isCompatible(field.getType(),columnMetaData.getDataType(),columnMetaData.getSize()))
 {
 	 throw new ORMException("Type mismatch for field '" + field.getName() +"' in entity '" + clazz.getSimpleName() +
-        "': Java type '" + field.getDataType().getSimpleName() +
+        "': Java type '" + field.getType().getSimpleName() +
         "' is not compatible with SQL type '" + columnMetaData.getDataType() + "'");
 }
 
@@ -275,7 +275,7 @@ throw new ORMException("Entity class " + clazz.getSimpleName() +" has missing fi
 entityMetaData=new EntityMetaData();
 entityMetaData.setEntityClass(clazz);
 entityMetaData.setTableName(tableName);
-entityMetaData.setFields(fieldMetaDataMap);
+entityMetaData.setFieldMetaDataMap(fieldMetaDataMap);
 entitiesMetaMap.put(clazz,entityMetaData);
 }// function ends
 
