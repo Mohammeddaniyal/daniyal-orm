@@ -6,5 +6,5 @@ import java.util.*;
 @FunctionalInterface
 interface FieldProcessor
 {
-	void process(FieldMeta fieldMeta,Object validatedValue,List<String> columns,List<Object> params,StringBuilder placeHolder) throws ORMException;
+	void process(FieldMetaData fieldMetaData,Object validatedValue,List<String> columns,List<Object> params,StringBuilder placeholders) throws ORMException;
 }
