@@ -242,11 +242,11 @@ throw new ORMException("Entity class " + clazz.getSimpleName() +" property '" + 
 
  // TODO: Add data type compatibility validation here (future improvement).
 
-if(!TypeMapper.isCompatible(field.getType(),columnMetaData.getType(),columnMetaData.getSize()))
+if(!TypeMapper.isCompatible(field.getDataType(),columnMetaData.getDataType(),columnMetaData.getSize()))
 {
 	 throw new ORMException("Type mismatch for field '" + field.getName() +"' in entity '" + clazz.getSimpleName() +
-        "': Java type '" + field.getType().getSimpleName() +
-        "' is not compatible with SQL type '" + columnMetaData.getType() + "'");
+        "': Java type '" + field.getDataType().getSimpleName() +
+        "' is not compatible with SQL type '" + columnMetaData.getDataType() + "'");
 }
 
 
