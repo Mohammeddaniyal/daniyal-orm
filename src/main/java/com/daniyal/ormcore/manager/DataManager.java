@@ -31,7 +31,7 @@ for (Map.Entry<String, TableMetaData> entry : tablesMetaMap.entrySet()) {
     System.out.println("Table Key: " + tableKey);
     System.out.println("Table Name: " + table.getTableName());
 
-    Map<String, ColumnMetaData> columns = table.getColumns();
+    Map<String, ColumnMetaData> columns = table.getColumnMetaDataMap();
     if (columns != null) {
         for (Map.Entry<String, ColumnMetaData> colEntry : columns.entrySet()) {
             String columnKey = colEntry.getKey();
