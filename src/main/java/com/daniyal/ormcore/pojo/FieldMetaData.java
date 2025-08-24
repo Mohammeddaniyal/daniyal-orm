@@ -7,7 +7,7 @@ private String columnName;
 private boolean isPrimaryKey;
 private boolean isAutoIncrement;
 private boolean isForeignKey;
-private ForeignKeyInfo foreignKeyInfo;
+private ForeignKeyMetaData foreignKeyMetaData;
 public FieldMetaData()
 {
 this.field=null;
@@ -15,7 +15,7 @@ this.columnName="";
 this.isPrimaryKey=false;
 this.isAutoIncrement=false;
 this.isForeignKey=false;
-this.foreignKeyInfo=null;
+this.foreignKeyMetaData=null;
 }
 public void setField(java.lang.reflect.Field field)
 {
@@ -58,13 +58,13 @@ public boolean isForeignKey()
 {
 return this.isForeignKey;
 }
-public void setForeignKeyInfo(ForeignKeyInfo foreignKeyInfo)
+public void setForeignKeyMetaData(ForeignKeyMetaData foreignKeyMetaData)
 {
-this.foreignKeyInfo=foreignKeyInfo;
+this.foreignKeyMetaData=foreignKeyMetaData;
 }
-public ForeignKeyInfo getForeignKeyInfo()
+public ForeignKeyMetaData getForeignKeyMetaData()
 {
-return this.foreignKeyInfo;
+return this.foreignKeyMetaData;
 }
 
 }
