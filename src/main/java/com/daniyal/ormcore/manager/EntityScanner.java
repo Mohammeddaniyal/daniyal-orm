@@ -123,7 +123,7 @@ throw new ORMException("No table exists with name "+tableName);
 System.out.println(" Checking for : "+tableName+" table exists in mysql or not");
 // we'll use map of TableMetaData
 Field []fields=clazz.getFields();
-Map<String,ColumnMetaData> columnMetaDataMap=tableMetaData.getColumns();
+Map<String,ColumnMetaData> columnMetaDataMap=tableMetaData.getColumnMetaDataMap();
 int columnMetaDataMapSize=columnMetaDataMap.size();
 int fieldsSize=fields.length;
 int fieldsWithColumnAnnotation=fields.length;
