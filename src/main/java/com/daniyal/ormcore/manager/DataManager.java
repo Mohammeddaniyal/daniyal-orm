@@ -40,12 +40,12 @@ for (Map.Entry<String, TableMetaData> entry : tablesMetaMap.entrySet()) {
             System.out.println("   Column Key: " + columnKey);
             System.out.println("   Column Name: " + column.getColumnName());
             System.out.println("   Type: " + column.getType() + "(" + column.getSize() + ")");
-            System.out.println("   Primary Key: " + column.getIsPrimaryKey());
-            System.out.println("   Auto Increment: " + column.getIsAutoIncrement());
-            System.out.println("   Nullable: " + column.getIsNull());
-            System.out.println("   Foreign Key: " + column.getIsForeignKey());
+            System.out.println("   Primary Key: " + column.isPrimaryKey());
+            System.out.println("   Auto Increment: " + column.isAutoIncrement());
+            System.out.println("   Nullable: " + column.isNull());
+            System.out.println("   Foreign Key: " + column.isForeignKey());
 
-            if (column.getIsForeignKey() && column.getForeignKeyInfo() != null) {
+            if (column.isForeignKey() && column.getForeignKeyInfo() != null) {
                 ForeignKeyInfo fk = column.getForeignKeyInfo();
                 System.out.println("      FK Column: " + fk.getFKColumn());
                 System.out.println("      References Table: " + fk.getPKTable());
@@ -79,11 +79,11 @@ for (Map.Entry<Class, EntityMeta> entry : entitiesMetaMap.entrySet()) {
             System.out.println("   Field Key: " + fieldKey);
             System.out.println("   Field Name: " + fieldMeta.getField().getName());
             System.out.println("   Column Name: " + fieldMeta.getColumnName());
-            System.out.println("   Primary Key: " + fieldMeta.getIsPrimaryKey());
-            System.out.println("   Auto Increment: " + fieldMeta.getIsAutoIncrement());
-            System.out.println("   Foreign Key: " + fieldMeta.getIsForeignKey());
+            System.out.println("   Primary Key: " + fieldMeta.isPrimaryKey());
+            System.out.println("   Auto Increment: " + fieldMeta.isAutoIncrement());
+            System.out.println("   Foreign Key: " + fieldMeta.isForeignKey());
 
-            if (fieldMeta.getIsForeignKey() && fieldMeta.getForeignKeyInfo() != null) {
+            if (fieldMeta.isForeignKey() && fieldMeta.getForeignKeyInfo() != null) {
                 ForeignKeyInfo fk = fieldMeta.getForeignKeyInfo();
                 System.out.println("      FK Column: " + fk.getFKColumn());
                 System.out.println("      References Table: " + fk.getPKTable());
