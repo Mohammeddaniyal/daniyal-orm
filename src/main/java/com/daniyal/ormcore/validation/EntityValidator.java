@@ -7,13 +7,13 @@ import java.math.*;
 
 public class EntityValidator
 {
-	public static Object validateAndConvert(Object value,FieldMeta fieldMeta,ColumnMetaData columnMetaData) throws ORMException
+	public static Object validateAndConvert(Object value,FieldMetaData fieldMetaData,ColumnMetaData columnMetaData) throws ORMException
 	{
 		if(value==null)
 		{
 			if(!columnMetaData.isNullable())
 			{
-				throw new ORMException("Field '" + fieldMeta.getField().getName() + "' cannot be null.");
+				throw new ORMException("Field '" + fieldMetaData.getField().getName() + "' cannot be null.");
 			}
 			return null;
 		}
@@ -25,7 +25,7 @@ public class EntityValidator
 				String str=(String)value;
 				if(str.length()>maxSize)
 				{
-					throw new ORMException("Value for field '" + fieldMeta.getField().getName() + "' exceeds max length of " + maxSize);
+					throw new ORMException("Value for field '" + fieldMetaData.getField().getName() + "' exceeds max length of " + maxSize);
 				}
 			}else if(value instanceof Character)
 			{
@@ -41,7 +41,7 @@ public class EntityValidator
 				{
 					return new java.sql.Timestamp(utilDate.getTime());
 				}else{
-					throw new ORMException("Field '" + fieldMeta.getField().getName() +"' is Date but column type is '" + sqlType + "'");
+					throw new ORMException("Field '" + fieldMetaData.getField().getName() +"' is Date but column type is '" + sqlType + "'");
 				}
 			}else if(value instanceof BigDecimal)
 			{
@@ -55,12 +55,12 @@ public class EntityValidator
 				int scale=columnMetaData.getScale();
 				if (valuePrecision > precision) 
 				{
-				throw new ORMException("BigDecimal value for field '" + fieldMeta.getField().getName() +
+				throw new ORMException("BigDecimal value for field '" + fieldMetaData.getField().getName() +
                 "' exceeds the maximum precision allowed (" + precision + "). Actual: " + valuePrecision);
 				}
 				if (valueScale > scale) 
 				{
-				throw new ORMException("BigDecimal value for field '" + fieldMeta.getField().getName() +
+				throw new ORMException("BigDecimal value for field '" + fieldMetaData.getField().getName() +
                 "' exceeds the maximum scale allowed (" + scale + "). Actual: " + valueScale);
 				}
 			}

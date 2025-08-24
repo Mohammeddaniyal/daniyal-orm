@@ -45,8 +45,8 @@ for (Map.Entry<String, TableMetaData> entry : tablesMetaMap.entrySet()) {
             System.out.println("   Nullable: " + columnMetaData.isNullable());
             System.out.println("   Foreign Key: " + columnMetaData.isForeignKey());
 
-            if (columnMetaData.isForeignKey() && columnMetaData.getForeignKeyInfo() != null) {
-                ForeignKeyInfo fk = columnMetaData.getForeignKeyInfo();
+            if (columnMetaData.isForeignKey() && columnMetaData.getForeignKeyMetaData() != null) {
+                ForeignKeyMetaData fk = columnMetaData.getForeignKeyMetaData();
                 System.out.println("      FK Column: " + fk.getFKColumn());
                 System.out.println("      References Table: " + fk.getPKTable());
                 System.out.println("      References Column: " + fk.getPKColumn());
@@ -83,8 +83,8 @@ for (Map.Entry<Class, EntityMetaData> entry : entityMetaDataMap.entrySet()) {
             System.out.println("   Auto Increment: " + fieldMeta.isAutoIncrement());
             System.out.println("   Foreign Key: " + fieldMeta.isForeignKey());
 
-            if (fieldMeta.isForeignKey() && fieldMeta.getForeignKeyInfo() != null) {
-                ForeignKeyInfo fk = fieldMeta.getForeignKeyInfo();
+            if (fieldMeta.isForeignKey() && fieldMeta.getForeignKeyMetaData() != null) {
+                ForeignKeyMetaData fk = fieldMeta.getForeignKeyMetaData();
                 System.out.println("      FK Column: " + fk.getFKColumn());
                 System.out.println("      References Table: " + fk.getPKTable());
                 System.out.println("      References Column: " + fk.getPKColumn());
