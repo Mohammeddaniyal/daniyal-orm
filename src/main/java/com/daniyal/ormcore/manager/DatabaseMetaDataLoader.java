@@ -79,7 +79,7 @@ columnMetaData.setForeignKey(true);
 columnMetaData.setForeignKeyInfo(foreignKeyInfo);
 }
 columnMetaData.setColumnName(columnName);
-columnMetaData.setType(type);
+columnMetaData.setDataType(type);
 columnMetaData.setSize(size);
 columnMetaData.setScale(scale);
 columnMetaData.setPrimaryKey(isPrimaryKey);
