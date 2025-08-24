@@ -4,13 +4,13 @@ public class EntityMeta
 {
 private Class entityClass;
 private String tableName;
-private Map<String,FieldMeta> fields;
+private Map<String,FieldMetaData> fieldMetaDataMap;
 
 public EntityMeta()
 {
 this.entityClass=null;
 this.tableName="";
-this.fields=null;
+this.fieldMetaDataMap=null;
 }
 
 public void setEntityClass(Class entityClass)
@@ -21,9 +21,9 @@ public void setTableName(String tableName)
 {
 this.tableName=tableName;
 }
-public void setFields(Map<String,FieldMeta> fields)
+public void setFieldMetaDataMap(Map<String,FieldMetaData> fieldMetaDataMap)
 {
-this.fields=fields;
+this.fieldMetaDataMap=fieldMetaDataMap;
 }
 public Class getEntityClass()
 {
@@ -33,8 +33,8 @@ public String getTableName()
 {
 return this.tableName;
 }
-public Map<String,FieldMeta> getFields()
+public Map<String,FieldMetaData> getFieldMetaDataMap()
 {
-return this.fields;
+return this.fieldMetaDataMap;
 }
 }
