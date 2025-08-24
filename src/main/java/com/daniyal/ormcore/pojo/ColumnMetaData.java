@@ -4,10 +4,10 @@ public class ColumnMetaData
 private String columnName;
 private boolean isPrimaryKey;
 private boolean isAutoIncrement;
-private boolean isNull;
+private boolean isNullable;
 private boolean isForeignKey;
 private ForeignKeyInfo foreignKeyInfo;
-private String type;
+private String dataType;
 private int size;
 private int scale;
 public ColumnMetaData()
@@ -15,10 +15,10 @@ public ColumnMetaData()
 this.columnName="";
 this.isPrimaryKey=false;
 this.isAutoIncrement=false;
-this.isNull=false;
+this.isNullable=false;
 this.isForeignKey=false;
 this.foreignKeyInfo=null;
-this.type="";
+this.dataType="";
 this.size=0;
 this.scale=0;
 }
@@ -46,13 +46,13 @@ public boolean getIsAutoIncrement()
 {
 return this.isAutoIncrement;
 }
-public void setIsNull(boolean isNull)
+public void setisNullable(boolean isNullable)
 {
-this.isNull=isNull;
+this.isNullable=isNullable;
 }
-public boolean getIsNull()
+public boolean getisNullable()
 {
-return this.isNull;
+return this.isNullable;
 }
 public void setIsForeignKey(boolean isForeignKey)
 {
@@ -70,13 +70,13 @@ public ForeignKeyInfo getForeignKeyInfo()
 {
 return this.foreignKeyInfo;
 }
-public void setType(java.lang.String type)
+public void setDataType(java.lang.String dataType)
 {
-this.type=type;
+this.dataTypeype=dataType;
 }
-public java.lang.String getType()
+public java.lang.String getDataType()
 {
-return this.type;
+return this.dataType;
 }
 public void setSize(int size)
 {
