@@ -1,10 +1,10 @@
 package com.daniyal.ormcore.pojo;
-public class ForeignKeyInfo
+public class ForeignKeyMetaData
 {
 private String fkColumn;
 private  String pkTable;
 private String pkColumn;
-public ForeignKeyInfo()
+public ForeignKeyMetaData()
 {
 this.fkColumn="";
 this.pkTable="";

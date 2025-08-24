@@ -12,8 +12,6 @@ public FieldMetaData()
 {
 this.field=null;
 this.columnName="";
-this.setterMethod=null;
-this.getterMethod=null;
 this.isPrimaryKey=false;
 this.isAutoIncrement=false;
 this.isForeignKey=false;
