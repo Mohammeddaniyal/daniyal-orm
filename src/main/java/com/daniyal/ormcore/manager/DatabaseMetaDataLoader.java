@@ -28,7 +28,7 @@ String columnName;
 String type;
 int size;
 int scale;
-String isNull;
+String isNullable;
 String autoIncrement;
 boolean isPrimaryKey;
 Map<String,ColumnMetaData> columnMetaDataMap;
@@ -69,7 +69,7 @@ columnName=columnsResultSet.getString("COLUMN_NAME");
 type=columnsResultSet.getString("TYPE_NAME");
 size=columnsResultSet.getInt("COLUMN_SIZE");
 scale=columnsResultSet.getInt("DECIMAL_DIGITS");
-isNull=columnsResultSet.getString("IS_NULLABLE");
+isNullable=columnsResultSet.getString("IS_NULLABLE");
 autoIncrement=columnsResultSet.getString("IS_AUTOINCREMENT");
 isPrimaryKey=primaryKeyColumns.contains(columnName);
 if(foreignKeyColumnsMap.containsKey(columnName))
@@ -84,7 +84,7 @@ columnMetaData.setSize(size);
 columnMetaData.setScale(scale);
 columnMetaData.setPrimaryKey(isPrimaryKey);
 columnMetaData.setAutoIncrement(autoIncrement.equalsIgnoreCase("YES"));
-columnMetaData.setNull(autoIncrement.equalsIgnoreCase("YES"));
+columnMetaData.setNullable(autoIncrement.equalsIgnoreCase("YES"));
 columnMetaDataMap.put(columnName,columnMetaData);
 } // on columns loop ends
 
