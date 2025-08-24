@@ -30,23 +30,23 @@ public java.lang.String getColumnName()
 {
 return this.columnName;
 }
-public void setIsPrimaryKey(boolean isPrimaryKey)
+public void setPrimaryKey(boolean isPrimaryKey)
 {
 this.isPrimaryKey=isPrimaryKey;
 }
-public boolean getIsPrimaryKey()
+public boolean isPrimaryKey()
 {
 return this.isPrimaryKey;
 }
-public void setIsAutoIncrement(boolean isAutoIncrement)
+public void setAutoIncrement(boolean isAutoIncrement)
 {
 this.isAutoIncrement=isAutoIncrement;
 }
-public boolean getIsAutoIncrement()
+public boolean isAutoIncrement()
 {
 return this.isAutoIncrement;
 }
-public void setisNullable(boolean isNullable)
+public void setNullable(boolean isNullable)
 {
 this.isNullable=isNullable;
 }
@@ -54,11 +54,11 @@ public boolean getisNullable()
 {
 return this.isNullable;
 }
-public void setIsForeignKey(boolean isForeignKey)
+public void setForeignKey(boolean isForeignKey)
 {
 this.isForeignKey=isForeignKey;
 }
-public boolean getIsForeignKey()
+public boolean isForeignKey()
 {
 return this.isForeignKey;
 }
