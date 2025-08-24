@@ -1,12 +1,12 @@
 package com.daniyal.ormcore.pojo;
 import java.util.*;
-public class EntityMeta
+public class EntityMetaData
 {
 private Class entityClass;
 private String tableName;
 private Map<String,FieldMetaData> fieldMetaDataMap;
 
-public EntityMeta()
+public EntityMetaData()
 {
 this.entityClass=null;
 this.tableName="";
