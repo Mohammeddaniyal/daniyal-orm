@@ -33,7 +33,7 @@ public class EntityValidator
 			}else if(value instanceof java.util.Date)
 			{
 				java.util.Date utilDate=(java.util.Date)value;
-				String sqlType=columnMetaData.getType();
+				String sqlType=columnMetaData.getDataType();
 				if("DATE".equals(sqlType))
 				{
 					return new java.sql.Date(utilDate.getTime());
