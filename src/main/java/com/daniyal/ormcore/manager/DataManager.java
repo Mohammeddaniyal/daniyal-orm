@@ -274,7 +274,7 @@ QueryBuilder queryBuilder=new QueryBuilder(entity,tableName,fieldMetaDataMap,col
 Query query=queryBuilder.buildUpdateQuery();
 params=query.getParameters();
 sql=query.getSQL();
-System.out.println("SQL statement for insert : "+sql);
+System.out.println("SQL statement for Update : "+sql);
 try
 {
 PreparedStatement preparedStatement=connection.prepareStatement(sql);
