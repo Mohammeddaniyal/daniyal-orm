@@ -62,6 +62,16 @@ public class QueryBuilder
 		
 		String sql="INSERT INTO "+this.tableName+" ("+String.join(",",columns)+") VALUES ("+placeholders.toString()+ ")";
 		return new Query(sql,params);
-	
+	}
+	public Query buildUpdateQuery()
+	{
+		List<String> columns=new ArrayList<>();
+		List<Object> params=new ArrayList<>();
+		StringBuilder dummy=new StringBuider();
+		final String[] primaryKeyColumn={null};
+		final Object[] primaryKeyValue[0]={null};
+		FieldProcessor updateProcessor=(fieldMetaData,validatedValue,cols,paramList,ph)->{
+			if(
+		};
 	}
 }
