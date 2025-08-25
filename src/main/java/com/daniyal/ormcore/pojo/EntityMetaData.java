@@ -3,6 +3,7 @@ import java.util.*;
 public class EntityMetaData
 {
 private Class entityClass;
+private Constructor entityNoArgConstructor;
 private String tableName;
 private Map<String,FieldMetaData> fieldMetaDataMap;
 
@@ -36,5 +37,13 @@ return this.tableName;
 public Map<String,FieldMetaData> getFieldMetaDataMap()
 {
 return this.fieldMetaDataMap;
+}
+public void setEntityNoArgConstructor(Constructor entityNoArgConstructor)
+{
+	this.entityNoArgConstructor=entityNoArgConstructor;
+}
+public Constructor getEntityNoArgConstructor()
+{
+	return entityNoArgConstructor;
 }
 }
