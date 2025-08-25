@@ -85,4 +85,20 @@ public class QueryBuilder
 		params.add(primaryKeyValue[0]);
 		return new Query(sql,params);
 	}
+	public Query buildDeleteQuery()
+	{
+		final String[] primaryKeyColumn={null};
+		final String[] primaryKeyValue={null};
+		FieldProcessor deleteProcessor=(fieldMetaData,validatedValue,cols,paramList,ph)->{
+			if(fieldMetaData.isPrimaryKey())
+			{
+				primaryKeyColumn[0]=fieldMetaData.getColumnName();
+				primaryKeyValue[0]=validatedValue;
+			}
+		};
+		processFields(deleteProcessor,null,null,null);
+		String sql="DELETE FROM "+this.tableName+" WHERE "+primaryKeyColumn[0]+"=?";
+		List<Object> params=Collections.singletonList(primaryKeyValue[0]);
+		return new Query(sql,params);
+	}
 }
