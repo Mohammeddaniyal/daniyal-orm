@@ -239,7 +239,7 @@ if(generatedKeysResultSet.next())
 		throw new ORMException("Cannot write value of field " + fieldWithAutoIncrement.getName() +"' in entity '" + entity.getClass().getSimpleName() +"'. Ensure the field is accessible (e.g., use @Column and allow access).");
 	}
 }
-
+generatedKeysResultSet.close();
 preparedStatement.close();
 }catch(SQLException sqlException)
 {
@@ -248,5 +248,55 @@ throw new ORMException(sqlException.getMessage());
 return entity;
 }
 
+
+
+public void update(Object entity)throws ORMException
+{
+if(connection==null)
+{
+throw new ORMException("Connection is closed, can't perform save");
+}
+Class entityClass=entity.getClass();
+
+EntityMetaData entityMetaData=entityMetaDataMap.get(entityClass);
+if(entityMetaData==null)
+{
+throw new ORMException("Entity class '" + entityClass.getName() + "' is not registered. " +"Make sure it is annotated with @Table and included in the base package defined in conf.json.");
+}
+
+String tableName=entityMetaData.getTableName();
+Map<String,FieldMetaData> fieldMetaDataMap=entityMetaData.getFieldMetaDataMap();
+TableMetaData tableMetaData=tablesMetaMap.get(tableName);
+Map<String,ColumnMetaData> columnMetaDataMap=tableMetaData.getColumnMetaDataMap();
+List<Object> params=new ArrayList<>();
+String sql;
+QueryBuilder queryBuilder=new QueryBuilder(entity,tableName,fieldMetaDataMap,columnMetaDataMap);
+Query query=queryBuilder.buildUpdateQuery();
+params=query.getParameters();
+sql=query.getSQL();
+System.out.println("SQL statement for insert : "+sql);
+try
+{
+PreparedStatement preparedStatement=connection.prepareStatement(sql);
+int x=1;
+//System.out.printf("%10s\n","VALUES");
+for(Object param:params)
+{
+//System.out.println(v);
+preparedStatement.setObject(x++,param);
+}
+int affectedRow=preparedStatement.executeUpdate();
+
+if(affectedRow==0)
+{
+	throw new ORMException("Update failed");
+}
+preparedStatement.close();
+}catch(SQLException sqlException)
+{
+throw new ORMException(sqlException.getMessage());
+}
+return entity;
+}
 
 }
