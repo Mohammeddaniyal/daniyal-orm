@@ -71,7 +71,12 @@ public class QueryBuilder
 		final String[] primaryKeyColumn={null};
 		final Object[] primaryKeyValue[0]={null};
 		FieldProcessor updateProcessor=(fieldMetaData,validatedValue,cols,paramList,ph)->{
-			if(
+			if(fieldMetaData.isPrimaryKey())
+			{
+				primaryKeyColumn[0]=fieldMetaData.getColumnName();
+				primaryKeyValue[0]=validatedValue;
+			}
+			
 		};
 	}
 }
