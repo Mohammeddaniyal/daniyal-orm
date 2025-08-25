@@ -340,7 +340,7 @@ throw new ORMException(sqlException.getMessage());
 }
 }
 
-public QueryBuilder query(Class entityClass) throws ORMException
+public <T> QueryBuilder<T> query(Class<T> entityClass) throws ORMException
 {
 if(connection==null)
 {
@@ -354,7 +354,7 @@ if(entityMetaData==null)
 throw new ORMException("Entity class '" + entityClass.getName() + "' is not registered. " +"Make sure it is annotated with @Table and included in the base package defined in conf.json.");
 }
 String tableName=entityMetaData.getTableName();
-QueryBuilder queryBuilder=new QueryBuilder(connection,entityClass,entityMetaData.getEntityNoArgConstructor(),tableName);
+QueryBuilder<T> queryBuilder=new QueryBuilder(connection,entityClass,entityMetaData.getEntityNoArgConstructor(),entityMetaData.getFieldMetaDataMap(),tableName);
 return queryBuilder;
 }
 
