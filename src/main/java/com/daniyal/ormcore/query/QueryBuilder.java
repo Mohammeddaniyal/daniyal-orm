@@ -5,26 +5,26 @@ import com.daniyal.ormcore.validation.*;
 import java.util.*;
 import java.lang.reflect.*;
 import java.sql.*;
-public class QueryBuilder
+public class QueryBuilder<T>
 {
 	private final Connection connection;
 	private final String tableName;
 	private final Map<String,FieldMetaData> fieldMetaDataMap;
 	private final Map<String,ColumnMetaData> columnMetaDataMap;
-	private final Class entityClass;
+	private final Class<T> entityClass;
 	private final Object entityInstance;
-	private final Constructor entityNoArgConstructor;
+	private final Constructor<T> entityNoArgConstructor;
 	private final List<String> conditions;
 	private final List<Object> params;
-	public QueryBuilder(Connection connection,Class entityClass,Constructor entityNoArgConstructor,String tableName)
+	public QueryBuilder(Connection connection,Class<T> entityClass,Constructor<T> entityNoArgConstructor,Map<String,FieldMetaData> fieldMetaDataMap,String tableName)
 	{
 		this.connection=connection;
 		this.entityClass=entityClass;
-		this.entityNoArgConstructor;
+		this.entityNoArgConstructor=entityNoArgConstructor;
 		this.tableName=tableName;
 		this.conditions=new ArrayList<>();
 		this.params=new ArrayList<>();
-		this.fieldMetaDataMap=null;
+		this.fieldMetaDataMap=fieldMetaDataMap;
 		this.columnMetaDataMap=null;
 		this.entityInstance=null;
 	}
@@ -133,22 +133,22 @@ public class QueryBuilder
 	{
 		this.conditions.add(condition);
 	}
-	public Condition where(String column)
+	public Condition<T> where(String column)
 	{
 		this.conditions.add(" WHERE ");
 		return new Condition(this,column);
 	}
-	public Condition or(String column)
+	public Condition<T> or(String column)
 	{
 		this.conditions.add(" OR ");
 		return new Condition(this,column);
 	}
-	public Condition and(String column)
+	public Condition<T> and(String column)
 	{
 		this.conditions.add(" AND ");
 		return new Condition(this,column);
 	}
-	public List<Object> list()
+	public List<T> list() throws ORMException
 	{
 		StringBuilder sqlBuilder=new StringBuilder("SELECT * FROM "+this.tableName);
 		if(!this.conditions.isEmpty())
@@ -159,23 +159,48 @@ public class QueryBuilder
 			}
 		}
 		System.out.println("SQL Query generated : "+sqlBuilder.toString());
-		List<?> entityList=new ArrayList<>();
-		Object entityInstance;
+		List<T> entityList=new ArrayList<>();
 		try
 		{
-			Statement statement=connection.createStatement();
-			ResultSet resultSet=statement.executeQuery(sqlBuilder.toString());
+			PreparedStatement preparedStatement=connection.prepareStatement(sqlBuilder.toString());
+			int x=1;
+			for(Object param:this.params)
+			{
+				preparedStatement.setObject(x++,param);
+			}
+			ResultSet resultSet=preparedStatement.executeQuery();
 			while(resultSet.next())
 			{
-				
-				entityInstance=this.entityClass.newInstance();
-				
+				entityList.add(mapRow(resultSet));
 			}
-			
+					
 		}catch(SQLException sqlException)
 			{
 					throw new ORMException(sqlException.getMessage());
 			}
-		return new ArrayList<>();
+		return entityList;
+	}
+	private T mapRow(ResultSet resultSet) throws ORMException
+	{
+		try
+		{
+			FieldMetaData fieldMetaData;
+			Field field;
+			String columnName;
+			Object rawValue;
+			T entityInstance=(T) this.entityNoArgConstructor.newInstance();
+			for(Map.Entry<String,FieldMetaData> entry:fieldMetaDataMap.entrySet())
+			{
+				fieldMetaData=entry.getValue();
+				field=fieldMetaData.getField();
+				columnName=fieldMetaData.getColumnName();
+				rawValue=resultSet.getObject(columnName);
+				field.set(entityInstance,EntityValidator.convertType(rawValue,field.getType()));
+			}
+			return entityInstance;
+		}catch(InstantiationException | SQLException | IllegalAccessException | InvocationTargetException exception)
+		{
+		 throw new ORMException(exception.getMessage());	
+		}
 	}
 }
