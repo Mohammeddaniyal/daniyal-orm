@@ -119,9 +119,10 @@ if(tableMetaData==null)
 {
 throw new ORMException("No table exists with name "+tableName);
 }
+Constructor entityNoArgConstructor=null;
 try
 {
-	Constructor entityNoArgConstructor=clazz.getDeclaredConstructor();
+	entityNoArgConstructor=clazz.getDeclaredConstructor();
 	entityNoArgConstructor.setAccessible(true);
 }catch(NoSuchMethodException exp)
 	{
@@ -281,6 +282,7 @@ throw new ORMException("Entity class " + clazz.getSimpleName() +" has missing fi
 
 entityMetaData=new EntityMetaData();
 entityMetaData.setEntityClass(clazz);
+entityMetaData.setEntityNoArgConstructor(entityNoArgConstructor);
 entityMetaData.setTableName(tableName);
 entityMetaData.setFieldMetaDataMap(fieldMetaDataMap);
 entitiesMetaMap.put(clazz,entityMetaData);
