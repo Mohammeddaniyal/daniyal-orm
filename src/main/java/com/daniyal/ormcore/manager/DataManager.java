@@ -354,7 +354,7 @@ if(entityMetaData==null)
 throw new ORMException("Entity class '" + entityClass.getName() + "' is not registered. " +"Make sure it is annotated with @Table and included in the base package defined in conf.json.");
 }
 String tableName=entityMetaData.getTableName();
-QueryBuilder queryBuilder=new QueryBuilder(connection,entityClass,tableName);
+QueryBuilder queryBuilder=new QueryBuilder(connection,entityClass,entityMetaData.getEntityNoArgConstructor(),tableName);
 return queryBuilder;
 }
 
