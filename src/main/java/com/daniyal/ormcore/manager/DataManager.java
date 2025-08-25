@@ -298,7 +298,7 @@ throw new ORMException(sqlException.getMessage());
 }
 }
 
-publib void delete(Object entity) throws ORMException
+public void delete(Object entity) throws ORMException
 {
 if(connection==null)
 {
@@ -339,5 +339,24 @@ preparedStatement.close();
 throw new ORMException(sqlException.getMessage());
 }
 }
+
+public QueryBuilder query(Class entityClass) throws ORMException
+{
+if(connection==null)
+{
+throw new ORMException("Connection is closed, can't perform save");
+}
+
+
+EntityMetaData entityMetaData=entityMetaDataMap.get(entityClass);
+if(entityMetaData==null)
+{
+throw new ORMException("Entity class '" + entityClass.getName() + "' is not registered. " +"Make sure it is annotated with @Table and included in the base package defined in conf.json.");
+}
+String tableName=entityMetaData.getTableName();
+QueryBuilder queryBuilder=new QueryBuilder(connection,entityClass,tableName);
+return queryBuilder;
+}
+
 
 }
