@@ -69,7 +69,7 @@ public class QueryBuilder
 		List<Object> params=new ArrayList<>();
 		StringBuilder dummy=new StringBuider();
 		final String[] primaryKeyColumn={null};
-		final Object[] primaryKeyValue[0]={null};
+		final Object[] primaryKeyValue={null};
 		FieldProcessor updateProcessor=(fieldMetaData,validatedValue,cols,paramList,ph)->{
 			if(fieldMetaData.isPrimaryKey())
 			{
@@ -77,7 +77,7 @@ public class QueryBuilder
 				primaryKeyValue[0]=validatedValue;
 				return;
 			}
-			setClauses.add(fieldMetaData.getColumnName()+"=?")
+			setClauses.add(fieldMetaData.getColumnName()+"=?");
 			params.add(validatedValue);
 		};
 		processFields(updatedProcessor,setClauses,params,dummy);
