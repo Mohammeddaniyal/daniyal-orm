@@ -296,7 +296,48 @@ preparedStatement.close();
 {
 throw new ORMException(sqlException.getMessage());
 }
-return entity;
+}
+
+publib void delete(Object entity) throws ORMException
+{
+if(connection==null)
+{
+throw new ORMException("Connection is closed, can't perform save");
+}
+Class entityClass=entity.getClass();
+
+EntityMetaData entityMetaData=entityMetaDataMap.get(entityClass);
+if(entityMetaData==null)
+{
+throw new ORMException("Entity class '" + entityClass.getName() + "' is not registered. " +"Make sure it is annotated with @Table and included in the base package defined in conf.json.");
+}
+
+String tableName=entityMetaData.getTableName();
+Map<String,FieldMetaData> fieldMetaDataMap=entityMetaData.getFieldMetaDataMap();
+TableMetaData tableMetaData=tablesMetaMap.get(tableName);
+Map<String,ColumnMetaData> columnMetaDataMap=tableMetaData.getColumnMetaDataMap();
+List<Object> params=new ArrayList<>();
+String sql;
+QueryBuilder queryBuilder=new QueryBuilder(entity,tableName,fieldMetaDataMap,columnMetaDataMap);
+Query query=queryBuilder.buildDeleteQuery();
+params=query.getParameters();
+sql=query.getSQL();
+System.out.println("SQL statement for Delete : "+sql);
+try
+{
+PreparedStatement preparedStatement=connection.prepareStatement(sql);
+preparedStatement.setObject(1,params.get(0));
+int affectedRow=preparedStatement.executeUpdate();
+
+if(affectedRow==0)
+{
+	throw new ORMException("Deletion failed");
+}
+preparedStatement.close();
+}catch(SQLException sqlException)
+{
+throw new ORMException(sqlException.getMessage());
+}
 }
 
 }
