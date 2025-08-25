@@ -63,11 +63,11 @@ public class QueryBuilder
 		String sql="INSERT INTO "+this.tableName+" ("+String.join(",",columns)+") VALUES ("+placeholders.toString()+ ")";
 		return new Query(sql,params);
 	}
-	public Query buildUpdateQuery()
+	public Query buildUpdateQuery() throws ORMException
 	{
 		List<String> setClauses=new ArrayList<>();
 		List<Object> params=new ArrayList<>();
-		StringBuilder dummy=new StringBuider();
+		StringBuilder dummy=new StringBuilder();
 		final String[] primaryKeyColumn={null};
 		final Object[] primaryKeyValue={null};
 		FieldProcessor updateProcessor=(fieldMetaData,validatedValue,cols,paramList,ph)->{
@@ -80,7 +80,7 @@ public class QueryBuilder
 			setClauses.add(fieldMetaData.getColumnName()+"=?");
 			params.add(validatedValue);
 		};
-		processFields(updatedProcessor,setClauses,params,dummy);
+		processFields(updateProcessor,setClauses,params,dummy);
 		String sql="UPDATE "+tableName+" SET "+String.join(",",setClauses)+" WHERE "+primaryKeyColumn[0]+"=?";
 		params.add(primaryKeyValue[0]);
 		return new Query(sql,params);
