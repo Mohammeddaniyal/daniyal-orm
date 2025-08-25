@@ -4,19 +4,37 @@ import com.daniyal.ormcore.exceptions.*;
 import com.daniyal.ormcore.validation.*;
 import java.util.*;
 import java.lang.reflect.*;
+import java.sql.*;
 public class QueryBuilder
 {
+	private final Connection connection;
 	private final String tableName;
-	private final Map<String,FieldMetaData> fieldMetaDataDataMap;
+	private final Map<String,FieldMetaData> fieldMetaDataMap;
 	private final Map<String,ColumnMetaData> columnMetaDataMap;
+	private final Class entityClass;
 	private final Object entityInstance;
+	private final List<String> conditions;
+	private final List<Object> params;
+	public QueryBuilder(Connection connection,Class entityClass,String tableName)
+	{
+		this.connection=connection;
+		this.entityClass=entityClass;
+		this.tableName=tableName;
+		this.conditions=new ArrayList<>();
+		this.params=new ArrayList<>();
+		this.fieldMetaDataMap=null;
+		this.columnMetaDataMap=null;
+		this.entityInstance=null;
+	}
 	public QueryBuilder(Object entityInstance,String tableName,Map<String,FieldMetaData> fieldMetaDataDataMap,Map<String,ColumnMetaData> columnMetaDataMap)
 	{
 		this.entityInstance=entityInstance;
 		this.tableName=tableName;
-		this.fieldMetaDataDataMap=fieldMetaDataDataMap;
+		this.fieldMetaDataMap=fieldMetaDataDataMap;
 		this.columnMetaDataMap=columnMetaDataMap;
-	}
+		this.conditions=null;
+		this.params=null;
+		}
 	private void processFields(FieldProcessor processor,List<String> columns,List<Object> params,StringBuilder placeholders) throws ORMException
 	{
 		
@@ -25,7 +43,7 @@ public class QueryBuilder
 			Object rawValue=null;
 			Object validatedValue;
 			ColumnMetaData columnMetaData;
-			for(Map.Entry<String,FieldMetaData> entry:fieldMetaDataDataMap.entrySet())
+			for(Map.Entry<String,FieldMetaData> entry:fieldMetaDataMap.entrySet())
 			{
 				fieldMetaData=entry.getValue();
 				field=fieldMetaData.getField();
@@ -85,10 +103,10 @@ public class QueryBuilder
 		params.add(primaryKeyValue[0]);
 		return new Query(sql,params);
 	}
-	public Query buildDeleteQuery()
+	public Query buildDeleteQuery()throws ORMException
 	{
 		final String[] primaryKeyColumn={null};
-		final String[] primaryKeyValue={null};
+		final Object[] primaryKeyValue={null};
 		FieldProcessor deleteProcessor=(fieldMetaData,validatedValue,cols,paramList,ph)->{
 			if(fieldMetaData.isPrimaryKey())
 			{
@@ -100,5 +118,63 @@ public class QueryBuilder
 		String sql="DELETE FROM "+this.tableName+" WHERE "+primaryKeyColumn[0]+"=?";
 		List<Object> params=Collections.singletonList(primaryKeyValue[0]);
 		return new Query(sql,params);
+	}
+	public void addCondition(String condition,Object value)
+	{
+		this.conditions.add(condition);
+		this.params.add(value);
+	}
+	public void addCondition(String condition)
+	{
+		this.conditions.add(condition);
+	}
+	public Condition where(String column)
+	{
+		this.conditions.add(" WHERE ");
+		return new Condition(this,column);
+	}
+	public Condition or(String column)
+	{
+		this.conditions.add(" OR ");
+		return new Condition(this,column);
+	}
+	public Condition and(String column)
+	{
+		this.conditions.add(" AND ");
+		return new Condition(this,column);
+	}
+	public List<Object> list()
+	{
+		StringBuilder sqlBuilder=new StringBuilder("SELECT * FROM "+this.tableName);
+		if(!this.conditions.isEmpty())
+		{
+			for(int i=0;i<this.conditions.size();i++)
+			{
+				sqlBuilder.append(this.conditions.get(i));
+				/* if(i<this.conditions.size()-1)
+				{
+					sqlBuilder.append(" ");
+				} */
+			}
+		}
+		System.out.println("SQL Query generated : "+sqlBuilder.toString());
+		List<?> entityList=new ArrayList<>();
+		Object entityInstance;
+		try
+		{
+			Statement statement=connection.createStatement();
+			ResultSet resultSet=statement.executeQuery(sqlBuilder.toString());
+			while(resultSet.next())
+			{
+				
+				entityInstance=this.entityClass.newInstance();
+				
+			}
+			
+		}catch(SQLException sqlException)
+			{
+					throw new ORMException(sqlException.getMessage());
+			}
+		return new ArrayList<>();
 	}
 }
