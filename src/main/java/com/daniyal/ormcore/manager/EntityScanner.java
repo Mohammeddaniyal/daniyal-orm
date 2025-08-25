@@ -119,8 +119,15 @@ if(tableMetaData==null)
 {
 throw new ORMException("No table exists with name "+tableName);
 }
-
-System.out.println(" Checking for : "+tableName+" table exists in mysql or not");
+try
+{
+	Constructor entityNoArgConstructor=clazz.getDeclaredConstructor();
+	entityNoArgConstructor.setAccessible(true);
+}catch(NoSuchMethodException exp)
+	{
+		throw new ORMException(clazz.getName()+" must have a no-arg constructor.");
+	}
+//System.out.println(" Checking for : "+tableName+" table exists in mysql or not");
 // we'll use map of TableMetaData
 Field []fields=clazz.getFields();
 Map<String,ColumnMetaData> columnMetaDataMap=tableMetaData.getColumnMetaDataMap();
