@@ -65,7 +65,7 @@ public class QueryBuilder
 	}
 	public Query buildUpdateQuery()
 	{
-		List<String> columns=new ArrayList<>();
+		List<String> setClauses=new ArrayList<>();
 		List<Object> params=new ArrayList<>();
 		StringBuilder dummy=new StringBuider();
 		final String[] primaryKeyColumn={null};
@@ -75,8 +75,14 @@ public class QueryBuilder
 			{
 				primaryKeyColumn[0]=fieldMetaData.getColumnName();
 				primaryKeyValue[0]=validatedValue;
+				return;
 			}
-			
+			setClauses.add(fieldMetaData.getColumnName()+"=?")
+			params.add(validatedValue);
 		};
+		processFields(updatedProcessor,setClauses,params,dummy);
+		String sql="UPDATE "+tableName+" SET "+String.join(",",setClauses)+" WHERE "+primaryKeyColumn[0]+"=?";
+		params.add(primaryKeyValue[0]);
+		return new Query(sql,params);
 	}
 }
