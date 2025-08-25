@@ -13,12 +13,14 @@ public class QueryBuilder
 	private final Map<String,ColumnMetaData> columnMetaDataMap;
 	private final Class entityClass;
 	private final Object entityInstance;
+	private final Constructor entityNoArgConstructor;
 	private final List<String> conditions;
 	private final List<Object> params;
-	public QueryBuilder(Connection connection,Class entityClass,String tableName)
+	public QueryBuilder(Connection connection,Class entityClass,Constructor entityNoArgConstructor,String tableName)
 	{
 		this.connection=connection;
 		this.entityClass=entityClass;
+		this.entityNoArgConstructor;
 		this.tableName=tableName;
 		this.conditions=new ArrayList<>();
 		this.params=new ArrayList<>();
@@ -34,6 +36,9 @@ public class QueryBuilder
 		this.columnMetaDataMap=columnMetaDataMap;
 		this.conditions=null;
 		this.params=null;
+		this.connection=null;
+		this.entityClass=null;
+		this.entityNoArgConstructor=null;
 		}
 	private void processFields(FieldProcessor processor,List<String> columns,List<Object> params,StringBuilder placeholders) throws ORMException
 	{
@@ -151,10 +156,6 @@ public class QueryBuilder
 			for(int i=0;i<this.conditions.size();i++)
 			{
 				sqlBuilder.append(this.conditions.get(i));
-				/* if(i<this.conditions.size()-1)
-				{
-					sqlBuilder.append(" ");
-				} */
 			}
 		}
 		System.out.println("SQL Query generated : "+sqlBuilder.toString());
