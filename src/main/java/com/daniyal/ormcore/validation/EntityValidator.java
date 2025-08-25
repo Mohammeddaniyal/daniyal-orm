@@ -67,4 +67,21 @@ public class EntityValidator
 			return value;
 		}
 	}
+	
+	
+	public static Object convertType(Object value, Class targetType) {
+    if (value == null) return null;
+    if (targetType.isAssignableFrom(value.getClass())) return value;
+
+    if (targetType == int.class || targetType == Integer.class) return ((Number) value).intValue();
+    if (targetType == long.class || targetType == Long.class) return ((Number) value).longValue();
+    if (targetType == double.class || targetType == Double.class) return ((Number) value).doubleValue();
+    if (targetType == boolean.class || targetType == Boolean.class) return (Boolean) value;
+    if (targetType == String.class) return value.toString();
+    if (targetType == java.util.Date.class && value instanceof java.sql.Timestamp) return new java.util.Date(((java.sql.Timestamp)value).getTime());
+    if (targetType == java.util.Date.class && value instanceof java.sql.Date) return new java.util.Date(((java.sql.Date)value).getTime());
+    return value; // fallback
+}
+
+	
 }
