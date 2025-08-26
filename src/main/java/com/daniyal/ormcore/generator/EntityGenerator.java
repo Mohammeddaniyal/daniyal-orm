@@ -121,7 +121,6 @@ if(!allTables)
 	if(!tableSet.contains(tableName)) continue;
 }
 
-System.out.println("\n=== " + tableName + " ===");
 String className=tableName.substring(0,1).toUpperCase()+tableName.substring(1);
 
 classBuilder.append("@Table(name=\"" + tableName + "\")\r\n");
