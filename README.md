@@ -8,8 +8,7 @@ Think of it as a simplified Hibernate — without the heavy learning curve.
 
 ---
 
-## ✨ Features (Updated)
-
+## ✨ Features
 - **Annotation Mapping**  
   Use `@Table`, `@Column`, `@PrimaryKey`, `@AutoIncrement`, and `@ForeignKey` annotations to declaratively map your Java classes and fields to MySQL tables. The framework processes these at runtime via reflection to generate SQL and manage persistence.
 
@@ -26,6 +25,9 @@ Think of it as a simplified Hibernate — without the heavy learning curve.
   Update and delete support is now fully integrated:  
   - Call `update(entity)` to update existing rows, automatically mapping provided values to the correct columns and using the primary key for the `WHERE` clause.  
   - Call `delete(entity)` to remove rows by primary key—just provide an entity instance with its PK set.
+
+- **Flexible Querying with Fluent API**  
+  Introduced `query(Class<T> entityClass)` returning a fluent `QueryBuilder<T>` to fetch entities. Supports dynamic filtering with `where()`, `and()`, `or()`, and SQL operators like `eq`, `gt`, `lt`, `le`, `ge`, and `like`. Enables building complex queries naturally and safely.
 
 - **Simple Session Management**  
   Explicit connection sessions: use `begin()` to start, perform CRUD, then `end()` to close safely. No hidden transactions.
@@ -154,6 +156,13 @@ public class ExampleUsage {
             Course toDelete = new Course(10);  // constructor with code only
             dm.delete(toDelete);
             System.out.println("Deleted course with code: " + toDelete.getCode());
+			
+			// Query Example - fetch all courses
+            List<Course> courseList = dm.query(Course.class).list();
+            System.out.println("Code  |  Title");
+            for (Course c : courseList) {
+                System.out.println(c.getCode() + "   " + c.getTitle());
+            }
 
             dm.end();
         } catch (ORMException ex) {
