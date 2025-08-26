@@ -58,4 +58,22 @@ switch(tableFieldType.toUpperCase())
 	return false;
 }
 }
+
+public static String  getDefaultValue(String type)
+{
+if(type.equalsIgnoreCase("int")) return "0";
+if(type.equalsIgnoreCase("long")) return "0";
+if(type.equalsIgnoreCase("boolean") && size==1) return "false";
+if(type.equalsIgnoreCase("byte") ) return "0";
+if(type.equalsIgnoreCase("short")) return "0";
+if(type.equalsIgnoreCase("float")) return "0.0f";
+if(type.equalsIgnoreCase("double")) return "0.0";
+if(type.equalsIgnoreCase("java.math.BigDecimal")) return "null";
+
+if(type.equalsIgnoreCase("char")) return "' '";
+if(type.equalsIgnoreCase("String")) return "\"\"";
+if(type.equalsIgnoreCase("java.util.Date")) return "null";
+return "null";
+}
+
 }
