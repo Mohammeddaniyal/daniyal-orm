@@ -169,7 +169,8 @@ public class QueryBuilder<T>
 			{
 				entityList.add(mapRow(resultSet));
 			}
-					
+			resultSet.close();
+			preparedStatement.close();
 		}catch(SQLException sqlException)
 			{
 					throw new ORMException(sqlException.getMessage());
