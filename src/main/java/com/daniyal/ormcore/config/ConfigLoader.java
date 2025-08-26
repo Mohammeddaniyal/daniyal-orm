@@ -8,11 +8,11 @@ private String connectionURL;
 private String username;
 private String password;
 private String basePackage;
-public ConfigLoader() throws ORMException
+public ConfigLoader(String confFilePath) throws ORMException
 {
 try
 {
-File file=new File("conf.json");
+File file=new File(confFilePath);
 RandomAccessFile randomAccessFile=new RandomAccessFile(file,"r");
 if(randomAccessFile==null)
 {
