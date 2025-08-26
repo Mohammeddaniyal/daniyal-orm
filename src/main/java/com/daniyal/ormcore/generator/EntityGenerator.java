@@ -243,6 +243,7 @@ setterGetterBuilder.append("}\r\n");
 }
 columns.close();
 randomAccessFile.writeBytes("package "+packageName+";\r\n");
+randomAccessFile.writeBytes("import com.daniyal.ormcore.annotations.*;\r\n");
 randomAccessFile.writeBytes(classBuilder.toString());
 randomAccessFile.writeBytes(setterGetterBuilder.toString());
 randomAccessFile.writeBytes("}");
