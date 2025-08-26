@@ -230,7 +230,7 @@ setterGetterBuilder.append("this."+fieldName+"="+fieldName+";\r\n");
 setterGetterBuilder.append("}\r\n");
 
 // generating getter
-setterGetterBuilder.append("public "+fieldType+"get"+capitalizeFieldName+"()\r\n");
+setterGetterBuilder.append("public "+fieldType+" get"+capitalizeFieldName+"()\r\n");
 setterGetterBuilder.append("{\r\n");
 setterGetterBuilder.append("return this."+fieldName+";\r\n");
 setterGetterBuilder.append("}\r\n");
@@ -242,7 +242,7 @@ setterGetterBuilder.append("}\r\n");
 
 }
 columns.close();
-randomAccessFile.writeBytes(packageName+"\r\n");
+randomAccessFile.writeBytes("package "+packageName+";\r\n");
 randomAccessFile.writeBytes(classBuilder.toString());
 randomAccessFile.writeBytes(setterGetterBuilder.toString());
 randomAccessFile.writeBytes("}");
