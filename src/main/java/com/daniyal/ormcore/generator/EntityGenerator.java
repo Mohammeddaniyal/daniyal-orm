@@ -200,18 +200,20 @@ foreignKeyMetaData=foreignKeyMetaDataMap.get(columnName);
 String fkCol= foreignKeyMetaData.getFKColumn();
 String pkTbl=foreignKeyMetaData.getPKTable();
 String pkCol=foreignKeyMetaData.getPKColumn();
-
-classSourceCode=classSourceCode+"@ForeignKey(parent=\"" + foreignKeyMetaData.parentTable + "\",column=\"" + foreignKeyMetaData.parentColumnName + "\")\r\n" ;
+classBuilder.append("@ForeignKey(parent=\"" + pkTable + "\",column=\"" + pkCol + "\")\r\n");
+//classSourceCode=classSourceCode+"@ForeignKey(parent=\"" + foreignKeyMetaData.parentTable + "\",column=\"" + foreignKeyMetaData.parentColumnName + "\")\r\n" ;
 }
 
 // check which type
 
 String fieldType=getFieldType(type,Integer.parseInt(size));
-if(fieldType.equalsIgnoreCase("Date")) importLines.add("import java.util.Date;");
-else if(fieldType.equalsIgnoreCase("BigDecimal")) importLines.add("import java.math.BigDecimal");
+String fieldName=CaseConvertor.toCamelCase(columnName);
+if(fieldType.equalsIgnoreCase("Date") fieldType="java.util.Date";
+else if(fieldType.equalsIgnoreCase("BigDecimal")) fieldType="java.math.BigDecimal";
 
-classSourceCode=classSourceCode+"public "+fieldType+" "+fieldName+";"+"\r\n\r\n";
-
+classBuilder.append("public "+fieldType+" "+fieldName+";"+"\r\n\r\n");
+//classSourceCode=classSourceCode+"public "+fieldType+" "+fieldName+";"+"\r\n\r\n";
+setterGetterBuilder.append();
 
 
 
