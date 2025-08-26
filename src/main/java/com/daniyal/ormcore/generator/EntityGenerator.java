@@ -222,7 +222,7 @@ else if(fieldType.equalsIgnoreCase("BigDecimal")) fieldType="java.math.BigDecima
 
 classBuilder.append("public "+fieldType+" "+fieldName+";"+"\r\n");
 //classSourceCode=classSourceCode+"public "+fieldType+" "+fieldName+";"+"\r\n\r\n";
-String capitalizeFieldName=fieldName.charAt(0)+fieldName.substring(1);
+String capitalizeFieldName=fieldName.charAt(0).toUpperCase()+fieldName.substring(1);
 // generating setter
 setterGetterBuilder.append("public void set"+capitalizeFieldName+"("+fieldType+" "+fieldName+")\r\n");
 setterGetterBuilder.append("{\r\n");
