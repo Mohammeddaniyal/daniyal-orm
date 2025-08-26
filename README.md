@@ -130,32 +130,38 @@ Drop a `conf.json` in the project root:
 ```java
 package com.daniyal.test.ormcore;
 
+import com.daniyal.test.ormcore.entity.*;
 import com.daniyal.ormcore.manager.DataManager;
 import com.daniyal.ormcore.exceptions.ORMException;
-import java.sql.Connection;
-import java.sql.SQLException;
 
-public class Eg1 {
+public class ExampleUsage {
     public static void main(String[] args) {
         try {
             DataManager dm = DataManager.getDataManager();
             dm.begin();
+            
+            // Save (Insert) Example
+            Course toInsert = new Course("Java");
+            dm.save(toInsert);
+            System.out.println("Saved course with code: " + toInsert.getCode());
 
-            Connection connection = dm.getConnection();
-            System.out.println("Connected as: " + connection.getMetaData().getUserName());
-			
-			// id is AutoIncremented
-            Course c = new Course("Java");
-            dm.save(c);
+            // Update Example
+			Course toUpdate=new Course(toInsert.getCode(),"JavaScript");
+			dm.update(c);
+            System.out.println("Updated course with code: " + toUpdate.getCode());
+
+            // Delete Example
+            Course toDelete = new Course(10);  // constructor with code only
+            dm.delete(toDelete);
+            System.out.println("Deleted course with code: " + toDelete.getCode());
 
             dm.end();
-        } catch (ORMException | SQLException ex) {
+        } catch (ORMException ex) {
             System.out.println("Error: " + ex.getMessage());
         }
     }
 }
 ```
-
 ---
 
 ## 🏗 Defining an Entity
@@ -191,7 +197,7 @@ public class Course {
 
 ## 🔮 Roadmap
 
-* Add support for `UPDATE`, `DELETE`, and `SELECT`.
+* Add support for `SELECT`.
 * Better validation and error messages.
 * Connection pooling + improved transaction handling.
 * Logging, tests, and CI pipeline.
