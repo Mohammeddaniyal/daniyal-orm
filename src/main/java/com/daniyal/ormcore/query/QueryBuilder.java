@@ -129,10 +129,6 @@ public class QueryBuilder<T>
 		this.conditions.add(condition);
 		this.params.add(value);
 	}
-	public void addCondition(String condition)
-	{
-		this.conditions.add(condition);
-	}
 	public Condition<T> where(String column)
 	{
 		this.conditions.add(" WHERE ");
