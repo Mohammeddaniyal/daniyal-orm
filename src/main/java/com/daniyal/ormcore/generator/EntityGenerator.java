@@ -121,7 +121,7 @@ if(!allTables)
 System.out.println("\n=== " + tableName + " ===");
 String className=tableName.substring(0,1).toUpperCase()+tableName.substring(1);
 
-classBuilder.append(@Table(name=\""+tableName+"\")\r\n");
+classBuilder.append(@Table(name=\"" + tableName + "\")\r\n");
 classBuilder.append("public class ");
 classBuilder.append(className+"\r\n{\r\n");
 //String classSourceCode="@Table(name=\""+tableName+"\")\r\n";
@@ -224,13 +224,13 @@ String capitalizeFieldName=fieldName.charAt(0)+fieldName.substring(1);
 // generating setter
 setterGetterBuilder.append("public void set"+capitalizeFieldName+"("+fieldType+" "+fieldName+")\r\n");
 setterGetterBuilder.append("{\r\n");
-setterGetterBuilder.append("this."fieldName+"="+fieldName+";\r\n");
+setterGetterBuilder.append("this."+fieldName+"="+fieldName+";\r\n");
 setterGetterBuilder.append("}\r\n");
 
 // generating getter
 setterGetterBuilder.append("public "+fieldType+"get"+capitalizeFieldName+"()\r\n");
 setterGetterBuilder.append("{\r\n");
-setterGetterBuilder.append("return this."fieldName+";\r\n");
+setterGetterBuilder.append("return this."+fieldName+";\r\n");
 setterGetterBuilder.append("}\r\n");
 
 
