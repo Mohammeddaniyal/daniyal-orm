@@ -16,7 +16,7 @@ java -cp daniyal-orm.jar;. com.daniyal.ormcore.generator.EntityGenerator --packa
 (optional)--output=src/main/java (optional)--table=student,course 
 (optional only if user is calling from the conf.json dir)--config=path/to/conf.json */
 	
-	if(args<1)
+	if(args.length<1)
 	{
 		System.out.println("Usage [java -cp daniyal-orm.jar;. com.daniyal.ormcore.generator.EntityGenerator --package=com.anis.customer.entities (optional)--output=src/main/java (optional)--table=student,course (optional)--config=path/to/conf.json]");
 		System.exit(1);
