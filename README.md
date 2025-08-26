@@ -135,7 +135,7 @@ package com.daniyal.test.ormcore;
 import com.daniyal.test.ormcore.entity.*;
 import com.daniyal.ormcore.manager.DataManager;
 import com.daniyal.ormcore.exceptions.ORMException;
-
+import java.util.List;
 public class ExampleUsage {
     public static void main(String[] args) {
         try {
@@ -176,6 +176,8 @@ public class ExampleUsage {
 ## 🏗 Defining an Entity
 
 ```java
+package com.daniyal.test.ormcore.entity;
+
 import com.daniyal.ormcore.annotations.*;
 
 @Table(name = "courses")
