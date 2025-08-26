@@ -71,7 +71,7 @@ java -cp daniyal-orm.jar;. com.daniyal.ormcore.generator.EntityGenerator --packa
 	File targetDir=new File(outputDir,packagePath);
 	if(!targetDir.exists())
 	{
-		if(!targetDir.mkdir())
+		if(!targetDir.mkdirs())
 		{
 			System.out.println("Failed to create output directory: "+targetDir.getAbsolutePath());
 			System.exit(1);
