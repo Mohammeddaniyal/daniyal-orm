@@ -80,7 +80,7 @@ java -cp daniyal-orm.jar;. com.daniyal.ormcore.generator.EntityGenerator --packa
 	if(tables==null)
 	{
 		allTables=true;
-	}else if(tables.equals("*")
+	}else if(tables.equals("*"))
 	{
 		allTables=true;
 	}
