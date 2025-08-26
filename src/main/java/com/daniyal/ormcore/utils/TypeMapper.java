@@ -63,7 +63,7 @@ public static String  getDefaultValue(String type)
 {
 if(type.equalsIgnoreCase("int")) return "0";
 if(type.equalsIgnoreCase("long")) return "0";
-if(type.equalsIgnoreCase("boolean") && size==1) return "false";
+if(type.equalsIgnoreCase("boolean")) return "false";
 if(type.equalsIgnoreCase("byte") ) return "0";
 if(type.equalsIgnoreCase("short")) return "0";
 if(type.equalsIgnoreCase("float")) return "0.0f";
