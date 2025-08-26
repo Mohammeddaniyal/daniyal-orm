@@ -35,7 +35,7 @@ java -cp daniyal-orm.jar;. com.daniyal.ormcore.generator.EntityGenerator --packa
 		}else if(arg.startsWith("--output="))
 		{
 			outputDir=arg.substring("--output=".length());
-		}else if(arg.startsWith("--table="))
+		}else if(arg.startsWith("--tables="))
 		{
 			tablesArg=arg.substring("--tables=".length());
 		}else if(arg.startsWith("--config="))
@@ -97,7 +97,7 @@ java -cp daniyal-orm.jar;. com.daniyal.ormcore.generator.EntityGenerator --packa
 			System.exit(1);
 		}
 	}
-	
+	System.out.println("All tables : "+allTables);
 Connection connection=ConnectionManager.getConnection(configLoader);
 
 DatabaseMetaData meta=connection.getMetaData();
