@@ -7,7 +7,6 @@ import java.io.*;
 import java.util.*;
 class EntityGenerator
 {
-
 public static void main(String []args)
 {
 try
@@ -19,10 +18,7 @@ java -cp daniyal-orm.jar;. com.daniyal.ormcore.generator.EntityGenerator --packa
 	
 	if(args<1)
 	{
-		System.out.println("Usage [java -cp daniyal-orm.jar;. com.daniyal.ormcore.generator.EntityGenerator 
-		--package=com.anis.customer.entities 
-		(optional)--output=src/main/java (optional)--table=student,course 
-		(optional)--config=path/to/conf.json]");
+		System.out.println("Usage [java -cp daniyal-orm.jar;. com.daniyal.ormcore.generator.EntityGenerator --package=com.anis.customer.entities (optional)--output=src/main/java (optional)--table=student,course (optional)--config=path/to/conf.json]");
 		System.exit(1);
 	}
 	String packageName=null;
@@ -62,7 +58,8 @@ java -cp daniyal-orm.jar;. com.daniyal.ormcore.generator.EntityGenerator --packa
 	ConfigLoader configLoader=null;
 	try
 	{	
-	configLoader=new ConfigLoader((config==null):"conf.json"?config);
+	if(config==null) config="conf.json";
+	configLoader=new ConfigLoader(config);
 	}catch(ORMException exception)
 	{
 		System.out.println(exception.getMessage());
@@ -158,7 +155,6 @@ foreignKeyMetaData.setPKTable(pkTbl);
 foreignKeyMetaData.setPKColumn(pkCol);
 foreignKeyMetaDataMap.put(fkCol,foreignKeyMetaData);
 //System.out.println(" FK: " + fkCol + " -> " + pkTbl + "(" + pkCol + ")");
-
 }
 
 k.close();
@@ -271,8 +267,7 @@ idx.close();
 randomAccessFile.writeBytes(importLine+"\r\n");
 } */
 
-}
-
+} // loops on column ends here
 tables.close();
 connection.close();
 }catch(IOException | SQLException ex)
