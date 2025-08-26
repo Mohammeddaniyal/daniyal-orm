@@ -215,7 +215,7 @@ classBuilder.append("@ForeignKey(parent=\"" + pkTable + "\",column=\"" + pkCol +
 
 String fieldType=getFieldType(type,Integer.parseInt(size));
 String fieldName=CaseConvertor.toCamelCase(columnName);
-if(fieldType.equalsIgnoreCase("Date") fieldType="java.util.Date";
+if(fieldType.equalsIgnoreCase("Date")) fieldType="java.util.Date";
 else if(fieldType.equalsIgnoreCase("BigDecimal")) fieldType="java.math.BigDecimal";
 
 classBuilder.append("public "+fieldType+" "+fieldName+";"+"\r\n");
