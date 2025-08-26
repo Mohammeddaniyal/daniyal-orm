@@ -15,6 +15,33 @@ Think of it as a **simplified Hibernate**, without the heavy learning curve.
 
 ---
 
+### Why Use This?
+
+- **Cut Boilerplate:** Avoid writing repetitive JDBC code and manual result mapping.  
+- **Annotation-Based Mapping:** Map Java classes to tables with simple annotations — no XML or complex setup.  
+- **Fluent Queries:** Build readable queries using the intuitive fluent API instead of raw SQL.  
+- **CLI Entity Generator:** Quickly generate entity classes from your database schema.  
+- **Lightweight & Focused:** Perfect for learning and small-to-medium projects. It’s simple, fast, and easy to understand.  
+- **Learning-Friendly:** Great for students and developers who want to explore ORM concepts without the overhead of big frameworks.
+
+---
+
+### Why I Built This
+
+I built **Daniyal ORM** as a **learning project** to understand how frameworks work under the hood. Some motivations behind it:  
+
+- To **explore ORM internals**: How entities, metadata, and reflection can interact with a database.  
+- To **practice framework-style programming**: Building a reusable, structured library from scratch.  
+- To **experiment with modern Java features** like reflection, annotations, and fluent APIs.  
+- To **have a personal, lightweight ORM** for small projects or prototypes.  
+- To **improve my coding skills** by solving real problems: entity validation, session management, query building, and CLI tooling.  
+
+> This project isn’t meant to compete with Hibernate or other full-scale ORMs — it’s a learning-focused, lightweight solution that’s easy to understand, extend, and experiment with.  
+
+---
+
+
+
 ## ⚡ Quick Start
 
 ```java
@@ -97,7 +124,11 @@ com.daniyal.ormcore
 
 ---
 
-## ⚙️ Configuration (`conf.json`)
+### ⚙️ Configuration (`conf.json`)
+
+This file contains **database connection info** and the **base package for your entity classes**. Daniyal ORM reads this at startup to know **where to connect** and **which classes to manage**.
+
+> **Placement:** Put this `conf.json` in the **root folder** of your project — the same location from which you will run **your application that uses Daniyal ORM**.
 
 ```json
 {
