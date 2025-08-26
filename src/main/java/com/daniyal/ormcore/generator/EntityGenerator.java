@@ -110,6 +110,7 @@ List<String> importLines=new ArrayList<>();
 Map<String,ForeignKeyMetaData> foreignKeyMetaDataMap=new HashMap<>();
 ForeignKeyMetaData foreignKeyMetaData;
 StringBuilder classBuilder=new StringBuilder();
+StringBuilder constructorBuilder=new StringBuilder();
 StringBuilder setterGetterBuilder=new StringBuilder();
 while(tables.next())
 {
@@ -124,13 +125,10 @@ System.out.println("\n=== " + tableName + " ===");
 String className=tableName.substring(0,1).toUpperCase()+tableName.substring(1);
 
 classBuilder.append("@Table(name=\"" + tableName + "\")\r\n");
-classBuilder.append("public class ");
+classBuilder.append("\r\npublic class ");
 classBuilder.append(className+"\r\n{\r\n");
-//String classSourceCode="@Table(name=\""+tableName+"\")\r\n";
-//classSourceCode=classSourceCode+"public class ";
 
-//classSourceCode=classSourceCode+className+"\r\n{\r\n";
-
+constructorBuilder.append("public "+className+"()\r\n{");
 file=new File(targetDir,className+".java");
 if(file.exists()) file.delete();
 randomAccessFile=new RandomAccessFile(file,"rw");
@@ -156,7 +154,6 @@ foreignKeyMetaData.setFKColumn(fkCol);
 foreignKeyMetaData.setPKTable(pkTbl);
 foreignKeyMetaData.setPKColumn(pkCol);
 foreignKeyMetaDataMap.put(fkCol,foreignKeyMetaData);
-//System.out.println(" FK: " + fkCol + " -> " + pkTbl + "(" + pkCol + ")");
 }
 
 k.close();
@@ -175,32 +172,16 @@ String size=columns.getString("COLUMN_SIZE");
 String isNull=columns.getString("IS_NULLABLE");
 String autoIncrement=columns.getString("IS_AUTOINCREMENT");
 boolean isPrimaryKey=primaryKeyColumns.contains(columnName);
-/* if(columnName.contains("_"))
-{
-// remove _ for class field name
-// roll_number -> rollNumber
-String[] parts=columnName.split("_");
-
-fieldName=parts[0];
-for(int i=1;i<parts.length;++i)
-{
-parts[i]=parts[i].substring(0,1).toUpperCase()+parts[i].substring(1);
-fieldName=fieldName+parts[i];
-}
-} */
 classBuilder.append("@Column(name=\""+columnName+"\")\r\n");
-//classSourceCode=classSourceCode+"@Column(name=\""+columnName+"\")\r\n";
 
 if(isPrimaryKey)
 {
 	classBuilder.append("@PrimaryKey\r\n");
-//classSourceCode=classSourceCode+"@PrimaryKey\r\n";
 }
 
 if(autoIncrement.equalsIgnoreCase("YES"))
 {
 	classBuilder.append("@AutoIncrement\r\n");
-//classSourceCode=classSourceCode+"@AutoIncrement\r\n";
 }
 
 if(foreignKeyMetaDataMap.containsKey(columnName))
@@ -210,7 +191,6 @@ String fkCol= foreignKeyMetaData.getFKColumn();
 String pkTbl=foreignKeyMetaData.getPKTable();
 String pkCol=foreignKeyMetaData.getPKColumn();
 classBuilder.append("@ForeignKey(parent=\"" + pkTbl + "\",column=\"" + pkCol + "\")\r\n");
-//classSourceCode=classSourceCode+"@ForeignKey(parent=\"" + foreignKeyMetaData.parentTable + "\",column=\"" + foreignKeyMetaData.parentColumnName + "\")\r\n" ;
 }
 
 // check which type
@@ -221,8 +201,11 @@ if(fieldType.equalsIgnoreCase("Date")) fieldType="java.util.Date";
 else if(fieldType.equalsIgnoreCase("BigDecimal")) fieldType="java.math.BigDecimal";
 
 classBuilder.append("public "+fieldType+" "+fieldName+";"+"\r\n");
-//classSourceCode=classSourceCode+"public "+fieldType+" "+fieldName+";"+"\r\n\r\n";
 String capitalizeFieldName=fieldName.substring(0,1).toUpperCase()+fieldName.substring(1);
+
+// adding this field into constructor
+constructorBuilder.append("\r\nthis."+fieldName+"="+TypeMapper.getDefaultValue(fieldType)+";");
+
 // generating setter
 setterGetterBuilder.append("public void set"+capitalizeFieldName+"("+fieldType+" "+fieldName+")\r\n");
 setterGetterBuilder.append("{\r\n");
@@ -236,24 +219,21 @@ setterGetterBuilder.append("return this."+fieldName+";\r\n");
 setterGetterBuilder.append("}\r\n");
 
 
-
-
-/* System.out.println(" - " + columnName + " : " + type + "(" + size + ")" +" | nullable=" + isNull +" | autoincrement=" + autoIncrement); */
-
 }
 columns.close();
+constructorBuilder.append("\r\n}\r\n");
 randomAccessFile.writeBytes("package "+packageName+";\r\n");
 randomAccessFile.writeBytes("import com.daniyal.ormcore.annotations.*;\r\n");
 randomAccessFile.writeBytes(classBuilder.toString());
+randomAccessFile.writeBytes(constructorBuilder.toString());
 randomAccessFile.writeBytes(setterGetterBuilder.toString());
 randomAccessFile.writeBytes("}");
 randomAccessFile.close();
 primaryKeyColumns.clear();
 foreignKeyMetaDataMap.clear();
 classBuilder.setLength(0);
+constructorBuilder.setLength(0);
 setterGetterBuilder.setLength(0);
-/* classSourceCode=classSourceCode+"}"; */
-
 
 /* ResultSet idx=meta.getIndexInfo(connection.getCatalog(), null, tableName, false, false);
 while(idx.next()) 
@@ -265,10 +245,6 @@ boolean nonUnique = idx.getBoolean("NON_UNIQUE");
 }
 idx.close();
  */
-/* for(String importLine:importLines)
-{
-randomAccessFile.writeBytes(importLine+"\r\n");
-} */
 
 } // loops on column ends here
 tables.close();
