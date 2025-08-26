@@ -1,5 +1,6 @@
 package com.daniyal.ormcore.generator;
 import com.daniyal.ormcore.pojo.ForeignKeyMetaData;
+import com.daniyal.ormcore.connection.*;
 import java.sql.*;
 import java.io.*;
 import java.util.*;
@@ -48,6 +49,12 @@ java -cp daniyal-orm.jar;. com.daniyal.ormcore.generator.EntityGenerator --packa
 		System.out.println("--package= required as command line argument");
 		System.exit(1);
 	}
+	if(output==null)
+	{
+		System.out.println("--output= required as command line argument");
+		System.exit(1);
+	}
+	
 	String packagePath=packageName.replace(".",File.separator);
 	
 	
@@ -60,7 +67,27 @@ java -cp daniyal-orm.jar;. com.daniyal.ormcore.generator.EntityGenerator --packa
 		System.out.println(exception.getMessage());
 		System.exit(1);
 	}
-Connection connection=DAOConnection.getConnection();
+	String entityDir;
+	
+	File targetDir=new File(output,packagePath);
+	if(!targetDir.exists())
+	{
+		if(!targetDir.mkdir())
+		{
+			System.out.println("Failed to create output directory: "+targetDir.getAbsolutePath());
+			System.exit(1);
+		}
+	}
+	boolean allTables=false;
+	if(tables==null)
+	{
+		allTables=true;
+	}
+	else
+	{
+		Set<String> tableSet=new HashMap<>(Array.asList(tables.split(",")));
+	}
+Connection connection=ConnectionManager.getConnection(configLoader);
 
 DatabaseMetaData meta=connection.getMetaData();
 ResultSet tables=meta.getTables(connection.getCatalog(),null,"%",new String[]{"TABLE"});
@@ -69,33 +96,34 @@ File file;
 RandomAccessFile randomAccessFile;
 Set<String> primaryKeyColumns=new HashSet<>();
 List<String> importLines=new ArrayList<>();
-Map<String,ForeignKeyInfo> foreignKeyColumnsMap=new HashMap<>();
-ForeignKeyInfo foreignKeyInfo;
+Map<String,ForeignKeyMetaData> foreignKeyMetaDataMap=new HashMap<>();
+ForeignKeyMetaData foreignKeyMetaData;
+String classBuilder=new StringBuilder();
+String setterGetterBuilder=new StringBuilder();
 while(tables.next())
 {
 String tableName=tables.getString("TABLE_NAME");
 
+if(!allTables)
+{
+	if(!tableSet.contains(tableName)) continue;
+}
+
 System.out.println("\n=== " + tableName + " ===");
-
-String classSourceCode="@Table(name=\""+tableName+"\")\r\n";
-classSourceCode=classSourceCode+"public class ";
 String className=tableName.substring(0,1).toUpperCase()+tableName.substring(1);
-classSourceCode=classSourceCode+className+"\r\n{\r\n";
 
-file=new File(className+".java");
-if(file==null)
-{
-System.out.println("Unable to create file for "+className);
-return;
-}
+classBuilder.append(@Table(name=\""+tableName+"\")\r\n");
+classBuilder.append("public class ");
+classBuilder.append(className+"\r\n{\r\n");
+//String classSourceCode="@Table(name=\""+tableName+"\")\r\n";
+//classSourceCode=classSourceCode+"public class ";
 
+//classSourceCode=classSourceCode+className+"\r\n{\r\n";
 
+file=new File(targetDir,className+".java");
+if(file.exists()) file.delete();
 randomAccessFile=new RandomAccessFile(file,"rw");
-if(randomAccessFile==null)
-{
-System.out.println("Unable to create file for "+className);
-return;
-}
+
 
 
 
@@ -112,11 +140,11 @@ while(k.next())
 String fkCol= k.getString("FKCOLUMN_NAME");
 String pkTbl=k.getString("PKTABLE_NAME");
 String pkCol=k.getString("PKCOLUMN_NAME");
-foreignKeyInfo=new ForeignKeyInfo();
-foreignKeyInfo.fkColumnName=fkCol;
-foreignKeyInfo.parentTable=pkTbl;
-foreignKeyInfo.parentColumnName=pkCol;
-foreignKeyColumnsMap.put(fkCol,foreignKeyInfo);
+foreignKeyMetaData=new ForeignKeyMetaData();
+foreignKeyMetaData.setFKColumn(fkCol);
+foreignKeyMetaData.setPKTable(pkTbl);
+foreignKeyMetaData.setPKColumn(pkCol);
+foreignKeyMetaDataMap.put(fkCol,foreignKeyMetaData);
 System.out.println(" FK: " + fkCol + " -> " + pkTbl + "(" + pkCol + ")");
 
 }
@@ -163,10 +191,10 @@ if(autoIncrement.equalsIgnoreCase("YES"))
 classSourceCode=classSourceCode+"@AutoIncrement\r\n";
 }
 
-if(foreignKeyColumnsMap.containsKey(columnName))
+if(foreignKeyMetaDataMap.containsKey(columnName))
 {
-foreignKeyInfo=foreignKeyColumnsMap.get(columnName);
-classSourceCode=classSourceCode+"@ForeignKey(parent=\"" + foreignKeyInfo.parentTable + "\",column=\"" + foreignKeyInfo.parentColumnName + "\")\r\n" ;
+foreignKeyMetaData=foreignKeyMetaDataMap.get(columnName);
+classSourceCode=classSourceCode+"@ForeignKey(parent=\"" + foreignKeyMetaData.parentTable + "\",column=\"" + foreignKeyMetaData.parentColumnName + "\")\r\n" ;
 }
 
 // check which type
@@ -207,7 +235,7 @@ randomAccessFile.writeBytes(importLine+"\r\n");
 randomAccessFile.writeBytes(classSourceCode);
 randomAccessFile.close();
 primaryKeyColumns.clear();
-foreignKeyColumnsMap.clear();
+foreignKeyMetaDataMap.clear();
 }
 
 tables.close();
