@@ -1,6 +1,7 @@
 package com.daniyal.ormcore.generator;
 import com.daniyal.ormcore.pojo.ForeignKeyMetaData;
 import com.daniyal.ormcore.connection.*;
+import com.daniyal.ormcore.connection.CaseConvertor;
 import java.sql.*;
 import java.io.*;
 import java.util.*;
@@ -97,6 +98,7 @@ java -cp daniyal-orm.jar;. com.daniyal.ormcore.generator.EntityGenerator --packa
 			System.exit(1);
 		}
 	}
+	
 Connection connection=ConnectionManager.getConnection(configLoader);
 
 DatabaseMetaData meta=connection.getMetaData();
