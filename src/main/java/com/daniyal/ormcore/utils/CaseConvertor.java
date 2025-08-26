@@ -25,7 +25,7 @@ return snakeCaseBuilder.toString();
 }
 public static String toCamelCase(String snakeCase)
 {
-if(snakeCase==null || snakeCase.isEmpty()) return snakeCase;
+if(snakeCase==null || snakeCase.isEmpty() || !snakeCase.contains("_")) return snakeCase;
 snakeCase=snakeCase.trim();
 StringBuilder camelCaseBuilder=new StringBuilder();
 boolean isNextCharCapital=false;
