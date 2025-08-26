@@ -48,6 +48,7 @@ else
 camelCaseBuilder.append(c);
 }
 }
+isNextCharCapital=false;
 } // loop ends
 return camelCaseBuilder.toString();
 } //toCamelCase
