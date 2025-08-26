@@ -18,7 +18,7 @@ private Map<Class,EntityMetaData> entityMetaDataMap;
 private Map<String,TableMetaData> tablesMetaMap;
 private DataManager() throws ORMException
 {
-this.configLoader=new ConfigLoader();
+this.configLoader=new ConfigLoader("conf.json");
 this.connection=null;
 this.entityMetaDataMap=null;
 populateDataStructures();
