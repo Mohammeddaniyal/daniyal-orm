@@ -189,6 +189,10 @@ public class Course {
 
     @Column(name = "name")
     private String name;
+	
+	Course() // no arg constructor is must
+	{
+	}
 
     // Constructors, getters, setters
 }
