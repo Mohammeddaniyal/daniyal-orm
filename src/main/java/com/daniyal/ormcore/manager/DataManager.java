@@ -169,15 +169,14 @@ QueryBuilder queryBuilder=new QueryBuilder(entity,tableName,fieldMetaDataMap,col
 Query query=queryBuilder.buildInsertQuery(fieldMetaData);
 params=query.getParameters();
 sql=query.getSQL();
-System.out.println("SQL statement for insert : "+sql);
 try
 {
 PreparedStatement preparedStatement=connection.prepareStatement(sql,Statement.RETURN_GENERATED_KEYS);
 int x=1;
-System.out.printf("%10s\n","VALUES");
+
 for(Object param:params)
 {
-//System.out.println(v);
+
 preparedStatement.setObject(x++,param);
 }
 int affectedRow=preparedStatement.executeUpdate();
@@ -274,15 +273,15 @@ QueryBuilder queryBuilder=new QueryBuilder(entity,tableName,fieldMetaDataMap,col
 Query query=queryBuilder.buildUpdateQuery();
 params=query.getParameters();
 sql=query.getSQL();
-System.out.println("SQL statement for Update : "+sql);
+
 try
 {
 PreparedStatement preparedStatement=connection.prepareStatement(sql);
 int x=1;
-//System.out.printf("%10s\n","VALUES");
+
 for(Object param:params)
 {
-//System.out.println(v);
+
 preparedStatement.setObject(x++,param);
 }
 int affectedRow=preparedStatement.executeUpdate();
@@ -322,7 +321,7 @@ QueryBuilder queryBuilder=new QueryBuilder(entity,tableName,fieldMetaDataMap,col
 Query query=queryBuilder.buildDeleteQuery();
 params=query.getParameters();
 sql=query.getSQL();
-System.out.println("SQL statement for Delete : "+sql);
+
 try
 {
 PreparedStatement preparedStatement=connection.prepareStatement(sql);
