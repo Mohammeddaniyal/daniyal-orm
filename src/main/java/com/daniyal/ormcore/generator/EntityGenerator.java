@@ -165,8 +165,7 @@ String size=columns.getString("COLUMN_SIZE");
 String isNull=columns.getString("IS_NULLABLE");
 String autoIncrement=columns.getString("IS_AUTOINCREMENT");
 boolean isPrimaryKey=primaryKeyColumns.contains(columnName);
-String fieldName=columnName;
-if(columnName.contains("_"))
+/* if(columnName.contains("_"))
 {
 // remove _ for class field name
 // roll_number -> rollNumber
@@ -178,7 +177,7 @@ for(int i=1;i<parts.length;++i)
 parts[i]=parts[i].substring(0,1).toUpperCase()+parts[i].substring(1);
 fieldName=fieldName+parts[i];
 }
-}
+} */
 classBuilder.append("@Column(name=\""+columnName+"\")\r\n");
 //classSourceCode=classSourceCode+"@Column(name=\""+columnName+"\")\r\n";
 
@@ -211,9 +210,14 @@ String fieldName=CaseConvertor.toCamelCase(columnName);
 if(fieldType.equalsIgnoreCase("Date") fieldType="java.util.Date";
 else if(fieldType.equalsIgnoreCase("BigDecimal")) fieldType="java.math.BigDecimal";
 
-classBuilder.append("public "+fieldType+" "+fieldName+";"+"\r\n\r\n");
+classBuilder.append("public "+fieldType+" "+fieldName+";"+"\r\n");
 //classSourceCode=classSourceCode+"public "+fieldType+" "+fieldName+";"+"\r\n\r\n";
-setterGetterBuilder.append();
+String capitalizeFieldName=fieldName.charAt(0)+fieldName.substring(1);
+setterGetterBuilder.append("public void set"+capitalizeFieldName+"("+fieldType+" "+fieldName+")\r\n");
+setterGetterBuilder.append("{\r\n");
+setterGetterBuilder.append("this."fieldName+"="+fieldName+ "\r\n");
+setterGetterBuilder.append("}\r\n");
+
 
 
 
