@@ -145,7 +145,7 @@ foreignKeyMetaData.setFKColumn(fkCol);
 foreignKeyMetaData.setPKTable(pkTbl);
 foreignKeyMetaData.setPKColumn(pkCol);
 foreignKeyMetaDataMap.put(fkCol,foreignKeyMetaData);
-System.out.println(" FK: " + fkCol + " -> " + pkTbl + "(" + pkCol + ")");
+//System.out.println(" FK: " + fkCol + " -> " + pkTbl + "(" + pkCol + ")");
 
 }
 
@@ -179,21 +179,28 @@ parts[i]=parts[i].substring(0,1).toUpperCase()+parts[i].substring(1);
 fieldName=fieldName+parts[i];
 }
 }
-classSourceCode=classSourceCode+"@Column(name=\""+columnName+"\")\r\n";
+classBuilder.append("@Column(name=\""+columnName+"\")\r\n");
+//classSourceCode=classSourceCode+"@Column(name=\""+columnName+"\")\r\n";
 
 if(isPrimaryKey)
 {
-classSourceCode=classSourceCode+"@PrimaryKey\r\n";
+	classBuilder.append("@PrimaryKey\r\n");
+//classSourceCode=classSourceCode+"@PrimaryKey\r\n";
 }
 
 if(autoIncrement.equalsIgnoreCase("YES"))
 {
-classSourceCode=classSourceCode+"@AutoIncrement\r\n";
+	classBuildera.append("@AutoIncrement\r\n");
+//classSourceCode=classSourceCode+"@AutoIncrement\r\n";
 }
 
 if(foreignKeyMetaDataMap.containsKey(columnName))
 {
 foreignKeyMetaData=foreignKeyMetaDataMap.get(columnName);
+String fkCol= foreignKeyMetaData.getFKColumn();
+String pkTbl=foreignKeyMetaData.getPKTable();
+String pkCol=foreignKeyMetaData.getPKColumn();
+
 classSourceCode=classSourceCode+"@ForeignKey(parent=\"" + foreignKeyMetaData.parentTable + "\",column=\"" + foreignKeyMetaData.parentColumnName + "\")\r\n" ;
 }
 
