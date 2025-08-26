@@ -1,10 +1,10 @@
-# Daniyal ORM Framework
+# Daniyal ORM
 
-[![Java](https://img.shields.io/badge/Java-8-blue)](https://www.oracle.com/java/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Build](https://img.shields.io/badge/build-passing-brightgreen)](#)
-[![Fluent API](https://img.shields.io/badge/API-Fluent-orange)](#)
-[![Status](https://img.shields.io/badge/status-active-brightgreen)](#)
+![Java](https://img.shields.io/badge/Java-8-blue?logo=openjdk&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-green)
+
+> A lightweight Java ORM for MySQL with annotation-based mapping, fluent queries, and a CLI for entity generation.
+
 
 Hey! I built **Daniyal ORM** to make working with MySQL in Java a lot less painful.
 Instead of writing endless SQL and manually mapping results, you just annotate your classes, and the framework handles the rest.
@@ -16,8 +16,6 @@ Think of it as a **simplified Hibernate**, without the heavy learning curve.
 ---
 
 ## ⚡ Quick Start
-
-Here’s how you can try it in a few lines:
 
 ```java
 DataManager dm = DataManager.getDataManager();
@@ -41,6 +39,7 @@ It’s that simple.
 
 ## ✨ Features
 
+
 * **Annotation Mapping**
   Use `@Table`, `@Column`, `@PrimaryKey`, `@AutoIncrement`, and `@ForeignKey` to map your classes and fields to DB tables. Reflection does all the heavy lifting.
 
@@ -58,7 +57,7 @@ It’s that simple.
   * `update(entity)` updates rows using the primary key.
   * `delete(entity)` removes rows using the primary key.
 
-* **Flexible Fluent API**
+* **Flexible Fluent API** 
 
   ```java
   List<Course> javaCourses = dm.query(Course.class)
@@ -77,6 +76,7 @@ It’s that simple.
 * **Config File Setup**
   All DB connection info and base package are defined in `conf.json`. No code changes needed.
 
+
 ---
 
 ## 📂 Project Layout
@@ -87,7 +87,7 @@ com.daniyal.ormcore
 ├───config            # ConfigLoader.java
 ├───connection        # ConnectionManager.java
 ├───exceptions        # ORMException.java
-├───generator         # Future code-gen features
+├───generator         # CLI EntityGenerator
 ├───manager           # DataManager, EntityScanner, DatabaseMetaDataLoader
 ├───pojo              # Metadata classes
 ├───query             # Query, QueryBuilder, FieldProcessor
@@ -114,28 +114,18 @@ com.daniyal.ormcore
 ## 🏗 Defining an Entity
 
 ```java
-package com.daniyal.test.ormcore.entity;
-
-import com.daniyal.ormcore.annotations.*;
-
 @Table(name = "courses")
 public class Course {
-    @PrimaryKey
-    @AutoIncrement
-    @Column(name = "id")
+    @PrimaryKey @AutoIncrement @Column(name = "id")
     private int id;
 
     @Column(name = "name")
     private String name;
 
-    // No-arg constructor is required
-    public Course() {}
+    public Course() {}  // No-arg constructor
 
-    public Course(String name) {
-        this.name = name;
-    }
+    public Course(String name) { this.name = name; }
 
-    // Getters & setters
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
     public String getName() { return name; }
@@ -155,16 +145,13 @@ try {
     // Insert
     Course course = new Course("Java");
     dm.save(course);
-    System.out.println("Saved course with ID: " + course.getId());
 
     // Update
     course.setName("JavaScript");
     dm.update(course);
-    System.out.println("Updated course to: " + course.getName());
 
     // Delete
     dm.delete(course);
-    System.out.println("Deleted course with ID: " + course.getId());
 
     // Query all
     List<Course> courses = dm.query(Course.class).list();
@@ -179,23 +166,75 @@ try {
 
 ---
 
+## 💻 Command Line Interface (CLI) Entity Generator
+
+Generate Java entity classes from your database schema using the **CLI tool** included in the ORM JAR.
+
+### Command Syntax
+
+```bash
+java -cp daniyal-orm.jar com.daniyal.ormcore.generator.EntityGenerator \
+--package=com.example.entities \
+--output=src/main/java \
+--tables=student,course \
+--config=path/to/conf.json
+```
+
+### Arguments
+
+* `--package=` (**required**) – Java package for generated entities
+* `--output=` (**required**) – Directory to create entity files
+* `--tables=` (optional) – Comma-separated list of table names, or `*` for all tables
+* `--config=` (optional) – Path to `conf.json` (defaults to current directory)
+
+### Examples
+
+Generate `student` and `course` entities:
+
+```bash
+java -cp daniyal-orm.jar com.daniyal.ormcore.generator.EntityGenerator \
+--package=com.example.entities --output=. --tables=student,course
+```
+
+Generate all tables with a custom config:
+
+```bash
+java -cp daniyal-orm.jar com.daniyal.ormcore.generator.EntityGenerator \
+--package=com.example.entities --output=src/main/java --config=../myproject/conf.json
+```
+
+### How It Works
+
+* Loads DB config from `conf.json`
+* Connects to the database
+* Reads schema metadata
+* Generates annotated Java entity classes
+
+### Notes
+
+* Always specify `--package` and `--output`
+* Paths can be relative or absolute
+* Run without arguments for help
+
+---
+
 ## 📌 Notes
 
 * Every mapped field needs `@Column`.
-* `@PrimaryKey`, `@AutoIncrement`, and `@ForeignKey` must be used together with `@Column`.
+* `@PrimaryKey`, `@AutoIncrement`, and `@ForeignKey` must be used with `@Column`.
 * Validation runs at startup and before saving data.
 * Reflection calls are cached internally for speed.
-* Currently MySQL-only; other databases can be added in the future.
+* Currently MySQL-only; other DBs can be added in the future.
 
 ---
 
 ## 🔮 Roadmap
 
-* CLI entity generator for DB-first workflows.
-* Full `SELECT` support with advanced queries.
-* Better validation and error messages.
-* Connection pooling & transaction handling.
-* Logging, unit tests, and CI/CD pipeline.
+* Full `SELECT` support with advanced queries
+* Better validation and error messages
+* Connection pooling & transaction handling
+* Logging, unit tests, and CI/CD pipeline
+
 ---
 
 ## 🤝 Contributing
