@@ -1,7 +1,9 @@
 package com.daniyal.ormcore.generator;
 import com.daniyal.ormcore.pojo.ForeignKeyMetaData;
 import com.daniyal.ormcore.connection.*;
-import com.daniyal.ormcore.utils.CaseConvertor;
+import com.daniyal.ormcore.utils.*;
+import com.daniyal.ormcore.config.*;
+import com.daniyal.ormcore.exceptions.*;
 import java.sql.*;
 import java.io.*;
 import java.util.*;
@@ -16,13 +18,13 @@ java -cp daniyal-orm.jar;. com.daniyal.ormcore.generator.EntityGenerator --packa
 (optional)--output=src/main/java (optional)--table=student,course 
 (optional only if user is calling from the conf.json dir)--config=path/to/conf.json */
 	
-	if(args.length<1)
+	if(args.length<2)
 	{
 		System.out.println("Usage [java -cp daniyal-orm.jar;. com.daniyal.ormcore.generator.EntityGenerator --package=com.anis.customer.entities (optional)--output=src/main/java (optional)--table=student,course (optional)--config=path/to/conf.json]");
 		System.exit(1);
 	}
 	String packageName=null;
-	String tables=null;
+	String tablesArg=null;
 	String outputDir=null;
 	String config=null;
 	for(String arg:args)
@@ -35,8 +37,8 @@ java -cp daniyal-orm.jar;. com.daniyal.ormcore.generator.EntityGenerator --packa
 			outputDir=arg.substring("output--=".length());
 		}else if(arg.startsWith("--table="))
 		{
-			tables=arg.substring("tables--=".length());
-		}else if(arg.startWith("--config="))
+			tablesArg=arg.substring("tables--=".length());
+		}else if(arg.startsWith("--config="))
 		{
 			config=arg.substring("config--=".length());
 		}
@@ -46,7 +48,7 @@ java -cp daniyal-orm.jar;. com.daniyal.ormcore.generator.EntityGenerator --packa
 		System.out.println("--package= required as command line argument");
 		System.exit(1);
 	}
-	if(output==null)
+	if(outputDir==null)
 	{
 		System.out.println("--output= required as command line argument");
 		System.exit(1);
@@ -66,7 +68,7 @@ java -cp daniyal-orm.jar;. com.daniyal.ormcore.generator.EntityGenerator --packa
 		System.exit(1);
 	}
 	
-	File targetDir=new File(output,packagePath);
+	File targetDir=new File(outputDir,packagePath);
 	if(!targetDir.exists())
 	{
 		if(!targetDir.mkdir())
@@ -77,10 +79,10 @@ java -cp daniyal-orm.jar;. com.daniyal.ormcore.generator.EntityGenerator --packa
 	}
 	boolean allTables=false;
 	Set<String> tableSet=null;
-	if(tables==null)
+	if(tablesArg==null)
 	{
 		allTables=true;
-	}else if(tables.equals("*"))
+	}else if(tablesArg.equals("*"))
 	{
 		allTables=true;
 	}
@@ -88,7 +90,7 @@ java -cp daniyal-orm.jar;. com.daniyal.ormcore.generator.EntityGenerator --packa
 	{
 		try
 		{
-		tableSet=new HashMap<>(Array.asList(tables.split(",")));
+		tableSet=new HashSet<>(Arrays.asList(tablesArg.split(",")));
 		}catch(Exception e)
 		{
 			System.out.println("Invalid '--tables=' argument");
@@ -107,8 +109,8 @@ Set<String> primaryKeyColumns=new HashSet<>();
 List<String> importLines=new ArrayList<>();
 Map<String,ForeignKeyMetaData> foreignKeyMetaDataMap=new HashMap<>();
 ForeignKeyMetaData foreignKeyMetaData;
-String classBuilder=new StringBuilder();
-String setterGetterBuilder=new StringBuilder();
+StringBuilder classBuilder=new StringBuilder();
+StringBuilder setterGetterBuilder=new StringBuilder();
 while(tables.next())
 {
 String tableName=tables.getString("TABLE_NAME");
@@ -197,7 +199,7 @@ if(isPrimaryKey)
 
 if(autoIncrement.equalsIgnoreCase("YES"))
 {
-	classBuildera.append("@AutoIncrement\r\n");
+	classBuilder.append("@AutoIncrement\r\n");
 //classSourceCode=classSourceCode+"@AutoIncrement\r\n";
 }
 
@@ -207,13 +209,13 @@ foreignKeyMetaData=foreignKeyMetaDataMap.get(columnName);
 String fkCol= foreignKeyMetaData.getFKColumn();
 String pkTbl=foreignKeyMetaData.getPKTable();
 String pkCol=foreignKeyMetaData.getPKColumn();
-classBuilder.append("@ForeignKey(parent=\"" + pkTable + "\",column=\"" + pkCol + "\")\r\n");
+classBuilder.append("@ForeignKey(parent=\"" + pkTbl + "\",column=\"" + pkCol + "\")\r\n");
 //classSourceCode=classSourceCode+"@ForeignKey(parent=\"" + foreignKeyMetaData.parentTable + "\",column=\"" + foreignKeyMetaData.parentColumnName + "\")\r\n" ;
 }
 
 // check which type
 
-String fieldType=getFieldType(type,Integer.parseInt(size));
+String fieldType=TypeMapper.getFieldType(type,Integer.parseInt(size));
 String fieldName=CaseConvertor.toCamelCase(columnName);
 if(fieldType.equalsIgnoreCase("Date")) fieldType="java.util.Date";
 else if(fieldType.equalsIgnoreCase("BigDecimal")) fieldType="java.math.BigDecimal";
