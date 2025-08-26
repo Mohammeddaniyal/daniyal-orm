@@ -20,7 +20,9 @@ java -cp daniyal-orm.jar;. com.daniyal.ormcore.generator.EntityGenerator --packa
 	
 	if(args.length<2)
 	{
-		System.out.println("Usage [java -cp daniyal-orm.jar;. com.daniyal.ormcore.generator.EntityGenerator --package=com.anis.customer.entities (optional)--output=src/main/java (optional)--table=student,course (optional)--config=path/to/conf.json]");
+		System.out.println("Usage: java -cp daniyal-orm.jar;. com.daniyal.ormcore.generator.EntityGenerator " +
+                   "--package=<your.package.name> [--output=<output/directory>] " +
+                   "[--tables=table1,table2,...] [--config=path/to/conf.json]");
 		System.exit(1);
 	}
 	String packageName=null;
