@@ -1,4 +1,5 @@
-
+package com.daniyal.ormcore.generator;
+import com.daniyal.ormcore.pojo.ForeignKeyMetaData;
 import java.sql.*;
 import java.io.*;
 import java.util.*;
@@ -9,6 +10,56 @@ public static void main(String []args)
 {
 try
 {
+
+java -cp daniyal-orm.jar;. com.daniyal.ormcore.generator.EntityGenerator --package=com.anis.customer.entities 
+(optional)--output=src/main/java (optional)--table=student,course 
+(optional only if user is calling from the conf.json dir)--config=path/to/conf.json
+	
+	if(args<1)
+	{
+		System.out.println("Usage [java -cp daniyal-orm.jar;. com.daniyal.ormcore.generator.EntityGenerator 
+		--package=com.anis.customer.entities 
+		(optional)--output=src/main/java (optional)--table=student,course 
+		(optional)--config=path/to/conf.json]");
+		System.exit(1);
+	}
+	String packageName=null;
+	String tables=null;
+	String outputDir=null;
+	String config=null;
+	for(String arg:args)
+	{
+		if(arg.startsWith("package--="))
+		{
+			packageName=arg.substring("package--=".length());
+		}else if(arg.startsWith("output--="))
+		{
+			outputDir=arg.substring("output--=".length());
+		}else if(arg.startsWith("--table="))
+		{
+			tables=arg.substring("tables--=".length());
+		}else if(arg.startWith("--config="))
+		{
+			config=arg.substring("config--=".length());
+		}
+	}
+	if(packageName==null)
+	{
+		System.out.println("--package= required as command line argument");
+		System.exit(1);
+	}
+	String packagePath=packageName.replace(".",File.separator);
+	
+	
+	ConfigLoader configLoader=null;
+	try
+	{	
+	configLoader=new ConfigLoader((config==null):"conf.json"?config);
+	}catch(ORMException exception)
+	{
+		System.out.println(exception.getMessage());
+		System.exit(1);
+	}
 Connection connection=DAOConnection.getConnection();
 
 DatabaseMetaData meta=connection.getMetaData();
@@ -23,7 +74,7 @@ ForeignKeyInfo foreignKeyInfo;
 while(tables.next())
 {
 String tableName=tables.getString("TABLE_NAME");
-//System.out.println("Table : "+tableName);
+
 System.out.println("\n=== " + tableName + " ===");
 
 String classSourceCode="@Table(name=\""+tableName+"\")\r\n";
