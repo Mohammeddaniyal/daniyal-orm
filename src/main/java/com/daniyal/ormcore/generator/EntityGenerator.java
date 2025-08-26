@@ -1,7 +1,7 @@
 package com.daniyal.ormcore.generator;
 import com.daniyal.ormcore.pojo.ForeignKeyMetaData;
 import com.daniyal.ormcore.connection.*;
-import com.daniyal.ormcore.connection.CaseConvertor;
+import com.daniyal.ormcore.utils.CaseConvertor;
 import java.sql.*;
 import java.io.*;
 import java.util.*;
