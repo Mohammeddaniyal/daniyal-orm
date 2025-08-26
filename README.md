@@ -140,23 +140,42 @@ This file contains **database connection info** and the **base package for your 
 }
 ```
 
+> This file contains the database connection details and the base package for generated or scanned entities.
+
 ---
 
 ## 🏗 Defining an Entity
 
 ```java
+package com.daniyal.test.ormcore.entity;
+
+import com.daniyal.ormcore.annotations.*;
+
 @Table(name = "courses")
 public class Course {
-    @PrimaryKey @AutoIncrement @Column(name = "id")
+    @PrimaryKey
+    @AutoIncrement
+    @Column(name = "id")
     private int id;
 
     @Column(name = "name")
     private String name;
 
-    public Course() {}  // No-arg constructor
+    // No-arg constructor is required for ORM
+    public Course() {}
 
-    public Course(String name) { this.name = name; }
+    // Constructor with full fields
+    public Course(int id, String name) {
+        this.id = id;
+        this.name = name;
+    }
 
+    // Constructor for insert (without ID)
+    public Course(String name) {
+        this.name = name;
+    }
+
+    // Getters and setters
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
     public String getName() { return name; }
@@ -169,31 +188,50 @@ public class Course {
 ## 🚀 Example Usage
 
 ```java
-DataManager dm = DataManager.getDataManager();
-dm.begin();
+package com.daniyal.test.ormcore;
 
-try {
-    // Insert
-    Course course = new Course("Java");
-    dm.save(course);
+import com.daniyal.test.ormcore.entity.*;
+import com.daniyal.ormcore.manager.DataManager;
+import com.daniyal.ormcore.exceptions.ORMException;
+import java.util.List;
 
-    // Update
-    course.setName("JavaScript");
-    dm.update(course);
+public class ExampleUsage {
+    public static void main(String[] args) {
+        try {
+            DataManager dm = DataManager.getDataManager();
+            dm.begin();
 
-    // Delete
-    dm.delete(course);
+            // Save (Insert) Example
+            Course toInsert = new Course("Java");
+            dm.save(toInsert);
+            System.out.println("Saved course with code: " + toInsert.getId());
 
-    // Query all
-    List<Course> courses = dm.query(Course.class).list();
-    courses.forEach(c -> System.out.println(c.getId() + " | " + c.getName()));
+            // Update Example
+            Course toUpdate = new Course(toInsert.getId(), "JavaScript");
+            dm.update(toUpdate);
+            System.out.println("Updated course with code: " + toUpdate.getId());
 
-} catch (ORMException e) {
-    System.out.println("Error: " + e.getMessage());
-} finally {
-    dm.end();
+            // Delete Example
+            Course toDelete = new Course(10);  // constructor with ID only
+            dm.delete(toDelete);
+            System.out.println("Deleted course with code: " + toDelete.getId());
+
+            // Query Example - fetch all courses
+            List<Course> courseList = dm.query(Course.class).list();
+            System.out.println("ID  |  Name");
+            for (Course c : courseList) {
+                System.out.println(c.getId() + "   " + c.getName());
+            }
+
+            dm.end();
+        } catch (ORMException ex) {
+            System.out.println("Error: " + ex.getMessage());
+        }
+    }
 }
 ```
+
+> This example shows how to perform **all CRUD operations** with Daniyal ORM in a clear and practical way.
 
 ---
 
