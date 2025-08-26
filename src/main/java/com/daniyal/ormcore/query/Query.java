@@ -4,6 +4,7 @@ public class Query
 {
 	private String sql;
 	private List<Object> parameters;
+	
 	public Query()
 	{
 		this.sql="";
