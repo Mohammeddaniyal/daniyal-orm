@@ -121,7 +121,7 @@ if(!allTables)
 System.out.println("\n=== " + tableName + " ===");
 String className=tableName.substring(0,1).toUpperCase()+tableName.substring(1);
 
-classBuilder.append(@Table(name=\"" + tableName + "\")\r\n");
+classBuilder.append("@Table(name=\"" + tableName + "\")\r\n");
 classBuilder.append("public class ");
 classBuilder.append(className+"\r\n{\r\n");
 //String classSourceCode="@Table(name=\""+tableName+"\")\r\n";
