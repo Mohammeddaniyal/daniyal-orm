@@ -11,10 +11,10 @@ public static void main(String []args)
 {
 try
 {
-
+/* 
 java -cp daniyal-orm.jar;. com.daniyal.ormcore.generator.EntityGenerator --package=com.anis.customer.entities 
 (optional)--output=src/main/java (optional)--table=student,course 
-(optional only if user is calling from the conf.json dir)--config=path/to/conf.json
+(optional only if user is calling from the conf.json dir)--config=path/to/conf.json */
 	
 	if(args<1)
 	{
@@ -67,7 +67,6 @@ java -cp daniyal-orm.jar;. com.daniyal.ormcore.generator.EntityGenerator --packa
 		System.out.println(exception.getMessage());
 		System.exit(1);
 	}
-	String entityDir;
 	
 	File targetDir=new File(output,packagePath);
 	if(!targetDir.exists())
@@ -79,13 +78,24 @@ java -cp daniyal-orm.jar;. com.daniyal.ormcore.generator.EntityGenerator --packa
 		}
 	}
 	boolean allTables=false;
+	Set<String> tableSet=null;
 	if(tables==null)
+	{
+		allTables=true;
+	}else if(tables.equals("*")
 	{
 		allTables=true;
 	}
 	else
 	{
-		Set<String> tableSet=new HashMap<>(Array.asList(tables.split(",")));
+		try
+		{
+		tableSet=new HashMap<>(Array.asList(tables.split(",")));
+		}catch(Exception e)
+		{
+			System.out.println("Invalid '--tables=' argument");
+			System.exit(1);
+		}
 	}
 Connection connection=ConnectionManager.getConnection(configLoader);
 
@@ -213,24 +223,38 @@ else if(fieldType.equalsIgnoreCase("BigDecimal")) fieldType="java.math.BigDecima
 classBuilder.append("public "+fieldType+" "+fieldName+";"+"\r\n");
 //classSourceCode=classSourceCode+"public "+fieldType+" "+fieldName+";"+"\r\n\r\n";
 String capitalizeFieldName=fieldName.charAt(0)+fieldName.substring(1);
+// generating setter
 setterGetterBuilder.append("public void set"+capitalizeFieldName+"("+fieldType+" "+fieldName+")\r\n");
 setterGetterBuilder.append("{\r\n");
-setterGetterBuilder.append("this."fieldName+"="+fieldName+ "\r\n");
+setterGetterBuilder.append("this."fieldName+"="+fieldName+";\r\n");
+setterGetterBuilder.append("}\r\n");
+
+// generating getter
+setterGetterBuilder.append("public "+fieldType+"get"+capitalizeFieldName+"()\r\n");
+setterGetterBuilder.append("{\r\n");
+setterGetterBuilder.append("return this."fieldName+";\r\n");
 setterGetterBuilder.append("}\r\n");
 
 
 
 
-
-System.out.println(" - " + columnName + " : " + type + "(" + size + ")" +" | nullable=" + isNull +" | autoincrement=" + autoIncrement);
+/* System.out.println(" - " + columnName + " : " + type + "(" + size + ")" +" | nullable=" + isNull +" | autoincrement=" + autoIncrement); */
 
 }
 columns.close();
+randomAccessFile.writeBytes(packageName+"\r\n");
+randomAccessFile.writeBytes(classBuilder.toString());
+randomAccessFile.writeBytes(setterGetterBuilder.toString());
+randomAccessFile.writeBytes("}");
+randomAccessFile.close();
+primaryKeyColumns.clear();
+foreignKeyMetaDataMap.clear();
+classBuilder.setLength(0);
+setterGetterBuilder.setLength(0);
+/* classSourceCode=classSourceCode+"}"; */
 
-classSourceCode=classSourceCode+"}";
 
-
-ResultSet idx=meta.getIndexInfo(connection.getCatalog(), null, tableName, false, false);
+/* ResultSet idx=meta.getIndexInfo(connection.getCatalog(), null, tableName, false, false);
 while(idx.next()) 
 {
 String idxName = idx.getString("INDEX_NAME");
@@ -239,16 +263,12 @@ boolean nonUnique = idx.getBoolean("NON_UNIQUE");
 //System.out.println(" IDX: " + idxName + " on " + colName + " | unique=" + !nonUnique);
 }
 idx.close();
-
-for(String importLine:importLines)
+ */
+/* for(String importLine:importLines)
 {
 randomAccessFile.writeBytes(importLine+"\r\n");
-}
+} */
 
-randomAccessFile.writeBytes(classSourceCode);
-randomAccessFile.close();
-primaryKeyColumns.clear();
-foreignKeyMetaDataMap.clear();
 }
 
 tables.close();
