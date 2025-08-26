@@ -29,18 +29,18 @@ java -cp daniyal-orm.jar;. com.daniyal.ormcore.generator.EntityGenerator --packa
 	String config=null;
 	for(String arg:args)
 	{
-		if(arg.startsWith("package--="))
+		if(arg.startsWith("--package="))
 		{
-			packageName=arg.substring("package--=".length());
-		}else if(arg.startsWith("output--="))
+			packageName=arg.substring("--package=".length());
+		}else if(arg.startsWith("--output="))
 		{
-			outputDir=arg.substring("output--=".length());
+			outputDir=arg.substring("--output=".length());
 		}else if(arg.startsWith("--table="))
 		{
-			tablesArg=arg.substring("tables--=".length());
+			tablesArg=arg.substring("--tables=".length());
 		}else if(arg.startsWith("--config="))
 		{
-			config=arg.substring("config--=".length());
+			config=arg.substring("--config=".length());
 		}
 	}
 	if(packageName==null)
