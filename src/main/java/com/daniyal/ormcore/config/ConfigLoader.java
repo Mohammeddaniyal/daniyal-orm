@@ -13,6 +13,10 @@ public ConfigLoader(String confFilePath) throws ORMException
 try
 {
 File file=new File(confFilePath);
+if(!file.exists())
+{
+	throw new ORMException("Configuration file not found\n");
+}
 RandomAccessFile randomAccessFile=new RandomAccessFile(file,"r");
 if(randomAccessFile==null)
 {
