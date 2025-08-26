@@ -78,7 +78,7 @@ public class EntityValidator
     if (targetType == double.class || targetType == Double.class) return ((Number) value).doubleValue();
 	if (targetType == float.class || targetType == Float.class) return ((Number) value).doubleValue();
     if (targetType == boolean.class || targetType == Boolean.class) return (Boolean) value;
-	if(targetType==char.class || targetType==Character.class) return (Character)value;
+	if(targetType==char.class || targetType==Character.class) return ((String)value).charAt(0);
     if (targetType == String.class) return value.toString();
     if (targetType == java.util.Date.class && value instanceof java.sql.Timestamp) return new java.util.Date(((java.sql.Timestamp)value).getTime());
     if (targetType == java.util.Date.class && value instanceof java.sql.Date) return new java.util.Date(((java.sql.Date)value).getTime());
