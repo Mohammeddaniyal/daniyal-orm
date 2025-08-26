@@ -41,6 +41,7 @@ else
 {
 if(isNextCharCapital)
 {
+	isNextCharCapital=false;
 camelCaseBuilder.append(Character.toUpperCase(c));
 }
 else
@@ -48,7 +49,6 @@ else
 camelCaseBuilder.append(c);
 }
 }
-isNextCharCapital=false;
 } // loop ends
 return camelCaseBuilder.toString();
 } //toCamelCase
