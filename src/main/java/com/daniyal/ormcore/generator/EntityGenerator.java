@@ -7,6 +7,10 @@ import com.daniyal.ormcore.exceptions.*;
 import java.sql.*;
 import java.io.*;
 import java.util.*;
+import javax.tools.JavaCompiler;
+import javax.tools.StandardJavaFileManager;
+import javax.tools.ToolProvider;
+import java.util.jar.*;
 class EntityGenerator
 {
 public static void main(String []args)
@@ -104,6 +108,7 @@ Connection connection=ConnectionManager.getConnection(configLoader);
 DatabaseMetaData meta=connection.getMetaData();
 ResultSet tables=meta.getTables(connection.getCatalog(),null,"%",new String[]{"TABLE"});
 
+List<File> javaFiles=new ArrayList<>();
 File file;
 RandomAccessFile randomAccessFile;
 Set<String> primaryKeyColumns=new HashSet<>();
@@ -234,7 +239,7 @@ foreignKeyMetaDataMap.clear();
 classBuilder.setLength(0);
 constructorBuilder.setLength(0);
 setterGetterBuilder.setLength(0);
-
+javaFiles.add(file);
 /* ResultSet idx=meta.getIndexInfo(connection.getCatalog(), null, tableName, false, false);
 while(idx.next()) 
 {
@@ -249,9 +254,123 @@ idx.close();
 } // loops on column ends here
 tables.close();
 connection.close();
+
+// compile files
+	compileJavaFiles(javaFiles);
+// create jar
+	createJar();
 }catch(IOException | SQLException ex)
 {
 System.out.println(ex.getMessage());
 }
+}
+
+private static  void compileJavaFiles(List<File> javaFiles) throws IOException 
+{
+	deleteDirectory(new File("bin"));
+	// getting the system Java compiler 
+	// which requires (JDK not JRE)
+	JavaCompiler compiler=ToolProvider.getSystemJavaCompiler();
+	if(compiler==null)
+	{
+		System.out.println("Java compiler not available. Run with JDK.");
+	}
+	List<String> options=Arrays.asList("-d","bin/classes");
+	// Get a standard file manager to handle JavaFileObjects
+	try(StandardJavaFileManager fileManager=compiler.getStandardFileManager(null,null,null))
+	{
+		// converting java.io.File list to compilation units
+		Iterable<? extends javax.tools.JavaFileObject> compilationUnits=fileManager.getJavaFileObjectsFromFiles(javaFiles);
+		// creating the compilation task with default options(null params, means we won't default behaviour )
+		JavaCompiler.CompilationTask task=compiler.getTask(null,fileManager,null,options,null,compilationUnits);
+		
+		// running the compilation tasl
+		boolean success=task.call();
+		if(!success)
+		{
+			System.out.println("Compilation failed.");
+			System.exit(1);
+		}
+	}
+}
+
+private static void createJar() throws IOException
+{
+	File classesDir=new File("bin/classes");
+	File jarFile=new File("dist/pojo.jar");
+	if(jarFile.exists())
+	{
+		if(!jarFile.delete())
+		{
+			System.out.println("Failed to delete exisitng jar file: "+jarFile.getAbsolutePath());
+			System.exit(1);
+		}
+	}
+	File parentDir=jarFile.getParentFile();
+	if(parentDir!=null && !parentDir.exists())
+	{
+		if(!parentDir.mkdirs())
+		{
+			System.out.println("Unable to create directory : "+parentDir.getAbsolutePath());
+			System.exit(1);
+		}
+	}
+	// create output stream for the jar file
+	try(JarOutputStream jarOutputStream=new JarOutputStream(new FileOutputStream(jarFile)))
+	{
+		// recursively adding all .class files which are in classesDir to the jar
+		addFilesToJar(jarOutputStream,classesDir,classesDir.getAbsolutePath().length()+1);
+	}
+	deleteDirectory(new File("bin"));
+}
+
+private static void addFilesToJar(JarOutputStream jarOutputStream,File source,int prefixLength) throws IOException
+{
+	if(source.isDirectory())
+	{
+		for(File file:source.listFiles())
+		{
+			addFilesToJar(jarOutputStream,file,prefixLength);
+		}
+		return;
+	}
+
+	String entryName=source.getAbsolutePath().substring(prefixLength).replace("\\","/");
+	System.out.println(entryName);
+	JarEntry jarEntry=new JarEntry(entryName);
+	
+	jarEntry.setTime(source.lastModified());
+	jarOutputStream.putNextEntry(jarEntry);
+	
+	// writing the file content into the jar entryName
+	try(BufferedInputStream bufferedInputStream=new BufferedInputStream(new FileInputStream(source)))
+	{
+		byte buffer[]=new byte[1024];
+		int bytesRead;
+		while((bytesRead=bufferedInputStream.read(buffer))!=-1)
+		{
+			jarOutputStream.write(buffer,0,bytesRead);
+		}
+	}
+	jarOutputStream.closeEntry();
+	
+}
+private static void deleteDirectory(File directory)
+{
+	if(!directory.exists()) return;
+	File[] files=directory.listFiles();
+	if(files!=null)
+	{
+		for(File file:files)
+		{
+			if(file.isDirectory())
+			{
+				deleteDirectory(file);
+			}else{
+				file.delete();
+			}
+		}
+	}
+	directory.delete();		
 }
 }
