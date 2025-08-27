@@ -158,6 +158,7 @@ String columnName;
 boolean isPrimaryKey;
 boolean isAutoIncrement;
 boolean isForeignKey;
+FieldMetaData primaryKeyFieldMetaData;
 ForeignKeyMetaData foreignKeyMetaData1=null;
 
 Map<String,FieldMetaData> fieldMetaDataMap=new HashMap<>();
@@ -270,7 +271,10 @@ if(isForeignKey)
 {
 fieldMetaData.setForeignKeyMetaData(foreignKeyMetaData1);
 }
-
+if(isPrimaryKey)
+{
+	primaryKeyFieldMetaData=fieldMetaData;
+}
 fieldMetaDataMap.put(columnName,fieldMetaData);
 } // for loop ends
 // means there are missing fields to that didn't represents some table columns
@@ -284,6 +288,7 @@ entityMetaData=new EntityMetaData();
 entityMetaData.setEntityClass(clazz);
 entityMetaData.setEntityNoArgConstructor(entityNoArgConstructor);
 entityMetaData.setTableName(tableName);
+entityMetaData.setPrimaryKeyFieldMetaData(primaryKeyFieldMetaData);
 entityMetaData.setFieldMetaDataMap(fieldMetaDataMap);
 entitiesMetaMap.put(clazz,entityMetaData);
 }// function ends
