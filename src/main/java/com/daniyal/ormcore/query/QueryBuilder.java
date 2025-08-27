@@ -200,4 +200,9 @@ public class QueryBuilder<T>
 		 throw new ORMException(exception.getMessage());	
 		}
 	}
+	public Query buildSelectQueryForIsExists()
+	{
+		String sql="SELECT 1 FROM "+this.tableName+" WHERE "+columnName+"=?";
+		return new Query(sql,null);
+	}
 }
