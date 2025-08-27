@@ -415,10 +415,10 @@ if(!recordExists(entity,tableName,null,primaryKeyFieldMetaData,columnMetaDataMap
 	throw new ORMException("RECORD NOT EXISTS with for primary key value "+paramValue[0]);
 }
 
-System.out.println("Validating fk constraint");
+
 // before deleting the record, check for foriegn key constraint is its value on any child table
 // check if value exists on any child table before deleting ensure if yes then don't delete
-System.out.println("SIZE OF REFRENCE LIST : "+tableMetaData.getReferenceByList().size());
+
 for(ForeignKeyMetaData foreignKeyMetaData:tableMetaData.getReferenceByList())
 {
 	String fkTbl=foreignKeyMetaData.getFKTable();
