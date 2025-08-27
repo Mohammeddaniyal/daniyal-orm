@@ -25,41 +25,51 @@ this.entityMetaDataMap=null;
 
 populateDataStructures();
 }
-private void printTableMetaData(Map<String,TableMetaData> tablesMetaMap)
-{
-for (Map.Entry<String, TableMetaData> entry : tablesMetaMap.entrySet()) {
-    String tableKey = entry.getKey();
-    TableMetaData table = entry.getValue();
 
-    System.out.println("Table Key: " + tableKey);
-    System.out.println("Table Name: " + table.getTableName());
+private void printTableMetaData(Map<String, TableMetaData> tablesMetaMap) {
+    for (Map.Entry<String, TableMetaData> entry : tablesMetaMap.entrySet()) {
+        String tableKey = entry.getKey();
+        TableMetaData table = entry.getValue();
 
-    Map<String, ColumnMetaData> columns = table.getColumnMetaDataMap();
-    if (columns != null) {
-        for (Map.Entry<String, ColumnMetaData> colEntry : columns.entrySet()) {
-            String columnKey = colEntry.getKey();
-            ColumnMetaData columnMetaData = colEntry.getValue();
+        System.out.println("Table Key: " + tableKey);
+        System.out.println("Table Name: " + table.getTableName());
 
-            System.out.println("   Column Key: " + columnKey);
-            System.out.println("   Column Name: " + columnMetaData.getColumnName());
-            System.out.println("   Type: " + columnMetaData.getDataType() + "(" + columnMetaData.getSize() + ")");
-            System.out.println("   Primary Key: " + columnMetaData.isPrimaryKey());
-            System.out.println("   Auto Increment: " + columnMetaData.isAutoIncrement());
-            System.out.println("   Nullable: " + columnMetaData.isNullable());
-            System.out.println("   Foreign Key: " + columnMetaData.isForeignKey());
+        // Print column metadata
+        Map<String, ColumnMetaData> columns = table.getColumnMetaDataMap();
+        if (columns != null) {
+            for (Map.Entry<String, ColumnMetaData> colEntry : columns.entrySet()) {
+                String columnKey = colEntry.getKey();
+                ColumnMetaData columnMetaData = colEntry.getValue();
 
-            if (columnMetaData.isForeignKey() && columnMetaData.getForeignKeyMetaData() != null) {
-                ForeignKeyMetaData fk = columnMetaData.getForeignKeyMetaData();
-                System.out.println("      FK Column: " + fk.getFKColumn());
-                System.out.println("      References Table: " + fk.getPKTable());
-                System.out.println("      References Column: " + fk.getPKColumn());
+                System.out.println("   Column Key: " + columnKey);
+                System.out.println("   Column Name: " + columnMetaData.getColumnName());
+                System.out.println("   Type: " + columnMetaData.getDataType() + "(" + columnMetaData.getSize() + ")");
+                System.out.println("   Primary Key: " + columnMetaData.isPrimaryKey());
+                System.out.println("   Auto Increment: " + columnMetaData.isAutoIncrement());
+                System.out.println("   Nullable: " + columnMetaData.isNullable());
+                System.out.println("   Foreign Key: " + columnMetaData.isForeignKey());
+
+                if (columnMetaData.isForeignKey() && columnMetaData.getForeignKeyMetaData() != null) {
+                    ForeignKeyMetaData fk = columnMetaData.getForeignKeyMetaData();
+                    System.out.println("      FK Column: " + fk.getFKColumn());
+                    System.out.println("      References Table: " + fk.getPKTable());
+                    System.out.println("      References Column: " + fk.getPKColumn());
+                }
+                System.out.println();
             }
-            System.out.println();
         }
-    }
-    System.out.println("-------------------------------------");
-}
 
+        // Print tables that reference this table
+        List<ForeignKeyMetaData> referenceByList = table.getReferenceByList();
+        if (referenceByList != null && !referenceByList.isEmpty()) {
+            System.out.println("   Referenced By:");
+            for (ForeignKeyMetaData ref : referenceByList) {
+                System.out.println("      Table: " + ref.getFKTable() + ", Column: " + ref.getFKColumn());
+            }
+        }
+
+        System.out.println("-------------------------------------");
+    }
 }
 
 private void printEntityMetaDataData()
@@ -282,7 +292,6 @@ String sql=query.getSQL();
 List<Object> params=query.getParameters();
 param[0]=params.get(0);
 
-System.out.println(sql);
 try
 {
 PreparedStatement preparedStatement=connection.prepareStatement(sql);
@@ -406,10 +415,20 @@ if(!recordExists(entity,tableName,null,primaryKeyFieldMetaData,columnMetaDataMap
 	throw new ORMException("RECORD NOT EXISTS with for primary key value "+paramValue[0]);
 }
 
+System.out.println("Validating fk constraint");
 // before deleting the record, check for foriegn key constraint is its value on any child table
 // check if value exists on any child table before deleting ensure if yes then don't delete
-
-
+System.out.println("SIZE OF REFRENCE LIST : "+tableMetaData.getReferenceByList().size());
+for(ForeignKeyMetaData foreignKeyMetaData:tableMetaData.getReferenceByList())
+{
+	String fkTbl=foreignKeyMetaData.getFKTable();
+	String fkCol=foreignKeyMetaData.getFKColumn();
+	FieldMetaData fieldMetaData=fieldMetaDataMap.get(foreignKeyMetaData.getPKColumn());	
+		if(recordExists(entity,fkTbl,fkCol,fieldMetaData,columnMetaDataMap,paramValue))
+		{
+			throw new ORMException("Foreign Key Constraint on child table "+fkTbl+" for value "+paramValue[0]+ "cannot delete");
+		}
+}
 String sql;
 QueryBuilder queryBuilder=new QueryBuilder(entity,tableName,fieldMetaDataMap,columnMetaDataMap);
 Query query=queryBuilder.buildDeleteQuery();
