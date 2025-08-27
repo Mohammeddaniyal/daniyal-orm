@@ -22,10 +22,10 @@ scanDirectory(file,packageName+"."+file.getName(),entitiesMetaMap,tableMetaDataM
 else if(file.getName().endsWith(".class"))
 {
 String className=packageName+"."+file.getName().replace(".class","");
-System.out.println("Discovered class : "+className);	
+//System.out.println("Discovered class : "+className);	
 
 Class clazz=Class.forName(className);
-System.out.println("Class loaded : "+clazz.getName());
+//System.out.println("Class loaded : "+clazz.getName());
 
 handleClassMetaData(clazz,entitiesMetaMap,tableMetaDataMap);
 }
@@ -158,7 +158,7 @@ String columnName;
 boolean isPrimaryKey;
 boolean isAutoIncrement;
 boolean isForeignKey;
-FieldMetaData primaryKeyFieldMetaData;
+FieldMetaData primaryKeyFieldMetaData=null;
 ForeignKeyMetaData foreignKeyMetaData1=null;
 
 Map<String,FieldMetaData> fieldMetaDataMap=new HashMap<>();
@@ -249,7 +249,7 @@ if(!isForeignKey && columnMetaData.isForeignKey())
 throw new ORMException("Entity class " + clazz.getSimpleName() +" property '" + field.getName() + "' missing @ForeignKey annotation but column '" +columnAnnotationValue + "' is a foreign key in table '" + tableName + "'");
 }
 
- // TODO: Add data type compatibility validation here (future improvement).
+ //[DONE] TODO: Add data type compatibility validation here (future improvement).
 
 if(!TypeMapper.isCompatible(field.getType(),columnMetaData.getDataType(),columnMetaData.getSize()))
 {
