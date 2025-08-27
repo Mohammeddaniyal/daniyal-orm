@@ -4,12 +4,12 @@ public class TableMetaData
 {
 private String tableName;
 private Map<String,ColumnMetaData> columnMetaDataMap;
-private Set<TableMetaData> childTableMetaDataSet;
+private List<ForeignKeyMetaData> referenceByList;
 public TableMetaData()
 {
 this.tableName="";
 this.columnMetaDataMap=null;
-this.childTableMetaDataSet=new HashSet<>();
+this.referenceByList=new ArrayList<>();
 }
 public void setTableName(java.lang.String tableName)
 {
@@ -27,12 +27,12 @@ public java.util.Map<String,ColumnMetaData> getColumnMetaDataMap()
 {
 return this.columnMetaDataMap;
 }
-public void setChildTableMetaDataSet(Set<TableMetaData> childTableMetaDataSet)
+public void setReferenceByList(List<ForeignKeyMetaData> referenceByList)
 {
-	this.childTableMetaDataSet=childTableMetaDataSet;
+	this.referenceByList=referenceByList;
 }
-public Set<TableMetaData> getChildTableMetaDataSet()
+public List<ForeignKeyMetaData> getReferenceByList()
 {
-	return this.childTableMetaDataSet;
+	return this.referenceByList;
 }
 }
