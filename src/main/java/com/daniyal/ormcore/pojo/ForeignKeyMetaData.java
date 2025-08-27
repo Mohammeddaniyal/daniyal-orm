@@ -1,14 +1,24 @@
 package com.daniyal.ormcore.pojo;
 public class ForeignKeyMetaData
 {
+private String fkTable;
 private String fkColumn;
 private  String pkTable;
 private String pkColumn;
 public ForeignKeyMetaData()
 {
+this.fkTable="";
 this.fkColumn="";
 this.pkTable="";
 this.fkColumn="";
+}
+public void setFKTable(java.lang.String fkTable)
+{
+this.fkTable=fkTable;
+}
+public java.lang.String getFKTable()
+{
+return this.fkTable;
 }
 public void setFKColumn(java.lang.String fkColumn)
 {
