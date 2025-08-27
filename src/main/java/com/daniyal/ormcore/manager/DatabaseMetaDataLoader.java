@@ -20,6 +20,7 @@ Map<String,ForeignKeyMetaData> foreignKeyColumnsMap=new HashMap<>();
 ResultSet tablesResultSet=databaseMetaData.getTables(connection.getCatalog(),null,"%",new String[]{"TABLE"});
 String tableName;
 ResultSet keysResultSet;
+String fkTbl;
 String fkCol;
 String pkTbl;
 String pkCol;
@@ -48,6 +49,7 @@ primaryKeyColumns.add(keysResultSet.getString("COLUMN_NAME"));
 } 
 keysResultSet.close();
 
+fkTbl=tableName;
 keysResultSet=databaseMetaData.getImportedKeys(connection.getCatalog(),null,tableName);
 while(keysResultSet.next())
 {
@@ -55,6 +57,7 @@ fkCol= keysResultSet.getString("FKCOLUMN_NAME");
 pkTbl=keysResultSet.getString("PKTABLE_NAME");
 pkCol=keysResultSet.getString("PKCOLUMN_NAME");
 foreignKeyMetaData=new ForeignKeyMetaData();
+foreignKeyMetaData.setFKTable(fkTbl);
 foreignKeyMetaData.setFKColumn(fkCol);
 foreignKeyMetaData.setPKTable(pkTbl);
 foreignKeyMetaData.setPKColumn(pkCol);
@@ -62,17 +65,18 @@ foreignKeyColumnsMap.put(fkCol,foreignKeyMetaData);
 
 // now check is parent TableMetaData exists
 TableMetaData parentTableMetaData=tableMetaDataMap.get(pkTbl);
+List<ForeignKeyMetaData> referenceByList;
 Set<TableMetaData> childs;
 if(parentTableMetaData!=null)
 {
-	childs=parentTableMetaData.getChildTableMetaDataSet();
-	childs.add(tableMetaData);
+	referenceByList=parentTableMetaData.getReferenceByList();
+	referenceByList.add(foreignKeyMetaData);
 }
 else
 {
 	parentTableMetaData=new TableMetaData();
-	childs=parentTableMetaData.getChildTableMetaDataSet();
-	childs.add(tableMetaData);
+	referenceByList=parentTableMetaData.getReferenceByList();
+	referenceByList.add(foreignKeyMetaData);
 	tableMetaDataMap.put(pkTbl,parentTableMetaData);
 }
 
