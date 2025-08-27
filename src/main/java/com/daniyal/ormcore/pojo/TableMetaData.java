@@ -4,6 +4,7 @@ public class TableMetaData
 {
 private String tableName;
 private Map<String,ColumnMetaData> columnMetaDataMap;
+private Set<TableMetaData> childTableMetaDataSet;
 public TableMetaData()
 {
 this.tableName="";
@@ -25,5 +26,12 @@ public java.util.Map<String,ColumnMetaData> getColumnMetaDataMap()
 {
 return this.columnMetaDataMap;
 }
-
+public void setChildTableMetaDataSet(TableMetaData childTableMetaDataSet)
+{
+	this.childTableMetaDataSet=childTableMetaDataSet;
+}
+public Set<TableMetaData> getChildTableMetaDataSet()
+{
+	return this.childTableMetaDataSet;
+}
 }
