@@ -66,7 +66,7 @@ foreignKeyColumnsMap.put(fkCol,foreignKeyMetaData);
 // now check is parent TableMetaData exists
 TableMetaData parentTableMetaData=tableMetaDataMap.get(pkTbl);
 List<ForeignKeyMetaData> referenceByList;
-Set<TableMetaData> childs;
+
 if(parentTableMetaData!=null)
 {
 	referenceByList=parentTableMetaData.getReferenceByList();

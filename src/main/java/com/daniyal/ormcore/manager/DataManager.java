@@ -335,7 +335,10 @@ try
 {
 if(!recordExists(entity,tableName,null,primaryKeyFieldMetaData,columnMetaDataMap,paramValue))
 {
-	throw new ORMException("RECORD NOT EXISTS with for primary key value "+paramValue[0]);
+	throw new ORMException("No record found in table '" + tableName +
+    "' for primary key '" + primaryKeyFieldMetaData.getColumnName() +
+    "' with value '" + paramValue + "'.");
+
 }
 
 // now in case of foreign key check if the value exists in parent table
@@ -357,7 +360,11 @@ for(Map.Entry<String,FieldMetaData> entry:fieldMetaDataMap.entrySet())
 		pkCol=foreignKeyMetaData.getPKColumn();
 		if(!recordExists(entity,pkTbl,pkCol,fieldMetaData,columnMetaDataMap,paramValue))
 		{
-			throw new ORMException("RECORD NOT EXISTS in parent table "+pkTbl+" for column "+fkCol+" value "+paramValue[0]);
+			throw new ORMException("Foreign key violation: No matching record in parent table '" + pkTbl +
+    "' for primary key column '" + pkCol +
+    "' with value '" + paramValue +
+    "' (for field '" + fkCol + "').");
+
 		}
 		//select 1 from parent table (course) where code=?
 		
