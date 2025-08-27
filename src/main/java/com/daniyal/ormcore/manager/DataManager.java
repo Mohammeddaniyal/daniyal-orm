@@ -16,11 +16,13 @@ private ConfigLoader configLoader;
 private Connection connection;
 private Map<Class,EntityMetaData> entityMetaDataMap;
 private Map<String,TableMetaData> tablesMetaMap;
+
 private DataManager() throws ORMException
 {
 this.configLoader=new ConfigLoader("conf.json");
 this.connection=null;
 this.entityMetaDataMap=null;
+
 populateDataStructures();
 }
 private void printTableMetaData(Map<String,TableMetaData> tablesMetaMap)
@@ -163,7 +165,33 @@ Map<String,FieldMetaData> fieldMetaDataMap=entityMetaData.getFieldMetaDataMap();
 TableMetaData tableMetaData=tablesMetaMap.get(tableName);
 Map<String,ColumnMetaData> columnMetaDataMap=tableMetaData.getColumnMetaDataMap();
 List<Object> params=new ArrayList<>();
-FieldMetaData fieldMetaData=new FieldMetaData();
+Object []paramValue={null};
+// now in case of foreign key check if the value exists in parent table
+FieldMetaData fieldMetaData;
+ForeignKeyMetaData foreignKeyMetaData;
+String fkCol;
+String pkTbl;
+String pkCol;
+String colNm;
+for(Map.Entry<String,FieldMetaData> entry:fieldMetaDataMap.entrySet())
+{
+	fieldMetaData=entry.getValue();
+	colNm=entry.getKey();
+	if(fieldMetaData.isForeignKey())
+	{
+		foreignKeyMetaData=columnMetaDataMap.get(colNm).getForeignKeyMetaData();
+		fkCol=foreignKeyMetaData.getFKColumn();
+		pkTbl=foreignKeyMetaData.getPKTable();
+		pkCol=foreignKeyMetaData.getPKColumn();
+		if(!recordExists(entity,pkTbl,pkCol,fieldMetaData,columnMetaDataMap,paramValue))
+		{
+			throw new ORMException("RECORD NOT EXISTS in parent table "+pkTbl+" for column "+fkCol+" value "+paramValue[0]);
+		}
+		//select 1 from parent table (course) where code=?
+		
+	}
+}
+fieldMetaData=new FieldMetaData();
 String sql;
 QueryBuilder queryBuilder=new QueryBuilder(entity,tableName,fieldMetaDataMap,columnMetaDataMap);
 Query query=queryBuilder.buildInsertQuery(fieldMetaData);
@@ -247,7 +275,28 @@ throw new ORMException(sqlException.getMessage());
 return entity;
 }
 
+private boolean recordExists(Object entityInstance,String tableName,String pkCol,FieldMetaData fieldMetaData,Map<String,ColumnMetaData> columnMetaDataMap,Object []param) throws ORMException
+{
+Query query=QueryBuilder.buildSelectQueryForIsExists(entityInstance,tableName,pkCol,fieldMetaData,columnMetaDataMap);
+String sql=query.getSQL();
+List<Object> params=query.getParameters();
+param[0]=params.get(0);
 
+System.out.println(sql);
+try
+{
+PreparedStatement preparedStatement=connection.prepareStatement(sql);
+preparedStatement.setObject(1,param[0]);
+ResultSet resultSet=preparedStatement.executeQuery();
+boolean exists=resultSet.next();
+resultSet.close();
+preparedStatement.close();
+return exists;
+}catch(SQLException exception)
+{
+	throw new ORMException(exception.getMessage());
+}
+}
 
 public void update(Object entity)throws ORMException
 {
@@ -267,21 +316,55 @@ String tableName=entityMetaData.getTableName();
 Map<String,FieldMetaData> fieldMetaDataMap=entityMetaData.getFieldMetaDataMap();
 TableMetaData tableMetaData=tablesMetaMap.get(tableName);
 Map<String,ColumnMetaData> columnMetaDataMap=tableMetaData.getColumnMetaDataMap();
-List<Object> params=new ArrayList<>();
+List<Object> params=null;
 String sql;
+Object paramValue[]={null};
+// first check if the record exists or not 
+FieldMetaData primaryKeyFieldMetaData=entityMetaData.getPrimaryKeyFieldMetaData();
+
+try
+{
+if(!recordExists(entity,tableName,null,primaryKeyFieldMetaData,columnMetaDataMap,paramValue))
+{
+	throw new ORMException("RECORD NOT EXISTS with for primary key value "+paramValue[0]);
+}
+
+// now in case of foreign key check if the value exists in parent table
+FieldMetaData fieldMetaData;
+ForeignKeyMetaData foreignKeyMetaData;
+String fkCol;
+String pkTbl;
+String pkCol;
+String colNm;
+for(Map.Entry<String,FieldMetaData> entry:fieldMetaDataMap.entrySet())
+{
+	fieldMetaData=entry.getValue();
+	colNm=entry.getKey();
+	if(fieldMetaData.isForeignKey())
+	{
+		foreignKeyMetaData=columnMetaDataMap.get(colNm).getForeignKeyMetaData();
+		fkCol=foreignKeyMetaData.getFKColumn();
+		pkTbl=foreignKeyMetaData.getPKTable();
+		pkCol=foreignKeyMetaData.getPKColumn();
+		if(!recordExists(entity,pkTbl,pkCol,fieldMetaData,columnMetaDataMap,paramValue))
+		{
+			throw new ORMException("RECORD NOT EXISTS in parent table "+pkTbl+" for column "+fkCol+" value "+paramValue[0]);
+		}
+		//select 1 from parent table (course) where code=?
+		
+	}
+}
+
 QueryBuilder queryBuilder=new QueryBuilder(entity,tableName,fieldMetaDataMap,columnMetaDataMap);
 Query query=queryBuilder.buildUpdateQuery();
 params=query.getParameters();
 sql=query.getSQL();
 
-try
-{
 PreparedStatement preparedStatement=connection.prepareStatement(sql);
 int x=1;
 
 for(Object param:params)
 {
-
 preparedStatement.setObject(x++,param);
 }
 int affectedRow=preparedStatement.executeUpdate();
@@ -315,7 +398,18 @@ String tableName=entityMetaData.getTableName();
 Map<String,FieldMetaData> fieldMetaDataMap=entityMetaData.getFieldMetaDataMap();
 TableMetaData tableMetaData=tablesMetaMap.get(tableName);
 Map<String,ColumnMetaData> columnMetaDataMap=tableMetaData.getColumnMetaDataMap();
+FieldMetaData primaryKeyFieldMetaData=entityMetaData.getPrimaryKeyFieldMetaData();
 List<Object> params=new ArrayList<>();
+Object paramValue[]={null};
+if(!recordExists(entity,tableName,null,primaryKeyFieldMetaData,columnMetaDataMap,paramValue))
+{
+	throw new ORMException("RECORD NOT EXISTS with for primary key value "+paramValue[0]);
+}
+
+// before deleting the record, check for foriegn key constraint is its value on any child table
+// check if value exists on any child table before deleting ensure if yes then don't delete
+
+
 String sql;
 QueryBuilder queryBuilder=new QueryBuilder(entity,tableName,fieldMetaDataMap,columnMetaDataMap);
 Query query=queryBuilder.buildDeleteQuery();
