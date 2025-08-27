@@ -34,8 +34,11 @@ boolean isPrimaryKey;
 Map<String,ColumnMetaData> columnMetaDataMap;
 while(tablesResultSet.next())
 {
-tableMetaData=new TableMetaData();
+
 tableName=tablesResultSet.getString("TABLE_NAME");
+tableMetaData=tableMetaDataMap.get(tableName);
+if(tableMetaData==null) tableMetaData=new TableMetaData();
+
 tableMetaData.setTableName(tableName);
 
 keysResultSet=databaseMetaData.getPrimaryKeys(connection.getCatalog(),null,tableName);
@@ -56,6 +59,24 @@ foreignKeyMetaData.setFKColumn(fkCol);
 foreignKeyMetaData.setPKTable(pkTbl);
 foreignKeyMetaData.setPKColumn(pkCol);
 foreignKeyColumnsMap.put(fkCol,foreignKeyMetaData);
+
+// now check is parent TableMetaData exists
+TableMetaData parentTableMetaData=tableMetaDataMap.get(pkTbl);
+Set<TableMetaData> childs;
+if(parentTableMetaData!=null)
+{
+	childs=parentTableMetaData.getChildTableMetaDataSet();
+	childs.add(tableMetaData);
+}
+else
+{
+	parentTableMetaData=new TableMetaData();
+	childs=parentTableMetaData.getChildTableMetaDataSet();
+	childs.add(tableMetaData);
+	tableMetaDataMap.put(pkTbl,parentTableMetaData);
+}
+
+
 //System.out.println(" FK: " + fkCol + " -> " + pkTbl + "(" + pkCol + ")");
 } // on foregn keys loop ends
 keysResultSet.close();
@@ -91,6 +112,8 @@ columnMetaDataMap.put(columnName,columnMetaData);
 columnsResultSet.close();
 tableMetaData.setColumnMetaDataMap(columnMetaDataMap);
 tableMetaDataMap.put(tableName,tableMetaData);
+
+
 primaryKeyColumns.clear();
 foreignKeyColumnsMap.clear();
 } // on tables loop ends
