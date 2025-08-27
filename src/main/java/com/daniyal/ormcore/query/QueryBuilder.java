@@ -112,6 +112,8 @@ public class QueryBuilder<T>
 	{
 		final String[] primaryKeyColumn={null};
 		final Object[] primaryKeyValue={null};
+		
+		
 		FieldProcessor deleteProcessor=(fieldMetaData,validatedValue,cols,paramList,ph)->{
 			if(fieldMetaData.isPrimaryKey())
 			{
@@ -154,7 +156,7 @@ public class QueryBuilder<T>
 				sqlBuilder.append(this.conditions.get(i));
 			}
 		}
-		System.out.println("SQL Query generated : "+sqlBuilder.toString());
+		
 		List<T> entityList=new ArrayList<>();
 		try
 		{
@@ -200,9 +202,23 @@ public class QueryBuilder<T>
 		 throw new ORMException(exception.getMessage());	
 		}
 	}
-	public Query buildSelectQueryForIsExists()
+	public static Query buildSelectQueryForIsExists(Object entityInstance,String tableName,String pkCol,FieldMetaData fieldMetaData,Map<String,ColumnMetaData> columnMetaDataMap) throws ORMException
 	{
-		String sql="SELECT 1 FROM "+this.tableName+" WHERE "+columnName+"=?";
-		return new Query(sql,null);
+		String columnName=fieldMetaData.getColumnName();
+		if(pkCol==null) pkCol=columnName;
+		Object rawValue;
+		Object validatedValue;
+		Field field=fieldMetaData.getField();
+		try
+		{
+			rawValue=field.get(entityInstance);
+		}catch(IllegalAccessException exception)
+		{
+			throw new ORMException("Cannot read value of field '" + field.getName() +"' in entity '" + entityInstance.getClass().getSimpleName() +"'. Ensure the field is accessible (e.g., use @Column and allow access).");		
+		}
+		validatedValue=EntityValidator.validateAndConvert(rawValue,fieldMetaData,columnMetaDataMap.get(columnName));
+		String sql="SELECT 1 FROM "+tableName+" WHERE "+pkCol+"=?";
+		List<Object> params=Collections.singletonList(validatedValue);
+		return new Query(sql,params);
 	}
 }
