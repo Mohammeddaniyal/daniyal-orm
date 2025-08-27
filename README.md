@@ -76,6 +76,9 @@ It’s that simple.
 * **Entity Validation**
   Checks your classes against the real DB schema: primary keys, foreign keys, nullability, and type mismatches. Catch issues early.
 
+* **Validation & Data Integrity**  
+  Ensures foreign keys exist, prevents invalid updates/deletes, and gives meaningful error messages.
+
 * **Auto-Increment Support**
   Inserts automatically fetch generated keys and update your object fields via reflection. No more manual syncing.
 
