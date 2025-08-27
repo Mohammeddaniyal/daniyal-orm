@@ -9,6 +9,7 @@ public TableMetaData()
 {
 this.tableName="";
 this.columnMetaDataMap=null;
+this.childTableMetaDataSet=new HashSet<>();
 }
 public void setTableName(java.lang.String tableName)
 {
@@ -26,7 +27,7 @@ public java.util.Map<String,ColumnMetaData> getColumnMetaDataMap()
 {
 return this.columnMetaDataMap;
 }
-public void setChildTableMetaDataSet(TableMetaData childTableMetaDataSet)
+public void setChildTableMetaDataSet(Set<TableMetaData> childTableMetaDataSet)
 {
 	this.childTableMetaDataSet=childTableMetaDataSet;
 }
