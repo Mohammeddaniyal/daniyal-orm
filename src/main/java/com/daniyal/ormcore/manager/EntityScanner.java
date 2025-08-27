@@ -37,13 +37,13 @@ public static Map<Class,EntityMetaData> scanBasePackage(String basePackage,Map<S
 {
 Map<Class,EntityMetaData> entitiesMetaMap=new HashMap<>();
 ClassLoader classLoader=Thread.currentThread().getContextClassLoader();
-System.out.println("Base package "+basePackage);
+//System.out.println("Base package "+basePackage);
 
 
 try
 {
 String path=basePackage.replace(".",File.separator);
-System.out.println("Path :"+path);
+//System.out.println("Path :"+path);
 // Get all resources(directory or jar) for basePackage
 Enumeration<URL> resources=classLoader.getResources(path);
 URL resource;
@@ -52,7 +52,7 @@ URL resource;
 while(resources.hasMoreElements())
 {
 resource=resources.nextElement();
-System.out.println("Found resource : "+resource);
+//System.out.println("Found resource : "+resource);
 
 // if it's a folder
 if(resource.getProtocol().equals("file"))
@@ -79,7 +79,7 @@ String name=entry.getName();
 if(name.startsWith(path) && name.endsWith(".class"))
 {
 String className=name.replace("/",".").replace(".class","");
-System.out.println("Discovered class : "+className);	
+//System.out.println("Discovered class : "+className);	
 
 Class clazz=Class.forName(className);
 System.out.println("Class loaded : "+clazz.getName());
