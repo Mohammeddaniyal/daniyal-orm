@@ -221,7 +221,9 @@ int affectedRow=preparedStatement.executeUpdate();
 
 if(affectedRow==0)
 {
-	throw new ORMException("Save failed");
+	throw new ORMException(
+    "Save failed: Unable to persist the entity. Please verify data validity and database connection."
+);
 }
 
 // set generated keys in user object
@@ -387,7 +389,10 @@ int affectedRow=preparedStatement.executeUpdate();
 
 if(affectedRow==0)
 {
-	throw new ORMException("Update failed");
+	throw new ORMException(
+    "Update failed: No record was updated. It may not exist or the values provided did not change any data."
+);
+
 }
 preparedStatement.close();
 }catch(SQLException sqlException)
@@ -436,7 +441,12 @@ for(ForeignKeyMetaData foreignKeyMetaData:tableMetaData.getReferenceByList())
 	FieldMetaData fieldMetaData=fieldMetaDataMap.get(foreignKeyMetaData.getPKColumn());	
 		if(recordExists(entity,fkTbl,fkCol,fieldMetaData,columnMetaDataMap,paramValue))
 		{
-			throw new ORMException("Foreign Key Constraint on child table "+fkTbl+" for value "+paramValue[0]+ "cannot delete");
+			throw new ORMException(
+    "Cannot delete from table '" + tableName + "': " +
+    "Record with primary key value '" + paramValue[0] + "' is referenced by child table '" + fkTbl +
+    "' via foreign key column '" + fkCol + "'. Deletion would violate referential integrity."
+);
+
 		}
 }
 String sql;
@@ -453,7 +463,11 @@ int affectedRow=preparedStatement.executeUpdate();
 
 if(affectedRow==0)
 {
-	throw new ORMException("Deletion failed");
+throw new ORMException(
+    "Deletion failed: The record could not be deleted. " +
+    "It may not exist or is restricted due to database constraints."
+);
+
 }
 preparedStatement.close();
 }catch(SQLException sqlException)
