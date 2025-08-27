@@ -202,10 +202,10 @@ public class QueryBuilder<T>
 		 throw new ORMException(exception.getMessage());	
 		}
 	}
-	public static Query buildSelectQueryForIsExists(Object entityInstance,String tableName,String pkCol,FieldMetaData fieldMetaData,Map<String,ColumnMetaData> columnMetaDataMap) throws ORMException
+	public static Query buildSelectQueryForIsExists(Object entityInstance,String tableName,String col,FieldMetaData fieldMetaData,Map<String,ColumnMetaData> columnMetaDataMap) throws ORMException
 	{
 		String columnName=fieldMetaData.getColumnName();
-		if(pkCol==null) pkCol=columnName;
+		if(col==null) col=columnName;
 		Object rawValue;
 		Object validatedValue;
 		Field field=fieldMetaData.getField();
@@ -217,7 +217,8 @@ public class QueryBuilder<T>
 			throw new ORMException("Cannot read value of field '" + field.getName() +"' in entity '" + entityInstance.getClass().getSimpleName() +"'. Ensure the field is accessible (e.g., use @Column and allow access).");		
 		}
 		validatedValue=EntityValidator.validateAndConvert(rawValue,fieldMetaData,columnMetaDataMap.get(columnName));
-		String sql="SELECT 1 FROM "+tableName+" WHERE "+pkCol+"=?";
+		String sql="SELECT 1 FROM "+tableName+" WHERE "+col+"=?";
+
 		List<Object> params=Collections.singletonList(validatedValue);
 		return new Query(sql,params);
 	}
