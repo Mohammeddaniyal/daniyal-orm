@@ -8,7 +8,6 @@ private Constructor entityNoArgConstructor;
 private String tableName;
 private FieldMetaData primaryKeyFieldMetaData;
 private Map<String,FieldMetaData> fieldMetaDataMap;
-
 public EntityMetaData()
 {
 this.entityClass=null;
@@ -28,6 +27,7 @@ public void setFieldMetaDataMap(Map<String,FieldMetaData> fieldMetaDataMap)
 {
 this.fieldMetaDataMap=fieldMetaDataMap;
 }
+
 public Class getEntityClass()
 {
 return this.entityClass;
@@ -36,6 +36,7 @@ public String getTableName()
 {
 return this.tableName;
 }
+
 public void setPrimaryKeyFieldMetaData(FieldMetaData primaryKeyFieldMetaData)
 {
 	this.primaryKeyFieldMetaData=primaryKeyFieldMetaData;
