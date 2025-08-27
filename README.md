@@ -238,9 +238,17 @@ public class ExampleUsage {
 
 ---
 
-## 💻 Command Line Interface (CLI) Entity Generator
+## 💻 Command Line Interface (CLI) – Entity Generator & JAR Builder
 
-Generate Java entity classes from your database schema using the **CLI tool** included in the ORM JAR.
+The Daniyal ORM includes a **CLI tool** that can:
+
+* Generate annotated Java entity classes from your database schema
+* Automatically **compile** those entities into `.class` files
+* Package them into a **ready-to-use JAR file**
+
+This eliminates the need for manual `javac` and `jar` commands.
+
+---
 
 ### Command Syntax
 
@@ -258,37 +266,51 @@ java -cp daniyal-orm.jar com.daniyal.ormcore.generator.EntityGenerator \
 * `--output=` (**required**) – Directory to create entity files
 * `--tables=` (optional) – Comma-separated list of table names, or `*` for all tables
 * `--config=` (optional) – Path to `conf.json` (defaults to current directory)
+* *(new)* **JAR Packaging:** After generation, entities are compiled and a JAR is created (e.g., `dist/pojo.jar`).
+
+---
 
 ### Examples
 
-Generate `student` and `course` entities:
+Generate and package entities for `student` and `course`:
 
 ```bash
 java -cp daniyal-orm.jar com.daniyal.ormcore.generator.EntityGenerator \
 --package=com.example.entities --output=. --tables=student,course
 ```
 
-Generate all tables with a custom config:
+Generate all tables with a custom config and auto-package into a JAR:
 
 ```bash
 java -cp daniyal-orm.jar com.daniyal.ormcore.generator.EntityGenerator \
 --package=com.example.entities --output=src/main/java --config=../myproject/conf.json
 ```
 
-### How It Works
+---
 
-* Loads DB config from `conf.json`
-* Connects to the database
-* Reads schema metadata
-* Generates annotated Java entity classes
+### What Happens Internally
+
+1. **Loads DB config** from `conf.json`
+2. **Scans schema metadata**
+3. **Generates entity classes** annotated with `@Table`, `@Column`, etc.
+4. **Compiles** the `.java` files using the Java Compiler API
+5. **Packages** compiled `.class` files into a JAR (`dist/pojo.jar`)
+6. **Cleans up** temporary compilation files
+
+---
 
 ### Notes
 
 * Always specify `--package` and `--output`
-* Paths can be relative or absolute
-* Run without arguments for help
+* By default, the JAR is created in a `dist/` folder
+* Use the JAR directly in your project by adding it to the classpath
+* Run without arguments to see usage help
 
 ---
+
+
+
+
 
 ## 📌 Notes
 
