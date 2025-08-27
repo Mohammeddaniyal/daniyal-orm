@@ -419,7 +419,10 @@ List<Object> params=new ArrayList<>();
 Object paramValue[]={null};
 if(!recordExists(entity,tableName,null,primaryKeyFieldMetaData,columnMetaDataMap,paramValue))
 {
-	throw new ORMException("RECORD NOT EXISTS with for primary key value "+paramValue[0]);
+	throw new ORMException("No record found in table '" + tableName +
+    "' for primary key '" + primaryKeyFieldMetaData.getColumnName() +
+    "' with value '" + paramValue + "'.");
+
 }
 
 
