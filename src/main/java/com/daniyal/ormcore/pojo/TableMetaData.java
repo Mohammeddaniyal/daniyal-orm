@@ -5,6 +5,7 @@ public class TableMetaData
 private String tableName;
 private Map<String,ColumnMetaData> columnMetaDataMap;
 private List<ForeignKeyMetaData> referenceByList;
+private List<ForiegnKetMetaData> foreignKeyList;
 public TableMetaData()
 {
 this.tableName="";
@@ -34,5 +35,13 @@ public void setReferenceByList(List<ForeignKeyMetaData> referenceByList)
 public List<ForeignKeyMetaData> getReferenceByList()
 {
 	return this.referenceByList;
+}
+public void setForeignKeyList(List<ForeignKeyMetaData> foreignKeyList)
+{
+	this.foreignKeyList=foreignKeyList;
+}
+public List<ForeignKeyMetaData> getForeignKeyList()
+{
+	return this.foreignKeyList;
 }
 }
