@@ -5,7 +5,7 @@ import java.util.*;
 import java.sql.*;
 public class DatabaseMetaDataLoader
 {
-private static Map<String,ColumnMetaData> getColumnMetaDataMapForView(Connection connection,DatabaseMetaData databaseMetaData,String viewName)
+private static Map<String,ColumnMetaData> getColumnMetaDataMapForView(Connection connection,DatabaseMetaData databaseMetaData,String viewName)throws SQLException
 {
 ResultSet columnsResultSet=databaseMetaData.getColumns(connection.getCatalog(),null,viewName,"%");
 Map<String,ColumnMetaData> columnMetaDataMap=new HashMap<>();
@@ -27,7 +27,7 @@ columnMetaData.setColumnName(columnName);
 columnMetaData.setDataType(type);
 columnMetaData.setSize(size);
 columnMetaData.setScale(scale);
-columnMetaData.setNullable(autoIncrement.equalsIgnoreCase("YES"));
+columnMetaData.setNullable(isNullable.equalsIgnoreCase("YES"));
 columnMetaDataMap.put(columnName,columnMetaData);
 } // on columns loop ends
 
@@ -69,7 +69,7 @@ while(tablesResultSet.next())
 {
 
 tableName=tablesResultSet.getString("TABLE_NAME");
-tableType=tableResultSet.getString("TABLE_TYPE");
+tableType=tablesResultSet.getString("TABLE_TYPE");
 isView="VIEW".equalsIgnoreCase(tableType);
 // doing so, gettting from map the reason is in case if a current tableMetaData is pointing to a table which is parent
 // constraint foreign key, so in this case if the TableMetaData object is not in the Map so we created the instance
