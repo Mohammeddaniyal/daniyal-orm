@@ -42,6 +42,17 @@ public void printAllSQLStatements() {
         System.out.println("  Update SQL:    " + statement.getUpdateSQL());
         System.out.println("  Delete SQL:    " + statement.getDeleteSQL());
         System.out.println("  SelectAll SQL: " + statement.getSelectAllSQL());
+
+        Map<String, String> existsMap = statement.getExistsByColumnSQLMap();
+        if (existsMap != null && !existsMap.isEmpty()) {
+            System.out.println("  Exists By Column SQLs:");
+            for (Map.Entry<String, String> existsEntry : existsMap.entrySet()) {
+                System.out.println("    " + existsEntry.getKey() + " : " + existsEntry.getValue());
+            }
+        } else {
+            System.out.println("  Exists By Column SQLs: None");
+        }
+
         System.out.println("----------------------------------");
     }
 }
@@ -344,12 +355,24 @@ throw new ORMException(sqlException.getMessage());
 return entity;
 }
 
-private boolean recordExists(Object entityInstance,String tableName,String pkCol,FieldMetaData fieldMetaData,Map<String,ColumnMetaData> columnMetaDataMap,Object []param) throws ORMException
+private boolean recordExists(Object entityInstance,String tableName,String columnName,FieldMetaData fieldMetaData,Map<String,ColumnMetaData> columnMetaDataMap,Object []param) throws ORMException
 {
-Query query=QueryBuilder.buildSelectQueryForIsExists(entityInstance,tableName,pkCol,fieldMetaData,columnMetaDataMap);
-String sql=query.getSQL();
-List<Object> params=query.getParameters();
-param[0]=params.get(0);
+Class entityClass=this.tableNameToClassMap.get(tableName);
+SQLStatement sqlStatement=this.sqlStatementsMap.get(entityClass);	
+Map<String,String> existsByColumnSQLMap=sqlStatement.getExistsByColumnSQLMap();
+String sql=existsByColumnSQLMap.get(columnName);
+Object rawValue;
+Object validatedValue;
+Field field=fieldMetaData.getField();
+try
+{
+rawValue=field.get(entityInstance);
+}catch(IllegalAccessException exception)
+{
+throw new ORMException("Cannot read value of field '" + field.getName() +"' in entity '" + entityInstance.getClass().getSimpleName() +"'. Ensure the field is accessible (e.g., use @Column and allow access).");		
+}
+validatedValue=EntityValidator.validateAndConvert(rawValue,fieldMetaData,columnMetaDataMap.get(fieldMetaData.getColumnName()));
+param[0]=validatedValue;
 
 try
 {
@@ -392,7 +415,7 @@ FieldMetaData primaryKeyFieldMetaData=entityMetaData.getPrimaryKeyFieldMetaData(
 
 try
 {
-if(!recordExists(entity,tableName,null,primaryKeyFieldMetaData,columnMetaDataMap,paramValue))
+if(!recordExists(entity,tableName,primaryKeyFieldMetaData.getColumnName(),primaryKeyFieldMetaData,columnMetaDataMap,paramValue))
 {
 	throw new ORMException("No record found in table '" + tableName +
     "' for primary key '" + primaryKeyFieldMetaData.getColumnName() +
@@ -484,7 +507,7 @@ Map<String,ColumnMetaData> columnMetaDataMap=tableMetaData.getColumnMetaDataMap(
 FieldMetaData primaryKeyFieldMetaData=entityMetaData.getPrimaryKeyFieldMetaData();
 List<Object> params=new ArrayList<>();
 Object paramValue[]={null};
-if(!recordExists(entity,tableName,null,primaryKeyFieldMetaData,columnMetaDataMap,paramValue))
+if(!recordExists(entity,tableName,primaryKeyFieldMetaData.getColumnName(),primaryKeyFieldMetaData,columnMetaDataMap,paramValue))
 {
 	throw new ORMException("No record found in table '" + tableName +
     "' for primary key '" + primaryKeyFieldMetaData.getColumnName() +
