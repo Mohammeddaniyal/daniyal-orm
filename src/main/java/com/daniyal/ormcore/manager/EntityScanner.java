@@ -80,7 +80,7 @@ String path=basePackage.replace(".","/");
 // Get all resources(directory or jar) for basePackage
 Enumeration<URL> resources=classLoader.getResources(path);
 URL resource;
-
+boolean inDisk=false;
 // Loop over every resource(can either be folder or jar)
 while(resources.hasMoreElements())
 {
@@ -92,12 +92,14 @@ resource=resources.nextElement();
 if(resource.getProtocol().equals("file"))
 {
 File directory=new File(resource.toURI());
+
 scanDirectory(directory,basePackage,entitiesMetaMap,tableMetaDataMap,tableNameToClassMap);
 
 }// folder on disk condition ends
 
 }// loop ends on resources
-scanClasspathJars(basePackage, entitiesMetaMap, tableMetaDataMap, tableNameToClassMap);
+
+	scanClasspathJars(basePackage, entitiesMetaMap, tableMetaDataMap, tableNameToClassMap);
 }catch(ClassNotFoundException | IOException | URISyntaxException exception)
 {
 throw new ORMException(exception.getMessage());
@@ -113,9 +115,30 @@ return entitiesMetaMap;
 private static void handleClassMetaData(Class clazz,Map<Class,EntityMetaData> entitiesMetaMap,Map<String,TableMetaData> tableMetaDataMap,Map<String,Class> tableNameToClassMap) throws ORMException
 {
 Table tableAnnotation=(Table)clazz.getAnnotation(Table.class);
-if(tableAnnotation==null) return;
+View viewAnnotation=(View)clazz.getAnnotation(View.class);
+boolean isView=false;
+if(tableAnnotation!=null && viewAnnotation!=null)
+{
+	throw new ORMException(
+    "Configuration error: Class " + clazz.getName() +
+    " cannot be annotated with both @Table and @View. " +
+    "Only one annotation is allowed. Use @Table for entity mappings or @View for database views."
+);
+}
+if(tableAnnotation==null && viewAnnotation==null)
+{
+	return;
+}
+if(tableAnnotation==null) 
+{
+	isView=true;
+}
 
-String tableName=tableAnnotation.name().trim();
+String tableName;
+if(isView)
+	tableName=viewAnnotation.name().trim();
+else
+	tableName=tableAnnotation.name().trim();
 if(tableName==null || tableName.length()==0)
 {
 tableName=clazz.getSimpleName();
@@ -125,8 +148,11 @@ tableName=CaseConvertor.toSnakeCase(tableName);
 TableMetaData tableMetaData=tableMetaDataMap.get(tableName);
 if(tableMetaData==null)
 {
-throw new ORMException("No table exists with name "+tableName);
-}
+if(isView)
+	throw new ORMException("No view exists with name "+tableName);
+else
+	throw new ORMException("No table exists with name "+tableName);
+}	
 Constructor entityNoArgConstructor=null;
 try
 {
@@ -138,7 +164,7 @@ try
 	}
 //System.out.println(" Checking for : "+tableName+" table exists in mysql or not");
 // we'll use map of TableMetaData
-Field []fields=clazz.getFields();
+Field []fields=clazz.getDeclaredFields();
 Map<String,ColumnMetaData> columnMetaDataMap=tableMetaData.getColumnMetaDataMap();
 int columnMetaDataMapSize=columnMetaDataMap.size();
 int fieldsSize=fields.length;
@@ -171,13 +197,13 @@ FieldMetaData autoIncrementFieldMetaData=null;
 ForeignKeyMetaData foreignKeyMetaData1=null;
 
 Map<String,FieldMetaData> fieldMetaDataMap=new HashMap<>();
+
 for(Field field:fields)
 {
 columnAnnotation=(Column)field.getAnnotation(Column.class);
 if(columnAnnotation==null)
 {
 // not part of sql table column so ignore this
-
 if(field.isAnnotationPresent(PrimaryKey.class) || field.isAnnotationPresent(AutoIncrement.class) || field.isAnnotationPresent(ForeignKey.class))
 {
 throw new ORMException("Entity class " + clazz.getSimpleName() +" property " + field.getName() +" has @PrimaryKey/@AutoIncrement/@ForeignKey annotation but is missing @Column");
@@ -294,6 +320,8 @@ fieldMetaDataMap.put(columnName,fieldMetaData);
 if(fieldsWithColumnAnnotation!=columnMetaDataMapSize)
 {
 fieldMetaDataMap.clear();
+System.out.println(fieldsWithColumnAnnotation);
+System.out.println(columnMetaDataMapSize);
 throw new ORMException("Entity class " + clazz.getSimpleName() +" has missing fields for some columns in the table '" + tableName + "'");
 }
 
@@ -304,8 +332,8 @@ entityMetaData.setTableName(tableName);
 entityMetaData.setPrimaryKeyFieldMetaData(primaryKeyFieldMetaData);
 entityMetaData.setAutoIncrementFieldMetaData(autoIncrementFieldMetaData);
 entityMetaData.setFieldMetaDataMap(fieldMetaDataMap);
+entityMetaData.setView(isView);
 entitiesMetaMap.put(clazz,entityMetaData);
-
 tableNameToClassMap.put(tableName,clazz);
 
 }// function ends
