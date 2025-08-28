@@ -21,7 +21,7 @@ public class SQLStatement
 	{
 		this.updateSQL=updateSQL;
 	}
-	public void setDelete(String deleteSQL)
+	public void setDeleteSQL(String deleteSQL)
 	{
 		this.deleteSQL=deleteSQL;
 	}
@@ -37,7 +37,7 @@ public class SQLStatement
 	{
 		return this.updateSQL;
 	}
-	public String getDelete()
+	public String getDeleteSQL()
 	{
 		return this.deleteSQL;
 	}

@@ -40,7 +40,7 @@ public void printAllSQLStatements() {
         System.out.println("Class: " + clazz.getName());
         System.out.println("  Insert SQL:    " + statement.getInsertSQL());
         System.out.println("  Update SQL:    " + statement.getUpdateSQL());
-        System.out.println("  Delete SQL:    " + statement.getDelete());
+        System.out.println("  Delete SQL:    " + statement.getDeleteSQL());
         System.out.println("  SelectAll SQL: " + statement.getSelectAllSQL());
         System.out.println("----------------------------------");
     }
@@ -188,6 +188,7 @@ private List<Object> getParams(String sqlType,Object entityInstance,Map<String,F
 		Object whereValue=null;
 		boolean insertMode=sqlType.equalsIgnoreCase("insert");
 		boolean updateMode=sqlType.equalsIgnoreCase("update");
+		boolean deleteMode=sqlType.equalsIgnoreCase("delete");
 		for(Map.Entry<String,FieldMetaData> entry:fieldMetaDataMap.entrySet())
 		{
 			
@@ -511,15 +512,29 @@ for(ForeignKeyMetaData foreignKeyMetaData:tableMetaData.getReferenceByList())
 		}
 }
 String sql;
+/*
 QueryBuilder queryBuilder=new QueryBuilder(entity,tableName,fieldMetaDataMap,columnMetaDataMap);
 Query query=queryBuilder.buildDeleteQuery(entityMetaData.getPrimaryKeyFieldMetaData());
 params=query.getParameters();
 sql=query.getSQL();
+*/
+sql=this.sqlStatementsMap.get(entityClass).getDeleteSQL();
 
+Field field=primaryKeyFieldMetaData.getField();
+Object rawValue,validatedValue;
+try
+{
+rawValue=field.get(entity);
+}catch(IllegalAccessException exception)
+{
+throw new ORMException("Cannot read value of field '" + field.getName() +"' in entity '" + entityClass.getSimpleName() +"'. Ensure the field is accessible (e.g., use @Column and allow access).");		
+}
+validatedValue=EntityValidator.validateAndConvert(rawValue,primaryKeyFieldMetaData,columnMetaDataMap.get(primaryKeyFieldMetaData.getColumnName()));
+			
 try
 {
 PreparedStatement preparedStatement=connection.prepareStatement(sql);
-preparedStatement.setObject(1,params.get(0));
+preparedStatement.setObject(1,validatedValue);
 int affectedRow=preparedStatement.executeUpdate();
 
 if(affectedRow==0)
