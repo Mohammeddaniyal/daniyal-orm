@@ -24,6 +24,7 @@ class SQLStatementGenerator
 		for(Map.Entry<Class,EntityMetaData> entityMetaDataEntry:entityMetaDataMap.entrySet())
 		{
 			entityMetaData=entityMetaDataEntry.getValue();
+			if(entityMetaData.isView()) continue;
 			entityClass=entityMetaDataEntry.getKey();
 			primaryKeyFieldMetaData=entityMetaData.getPrimaryKeyFieldMetaData();
 			primaryKeyColumn=primaryKeyFieldMetaData.getColumnName();
