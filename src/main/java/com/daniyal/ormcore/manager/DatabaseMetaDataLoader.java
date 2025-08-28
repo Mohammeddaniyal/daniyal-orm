@@ -5,6 +5,35 @@ import java.util.*;
 import java.sql.*;
 public class DatabaseMetaDataLoader
 {
+private static Map<String,ColumnMetaData> getColumnMetaDataMapForView(Connection connection,DatabaseMetaData databaseMetaData,String viewName)
+{
+ResultSet columnsResultSet=databaseMetaData.getColumns(connection.getCatalog(),null,viewName,"%");
+Map<String,ColumnMetaData> columnMetaDataMap=new HashMap<>();
+ColumnMetaData columnMetaData;
+String columnName;
+String type;
+int size;
+int scale;
+String isNullable;
+while(columnsResultSet.next())
+{
+columnMetaData=new ColumnMetaData();
+columnName=columnsResultSet.getString("COLUMN_NAME");
+type=columnsResultSet.getString("TYPE_NAME");
+size=columnsResultSet.getInt("COLUMN_SIZE");
+scale=columnsResultSet.getInt("DECIMAL_DIGITS");
+isNullable=columnsResultSet.getString("IS_NULLABLE");
+columnMetaData.setColumnName(columnName);
+columnMetaData.setDataType(type);
+columnMetaData.setSize(size);
+columnMetaData.setScale(scale);
+columnMetaData.setNullable(autoIncrement.equalsIgnoreCase("YES"));
+columnMetaDataMap.put(columnName,columnMetaData);
+} // on columns loop ends
+
+columnsResultSet.close();
+return columnMetaDataMap;
+}
 public static Map<String,TableMetaData> loadTableMetaData(Connection connection) throws ORMException
 {
 try
@@ -17,8 +46,10 @@ DatabaseMetaData databaseMetaData=connection.getMetaData();
 Set<String> primaryKeyColumns=new HashSet<>();
 Map<String,ForeignKeyMetaData> foreignKeyColumnsMap=new HashMap<>();
 
-ResultSet tablesResultSet=databaseMetaData.getTables(connection.getCatalog(),null,"%",new String[]{"TABLE"});
+ResultSet tablesResultSet=databaseMetaData.getTables(connection.getCatalog(),null,"%",new String[]{"TABLE","VIEW"});
 String tableName;
+String tableType;
+boolean isView;
 ResultSet keysResultSet;
 String fkTbl;
 String fkCol;
@@ -38,6 +69,8 @@ while(tablesResultSet.next())
 {
 
 tableName=tablesResultSet.getString("TABLE_NAME");
+tableType=tableResultSet.getString("TABLE_TYPE");
+isView="VIEW".equalsIgnoreCase(tableType);
 // doing so, gettting from map the reason is in case if a current tableMetaData is pointing to a table which is parent
 // constraint foreign key, so in this case if the TableMetaData object is not in the Map so we created the instance
 // and put it in the map and also updated the value for referenceByList ArrayList<> which hold ForeignKeyMetaData
@@ -46,6 +79,15 @@ tableMetaData=tableMetaDataMap.get(tableName);
 if(tableMetaData==null) tableMetaData=new TableMetaData();
 foreignKeyList=tableMetaData.getForeignKeyList();
 tableMetaData.setTableName(tableName);
+tableMetaData.setView(isView);
+if(isView)
+{
+	columnMetaDataMap=getColumnMetaDataMapForView(connection,databaseMetaData,tableName);
+	tableMetaData.setColumnMetaDataMap(columnMetaDataMap);
+	tableMetaDataMap.put(tableName,tableMetaData); 
+	continue;
+}
+
 
 keysResultSet=databaseMetaData.getPrimaryKeys(connection.getCatalog(),null,tableName);
 while(keysResultSet.next())
@@ -53,7 +95,6 @@ while(keysResultSet.next())
 primaryKeyColumns.add(keysResultSet.getString("COLUMN_NAME"));
 } 
 keysResultSet.close();
-
 fkTbl=tableName;
 keysResultSet=databaseMetaData.getImportedKeys(connection.getCatalog(),null,tableName);
 while(keysResultSet.next())
@@ -119,7 +160,7 @@ columnMetaData.setSize(size);
 columnMetaData.setScale(scale);
 columnMetaData.setPrimaryKey(isPrimaryKey);
 columnMetaData.setAutoIncrement(autoIncrement.equalsIgnoreCase("YES"));
-columnMetaData.setNullable(autoIncrement.equalsIgnoreCase("YES"));
+columnMetaData.setNullable(isNullable.equalsIgnoreCase("YES"));
 columnMetaDataMap.put(columnName,columnMetaData);
 } // on columns loop ends
 
