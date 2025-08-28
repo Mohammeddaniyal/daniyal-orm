@@ -5,7 +5,7 @@ public class TableMetaData
 private String tableName;
 private Map<String,ColumnMetaData> columnMetaDataMap;
 private List<ForeignKeyMetaData> referenceByList;
-private List<ForiegnKetMetaData> foreignKeyList;
+private List<ForeignKeyMetaData> foreignKeyList;
 public TableMetaData()
 {
 this.tableName="";

@@ -50,6 +50,10 @@ public FieldMetaData getPrimaryKeyFieldMetaData()
 {
 	return this.primaryKeyFieldMetaData;
 }
+public FieldMetaData getAutoIncrementFieldMetaData()
+{
+	return this.autoIncrementFieldMetaData;
+}
 public Map<String,FieldMetaData> getFieldMetaDataMap()
 {
 return this.fieldMetaDataMap;
