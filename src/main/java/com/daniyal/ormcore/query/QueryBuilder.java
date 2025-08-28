@@ -16,6 +16,18 @@ public class QueryBuilder<T>
 	private final Constructor<T> entityNoArgConstructor;
 	private final List<String> conditions;
 	private final List<Object> params;
+	public QueryBuilder(String tableName,Map<String,FieldMetaData> fieldMetaData)
+	{
+		this.tableName=tableName;
+		this.fieldMetaDataMap=fieldMetaDataMap;
+		this.connection=null;
+		this.entityClass=null;
+		this.entityNoArgConstructor=null;
+		this.conditions=null;
+		this.params=null;
+		this.columnMetaDataMap=null;
+		this.entityInstance=null;
+	}
 	public QueryBuilder(Connection connection,Class<T> entityClass,Constructor<T> entityNoArgConstructor,Map<String,FieldMetaData> fieldMetaDataMap,String tableName)
 	{
 		this.connection=connection;
@@ -66,13 +78,13 @@ public class QueryBuilder<T>
 	private void processFieldsOnlySQL(FieldProcessor processor,List<String> columns,StringBuilder placeHolder)
 	{
 			FieldMetaData fieldMetaData;
-			Field field;
 			for(Map.Entry<String,FieldMetaData> entry:fieldMetaDataMap.entrySet())
 			{
 				fieldMetaData=entry.getValue();
 				processor.process(fieldMetaData,null,columns,null,placeholders);
 			}
 	}
+	public String buildInsertSQL(FieldMetaData
 	public Query buildInsertQuery(FieldMetaData fieldMetaDataWithAutoIncrementOnField) throws ORMException
 	{
 		List<String> columns=new ArrayList<>();
