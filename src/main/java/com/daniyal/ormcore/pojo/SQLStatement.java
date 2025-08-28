@@ -4,8 +4,16 @@ public class SQLStatement
 	private String insertSQL;
 	private String updateSQL;
 	private String deleteSQL;
-	private String getAllSQL;
-	public void setInsert(String insertSQL)
+	private String selectAllSQL;
+	public SQLStatement(){}
+	public SQLStatement(String insertSQL,String updateSQL,String deleteSQL,String selectAllSQL)
+	{
+		this.insertSQL=insertSQL;
+		this.updateSQL=updateSQL;
+		this.deleteSQL=deleteSQL;
+		this.selectAllSQL=selectAllSQL;
+	}
+	public void setInsertSQL(String insertSQL)
 	{
 		this.insertSQL=insertSQL;
 	}
@@ -17,11 +25,11 @@ public class SQLStatement
 	{
 		this.deleteSQL=deleteSQL;
 	}
-	public void setGetAllSQL(String getAllSQL)
+	public void setSelectAllSQL(String selectAllSQL)
 	{
-		this.getAllSQL=getAllSQL;
+		this.selectAllSQL=selectAllSQL;
 	}
-	public String getInsert()
+	public String getInsertSQL()
 	{
 		return this.insertSQL;
 	}
@@ -33,8 +41,8 @@ public class SQLStatement
 	{
 		return this.deleteSQL;
 	}
-	public String getGetAllSQL()
+	public String getSelectAllSQL()
 	{
-		return this.getAllSQL;
+		return this.selectAllSQL;
 	}
 }
