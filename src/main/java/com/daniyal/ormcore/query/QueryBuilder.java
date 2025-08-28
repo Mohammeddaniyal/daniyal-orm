@@ -90,7 +90,11 @@ public class QueryBuilder<T>
 		StringBuilder placeholders=new StringBuilder();
 		
 		FieldProcessor insertProcessor=(fieldMetaData,validatedValue,cols,paramList,ph)->{
-			columns.add(fieldMetaData.getColumnName());
+			if(fieldMetaData.isAutoIncrement())
+			{
+				return;
+			}
+		columns.add(fieldMetaData.getColumnName());
 			if(ph.length()>0) 
 				ph.append(",");
 			ph.append("?");
@@ -100,27 +104,21 @@ public class QueryBuilder<T>
 		String sql="INSERT INTO "+this.tableName+" ("+String.join(",",columns)+") VALUES ("+placeholders.toString()+ ")";
 		return new sql;
 	}
-	public Query buildUpdateQuery() throws ORMException
+	public String buildUpdateQuery(String primaryKeyColumn) throws ORMException
 	{
 		List<String> setClauses=new ArrayList<>();
-		List<Object> params=new ArrayList<>();
+		
 		StringBuilder dummy=new StringBuilder();
-		final String[] primaryKeyColumn={null};
-		final Object[] primaryKeyValue={null};
 		FieldProcessor updateProcessor=(fieldMetaData,validatedValue,cols,paramList,ph)->{
 			if(fieldMetaData.isPrimaryKey())
 			{
-				primaryKeyColumn[0]=fieldMetaData.getColumnName();
-				primaryKeyValue[0]=validatedValue;
 				return;
 			}
 			setClauses.add(fieldMetaData.getColumnName()+"=?");
-			params.add(validatedValue);
 		};
 		processFields(updateProcessor,setClauses,params,dummy);
-		String sql="UPDATE "+tableName+" SET "+String.join(",",setClauses)+" WHERE "+primaryKeyColumn[0]+"=?";
-		params.add(primaryKeyValue[0]);
-		return new Query(sql,params);
+		String sql="UPDATE "+tableName+" SET "+String.join(",",setClauses)+" WHERE "+primaryKeyColumn+"=?";
+		return sql;
 	}
 	public static String buildDeleteSQL(String primaryKeyColumn)throws ORMException
 	{
