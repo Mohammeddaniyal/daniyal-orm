@@ -235,8 +235,14 @@ if(entityMetaData==null)
 {
 throw new ORMException("Entity class '" + entityClass.getName() + "' is not registered. " +"Make sure it is annotated with @Table and included in the base package defined in conf.json.");
 }
-
 String tableName=entityMetaData.getTableName();
+if(entityMetaData.isView()) {
+    throw new ORMException(
+        "Operation not allowed: The class '" + entityClass.getName() + 
+        "' is mapped to a database VIEW (" + tableName + 
+        "). Save/Insert operations are not supported for views."
+    );
+}
 Map<String,FieldMetaData> fieldMetaDataMap=entityMetaData.getFieldMetaDataMap();
 TableMetaData tableMetaData=tablesMetaMap.get(tableName);
 Map<String,ColumnMetaData> columnMetaDataMap=tableMetaData.getColumnMetaDataMap();
@@ -404,6 +410,13 @@ throw new ORMException("Entity class '" + entityClass.getName() + "' is not regi
 }
 
 String tableName=entityMetaData.getTableName();
+if(entityMetaData.isView()) {
+    throw new ORMException(
+        "Operation not allowed: The class '" + entityClass.getName() + 
+        "' is mapped to a database VIEW (" + tableName + 
+        "). Update operations are not supported for views."
+    );
+}
 Map<String,FieldMetaData> fieldMetaDataMap=entityMetaData.getFieldMetaDataMap();
 TableMetaData tableMetaData=tablesMetaMap.get(tableName);
 Map<String,ColumnMetaData> columnMetaDataMap=tableMetaData.getColumnMetaDataMap();
@@ -501,6 +514,13 @@ throw new ORMException("Entity class '" + entityClass.getName() + "' is not regi
 }
 
 String tableName=entityMetaData.getTableName();
+if(entityMetaData.isView()) {
+    throw new ORMException(
+        "Operation not allowed: The class '" + entityClass.getName() + 
+        "' is mapped to a database VIEW (" + tableName + 
+        "). Delete operations are not supported for views."
+    );
+}
 Map<String,FieldMetaData> fieldMetaDataMap=entityMetaData.getFieldMetaDataMap();
 TableMetaData tableMetaData=tablesMetaMap.get(tableName);
 Map<String,ColumnMetaData> columnMetaDataMap=tableMetaData.getColumnMetaDataMap();
