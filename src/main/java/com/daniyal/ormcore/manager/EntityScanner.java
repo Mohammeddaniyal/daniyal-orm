@@ -11,13 +11,13 @@ import java.net.*;
 import java.util.jar.*;
 class EntityScanner
 {
-private static void scanDirectory(File directory,String packageName,Map<Class,EntityMetaData> entitiesMetaMap,Map<String,TableMetaData> tableMetaDataMap) throws Exception 
+private static void scanDirectory(File directory,String packageName,Map<Class,EntityMetaData> entitiesMetaMap,Map<String,TableMetaData> tableMetaDataMap,Map<String,Class> tableNameToClassMap) throws Exception 
 {
 for(File file:directory.listFiles())
 {
 if(file.isDirectory())
 {
-scanDirectory(file,packageName+"."+file.getName(),entitiesMetaMap,tableMetaDataMap);
+scanDirectory(file,packageName+"."+file.getName(),entitiesMetaMap,tableMetaDataMap,tableNameToClassMap);
 }
 else if(file.getName().endsWith(".class"))
 {
@@ -27,13 +27,13 @@ String className=packageName+"."+file.getName().replace(".class","");
 Class clazz=Class.forName(className);
 //System.out.println("Class loaded : "+clazz.getName());
 
-handleClassMetaData(clazz,entitiesMetaMap,tableMetaDataMap);
+handleClassMetaData(clazz,entitiesMetaMap,tableMetaDataMap,tableNameToClassMap);
 }
 }// for loop ends on directory files list
 
 }
 
-public static Map<Class,EntityMetaData> scanBasePackage(String basePackage,Map<String,TableMetaData> tableMetaDataMap) throws ORMException
+public static Map<Class,EntityMetaData> scanBasePackage(String basePackage,Map<String,TableMetaData> tableMetaDataMap,Map<String,Class> tableNameToClassMap) throws ORMException
 {
 Map<Class,EntityMetaData> entitiesMetaMap=new HashMap<>();
 ClassLoader classLoader=Thread.currentThread().getContextClassLoader();
@@ -58,7 +58,7 @@ resource=resources.nextElement();
 if(resource.getProtocol().equals("file"))
 {
 File directory=new File(resource.toURI());
-scanDirectory(directory,basePackage,entitiesMetaMap,tableMetaDataMap);
+scanDirectory(directory,basePackage,entitiesMetaMap,tableMetaDataMap,tableNameToClassMap);
 
 }// folder on disk condition ends
 else if(resource.getProtocol().equals("jar"))
@@ -83,7 +83,7 @@ String className=name.replace("/",".").replace(".class","");
 
 Class clazz=Class.forName(className);
 System.out.println("Class loaded : "+clazz.getName());
-handleClassMetaData(clazz,entitiesMetaMap,tableMetaDataMap);
+handleClassMetaData(clazz,entitiesMetaMap,tableMetaDataMap,tableNameToClassMap);
 }
 } // for loop on jar entries ends here
 
@@ -102,7 +102,7 @@ return entitiesMetaMap;
 }// function ends
 
 
-private static void handleClassMetaData(Class clazz,Map<Class,EntityMetaData> entitiesMetaMap,Map<String,TableMetaData> tableMetaDataMap) throws ORMException
+private static void handleClassMetaData(Class clazz,Map<Class,EntityMetaData> entitiesMetaMap,Map<String,TableMetaData> tableMetaDataMap,Map<String,Class> tableNameToClassMap) throws ORMException
 {
 Table tableAnnotation=(Table)clazz.getAnnotation(Table.class);
 if(tableAnnotation==null) return;
@@ -159,6 +159,7 @@ boolean isPrimaryKey;
 boolean isAutoIncrement;
 boolean isForeignKey;
 FieldMetaData primaryKeyFieldMetaData=null;
+FieldMetaData autoIncrementFieldMetaData=null;
 ForeignKeyMetaData foreignKeyMetaData1=null;
 
 Map<String,FieldMetaData> fieldMetaDataMap=new HashMap<>();
@@ -275,6 +276,10 @@ if(isPrimaryKey)
 {
 	primaryKeyFieldMetaData=fieldMetaData;
 }
+if(isAutoIncrement)
+{
+	autoIncrementFieldMetaData=fieldMetaData;
+}
 fieldMetaDataMap.put(columnName,fieldMetaData);
 } // for loop ends
 // means there are missing fields to that didn't represents some table columns
@@ -289,8 +294,12 @@ entityMetaData.setEntityClass(clazz);
 entityMetaData.setEntityNoArgConstructor(entityNoArgConstructor);
 entityMetaData.setTableName(tableName);
 entityMetaData.setPrimaryKeyFieldMetaData(primaryKeyFieldMetaData);
+entityMetaData.setAutoIncrementFieldMetaData(autoIncrementFieldMetaData);
 entityMetaData.setFieldMetaDataMap(fieldMetaDataMap);
 entitiesMetaMap.put(clazz,entityMetaData);
+
+tableNameToClassMap.put(tableName,clazz);
+
 }// function ends
 
 }// class ends 
