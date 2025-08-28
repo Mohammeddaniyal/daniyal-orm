@@ -26,11 +26,12 @@ java -cp daniyal-orm.jar;. com.daniyal.ormcore.generator.EntityGenerator --packa
 	{
 		System.out.println("Usage: java -cp daniyal-orm.jar;. com.daniyal.ormcore.generator.EntityGenerator " +
                    "--package=<your.package.name> [--output=<output/directory>] " +
-                   "[--tables=table1,table2,...] [--config=path/to/conf.json]");
+                   "[--tables=table1,table2,...] [--views=view1,view2,...] [--config=path/to/conf.json]");
 		System.exit(1);
 	}
 	String packageName=null;
 	String tablesArg=null;
+	String viewsArg=null;
 	String outputDir=null;
 	String config=null;
 	for(String arg:args)
@@ -44,6 +45,9 @@ java -cp daniyal-orm.jar;. com.daniyal.ormcore.generator.EntityGenerator --packa
 		}else if(arg.startsWith("--tables="))
 		{
 			tablesArg=arg.substring("--tables=".length());
+		}else if(arg.startsWith("--views="))
+		{
+			viewsArg=arg.substring("--views=".length());
 		}else if(arg.startsWith("--config="))
 		{
 			config=arg.substring("--config=".length());
@@ -103,10 +107,30 @@ java -cp daniyal-orm.jar;. com.daniyal.ormcore.generator.EntityGenerator --packa
 			System.exit(1);
 		}
 	}
+	boolean allViews=false;
+	Set<String> viewSet=null;
+	if(viewsArg==null)
+	{
+		allViews=true;
+	}else if(viewsArg.equals("*"))
+	{
+		allViews=true;
+	}
+	else
+	{
+		try
+		{
+		viewSet=new HashSet<>(Arrays.asList(viewsArg.split(",")));
+		}catch(Exception e)
+		{
+			System.out.println("Invalid '--views=' argument");
+			System.exit(1);
+		}
+	}
 Connection connection=ConnectionManager.getConnection(configLoader);
 
 DatabaseMetaData meta=connection.getMetaData();
-ResultSet tables=meta.getTables(connection.getCatalog(),null,"%",new String[]{"TABLE"});
+ResultSet tables=meta.getTables(connection.getCatalog(),null,"%",new String[]{"TABLE","VIEW"});
 
 List<File> javaFiles=new ArrayList<>();
 File file;
@@ -118,18 +142,34 @@ ForeignKeyMetaData foreignKeyMetaData;
 StringBuilder classBuilder=new StringBuilder();
 StringBuilder constructorBuilder=new StringBuilder();
 StringBuilder setterGetterBuilder=new StringBuilder();
+boolean isView=false;
 while(tables.next())
 {
 String tableName=tables.getString("TABLE_NAME");
+String tableType=tables.getString("TABLE_TYPE");
 
+isView="VIEW".equalsIgnoreCase(tableType);
+if(isView)
+{
+if(!allViews)
+{
+		if(!viewSet.contains(tableName)) continue;
+}	
+}
+else
+{
 if(!allTables)
 {
 	if(!tableSet.contains(tableName)) continue;
 }
+}
+String className=CaseConvertor.toCamelCase(tableName);
+className=className.substring(0,1).toUpperCase()+className.substring(1);
 
-String className=tableName.substring(0,1).toUpperCase()+tableName.substring(1);
-
-classBuilder.append("@Table(name=\"" + tableName + "\")\r\n");
+if(isView)
+	classBuilder.append("@View(name=\"" + tableName + "\")\r\n");
+else
+	classBuilder.append("@Table(name=\"" + tableName + "\")\r\n");
 classBuilder.append("\r\npublic class ");
 classBuilder.append(className+"\r\n{\r\n");
 
@@ -140,7 +180,8 @@ randomAccessFile=new RandomAccessFile(file,"rw");
 
 
 
-
+if(!isView)
+{
 ResultSet k=meta.getPrimaryKeys(connection.getCatalog(),null,tableName);
 while(k.next())
 {
@@ -160,9 +201,8 @@ foreignKeyMetaData.setPKTable(pkTbl);
 foreignKeyMetaData.setPKColumn(pkCol);
 foreignKeyMetaDataMap.put(fkCol,foreignKeyMetaData);
 }
-
 k.close();
-
+}
 
 
 ResultSet columns=meta.getColumns(connection.getCatalog(),null,tableName,"%");
@@ -175,10 +215,17 @@ String columnName=columns.getString("COLUMN_NAME");
 String type=columns.getString("TYPE_NAME");
 String size=columns.getString("COLUMN_SIZE");
 String isNull=columns.getString("IS_NULLABLE");
-String autoIncrement=columns.getString("IS_AUTOINCREMENT");
-boolean isPrimaryKey=primaryKeyColumns.contains(columnName);
+String autoIncrement="NO";
+boolean isPrimaryKey=false;
+if(!isView)
+{
+	autoIncrement=columns.getString("IS_AUTOINCREMENT");
+	isPrimaryKey=primaryKeyColumns.contains(columnName);
+}
 classBuilder.append("@Column(name=\""+columnName+"\")\r\n");
 
+if(!isView)
+{
 if(isPrimaryKey)
 {
 	classBuilder.append("@PrimaryKey\r\n");
@@ -197,15 +244,16 @@ String pkTbl=foreignKeyMetaData.getPKTable();
 String pkCol=foreignKeyMetaData.getPKColumn();
 classBuilder.append("@ForeignKey(parent=\"" + pkTbl + "\",column=\"" + pkCol + "\")\r\n");
 }
-
+}
 // check which type
+
 
 String fieldType=TypeMapper.getFieldType(type,Integer.parseInt(size));
 String fieldName=CaseConvertor.toCamelCase(columnName);
 if(fieldType.equalsIgnoreCase("Date")) fieldType="java.util.Date";
 else if(fieldType.equalsIgnoreCase("BigDecimal")) fieldType="java.math.BigDecimal";
 
-classBuilder.append("public "+fieldType+" "+fieldName+";"+"\r\n");
+classBuilder.append("private "+fieldType+" "+fieldName+";"+"\r\n");
 String capitalizeFieldName=fieldName.substring(0,1).toUpperCase()+fieldName.substring(1);
 
 // adding this field into constructor
@@ -222,7 +270,6 @@ setterGetterBuilder.append("public "+fieldType+" get"+capitalizeFieldName+"()\r\
 setterGetterBuilder.append("{\r\n");
 setterGetterBuilder.append("return this."+fieldName+";\r\n");
 setterGetterBuilder.append("}\r\n");
-
 
 }
 columns.close();
@@ -336,7 +383,7 @@ private static void addFilesToJar(JarOutputStream jarOutputStream,File source,in
 	}
 
 	String entryName=source.getAbsolutePath().substring(prefixLength).replace("\\","/");
-	System.out.println(entryName);
+	//System.out.println(entryName);
 	JarEntry jarEntry=new JarEntry(entryName);
 	
 	jarEntry.setTime(source.lastModified());
