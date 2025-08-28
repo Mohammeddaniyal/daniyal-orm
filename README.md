@@ -112,6 +112,13 @@ It’s that simple.
 * **SQL Statement Caching for Faster CRUD**
   SQL statements for each entity are **generated once at metadata load** and cached internally. This eliminates repeated SQL string generation during runtime, improving performance for CRUD operations.
 
+* **Views Support & Read-Only Entities**
+  Daniyal ORM can now generate entities for **database views**. 
+  - Use the new CLI `--views` option to generate view POJOs.
+  - View entities are annotated with `@View(name="view_name")`.
+  - Read-only: no primary key or auto-increment; insert/update/delete are disabled.
+  - Supports dynamic SELECT queries with fluent API.
+
 
 ---
 
@@ -263,6 +270,7 @@ java -cp daniyal-orm.jar com.daniyal.ormcore.generator.EntityGenerator \
 --package=com.example.entities \
 --output=src/main/java \
 --tables=student,course \
+--views=view1,view2 \
 --config=path/to/conf.json
 ```
 
@@ -271,6 +279,7 @@ java -cp daniyal-orm.jar com.daniyal.ormcore.generator.EntityGenerator \
 * `--package=` (**required**) – Java package for generated entities
 * `--output=` (**required**) – Directory where entity files will be created
 * `--tables=` (optional) – Comma-separated list of table names, or `*` for all tables
+* `--views=` (optional) – Comma-separated list of view names to generate, or `*` for all views.
 * `--config=` (optional) – Path to `conf.json` (defaults to current directory)
 
 **Phase 13 Additions:**
@@ -296,6 +305,9 @@ java -cp daniyal-orm.jar com.daniyal.ormcore.generator.EntityGenerator \
 java -cp daniyal-orm.jar com.daniyal.ormcore.generator.EntityGenerator \
 --package=com.example.entities --output=src/main/java --config=../myproject/conf.json
 ```
+** Generate and package entities for specific tables and views :**
+java -cp daniyal-orm.jar com.daniyal.ormcore.generator.EntityGenerator \
+--package=com.example.entities --output=. --tables=student,course --views=student_summary,course_stats
 
 > After running these commands, the JAR (`dist/pojo.jar`) can be added directly to your **project’s classpath**.
 
@@ -309,6 +321,7 @@ java -cp daniyal-orm.jar com.daniyal.ormcore.generator.EntityGenerator \
 4. **Compile `.java` files** programmatically using the Java Compiler API
 5. **Package compiled `.class` files into a JAR** (`dist/pojo.jar`)
 6. **Clean up** temporary compilation files
+7. Optionally **generate POJOs for views** marked with `@View` when `--views` is specified.
 
 > You now get fully compiled, packaged entities with **zero manual effort**.
 
@@ -332,6 +345,8 @@ java -cp daniyal-orm.jar com.daniyal.ormcore.generator.EntityGenerator \
 * Validation runs at startup and before saving data.
 * Reflection calls are cached internally for speed.
 * Currently MySQL-only; other DBs can be added in the future.
+* View entities are **read-only**; insert, update, delete operations are not supported.
+* Use `@View` annotation to clearly distinguish view POJOs from table entities.
 
 ---
 
