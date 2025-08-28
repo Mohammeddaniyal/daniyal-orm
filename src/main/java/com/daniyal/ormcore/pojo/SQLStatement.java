@@ -1,40 +1,40 @@
 package com.daniyal.ormcore.pojo;
 public class SQLStatement
 {
-	private String insert;
-	private String update;
-	private String delete;
-	private String getAll;
-	public void setInsert(String insert)
+	private String insertSQL;
+	private String updateSQL;
+	private String deleteSQL;
+	private String getAllSQL;
+	public void setInsert(String insertSQL)
 	{
-		this.insert=insert;
+		this.insertSQL=insertSQL;
 	}
-	public void setUpdate(String update)
+	public void setUpdateSQL(String updateSQL)
 	{
-		this.update=update;
+		this.updateSQL=updateSQL;
 	}
-	public void setDelete(String delete)
+	public void setDelete(String deleteSQL)
 	{
-		this.delete=delete;
+		this.deleteSQL=deleteSQL;
 	}
-	public void setGetAll(String getAll)
+	public void setGetAllSQL(String getAllSQL)
 	{
-		this.getAll=getAll;
+		this.getAllSQL=getAllSQL;
 	}
 	public String getInsert()
 	{
-		return this.insert;
+		return this.insertSQL;
 	}
-	public String getUpdate()
+	public String getUpdateSQL()
 	{
-		return this.update;
+		return this.updateSQL;
 	}
 	public String getDelete()
 	{
-		return this.delete;
+		return this.deleteSQL;
 	}
-	public String getGetAll()
+	public String getGetAllSQL()
 	{
-		return this.getAll;
+		return this.getAllSQL;
 	}
 }
