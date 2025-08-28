@@ -17,8 +17,10 @@ class SQLStatementGenerator
 		String updateSQL;
 		String deleteSQL;
 		String selectAllSQL;
+		Map<String,String> existsByColumnSQLMap;
 		FieldMetaData primaryKeyFieldMetaData;
 		String primaryKeyColumn;
+		
 		for(Map.Entry<Class,EntityMetaData> entityMetaDataEntry:entityMetaDataMap.entrySet())
 		{
 			entityMetaData=entityMetaDataEntry.getValue();
@@ -30,7 +32,8 @@ class SQLStatementGenerator
 			updateSQL=queryBuilder.buildUpdateSQL(primaryKeyColumn);
 			deleteSQL=queryBuilder.buildDeleteSQL(primaryKeyColumn);
 			selectAllSQL=queryBuilder.buildSelectAllSQL();
-			sqlStatement=new SQLStatement(insertSQL,updateSQL,deleteSQL,selectAllSQL);
+			existsByColumnSQLMap=queryBuilder.buildExistsByColumnSQLMap();
+			sqlStatement=new SQLStatement(insertSQL,updateSQL,deleteSQL,selectAllSQL,existsByColumnSQLMap);
 			sqlStatementMap.put(entityClass,sqlStatement);
 		}
 		return sqlStatementMap;
