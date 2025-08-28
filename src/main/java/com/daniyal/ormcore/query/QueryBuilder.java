@@ -130,6 +130,21 @@ public class QueryBuilder<T>
 		String sql="SELECT * FROM "+this.tableName;
 		return sql;
 	}
+	public Map<String,String> buildExistsByColumnSQLMap()
+	{
+		Map<String,String> existsByColumnSQLMap=new HashMap<>();
+		String sql1="SELECT 1 FROM "+this.tableName+" WHERE ";
+		String sql2="=?";
+		String sql;
+		String columnName;
+		for(Map.Entry<String,FieldMetaData> entry:this.fieldMetaDataMap.entrySet())
+		{
+			columnName=entry.getValue().getColumnName();
+			sql=sql1+columnName+sql2;
+			existsByColumnSQLMap.put(columnName,sql);
+		}
+		return existsByColumnSQLMap;
+	}
 	public Query buildInsertQuery(FieldMetaData fieldMetaDataWithAutoIncrementOnField) throws ORMException
 	{
 		List<String> columns=new ArrayList<>();
