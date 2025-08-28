@@ -1,4 +1,5 @@
 package com.daniyal.ormcore.pojo;
+import java.util.*;
 public class SQLStatement
 {
 	private String insertSQL;
@@ -7,12 +8,13 @@ public class SQLStatement
 	private String selectAllSQL;
 	private Map<String,String> existsByColumnSQLMap;
 	public SQLStatement(){}
-	public SQLStatement(String insertSQL,String updateSQL,String deleteSQL,String selectAllSQL)
+	public SQLStatement(String insertSQL,String updateSQL,String deleteSQL,String selectAllSQL,Map<String,String> existsByColumnSQLMap)
 	{
 		this.insertSQL=insertSQL;
 		this.updateSQL=updateSQL;
 		this.deleteSQL=deleteSQL;
 		this.selectAllSQL=selectAllSQL;
+		this.existsByColumnSQLMap=existsByColumnSQLMap;
 	}
 	public void setInsertSQL(String insertSQL)
 	{
