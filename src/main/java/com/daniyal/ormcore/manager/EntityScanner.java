@@ -11,6 +11,39 @@ import java.net.*;
 import java.util.jar.*;
 class EntityScanner
 {
+	private static void scanClasspathJars(String basePackage,Map<Class,EntityMetaData> entitiesMetaMap,Map<String,TableMetaData> tableMetaDataMap,Map<String,Class> tableNameToClassMap) throws Exception 
+	{
+		String classpath=System.getProperty("java.class.path");
+		String[] entries=classpath.split(File.pathSeparator);
+		String packagePath=basePackage.replace(".","/");
+		for(String entry:entries)
+		{
+			File file=new File(entry);
+			if(file.isFile() && file.getName().endsWith(".jar"))
+			{
+				try(JarFile jarFile=new JarFile(file))
+				{
+							// going through every entry in the jar file
+					for(JarEntry jarEntry:java.util.Collections.list(jarFile.entries()))	
+					{
+						String name=jarEntry.getName();
+
+						// only picking .class files inside our package 
+						if(name.startsWith(packagePath) && name.endsWith(".class"))
+						{
+							String className=name.replace("/",".").replace(".class","");
+							//System.out.println("(Jar)Discovered class : "+className);	
+
+							Class clazz=Class.forName(className);
+							//System.out.println("Class loaded : "+clazz.getName());
+							handleClassMetaData(clazz,entitiesMetaMap,tableMetaDataMap,tableNameToClassMap);
+						}
+					} // for loop on jar entries ends here
+
+				}
+			}
+		}
+	}
 private static void scanDirectory(File directory,String packageName,Map<Class,EntityMetaData> entitiesMetaMap,Map<String,TableMetaData> tableMetaDataMap,Map<String,Class> tableNameToClassMap) throws Exception 
 {
 for(File file:directory.listFiles())
@@ -42,7 +75,7 @@ ClassLoader classLoader=Thread.currentThread().getContextClassLoader();
 
 try
 {
-String path=basePackage.replace(".",File.separator);
+String path=basePackage.replace(".","/");
 //System.out.println("Path :"+path);
 // Get all resources(directory or jar) for basePackage
 Enumeration<URL> resources=classLoader.getResources(path);
@@ -53,6 +86,7 @@ while(resources.hasMoreElements())
 {
 resource=resources.nextElement();
 //System.out.println("Found resource : "+resource);
+//System.out.println("Resource protocol: " + resource.getProtocol() + " -> " + resource);
 
 // if it's a folder
 if(resource.getProtocol().equals("file"))
@@ -61,35 +95,9 @@ File directory=new File(resource.toURI());
 scanDirectory(directory,basePackage,entitiesMetaMap,tableMetaDataMap,tableNameToClassMap);
 
 }// folder on disk condition ends
-else if(resource.getProtocol().equals("jar"))
-{
-// this how path looks 
-//jar:file:/C:/libs/myLib.jar!/com/example/MyClass.class
-// because of this below line it will become 
-// C:/libs/myLib.jar
-String jarPath=resource.getPath().substring("file:/".length(),resource.getPath().indexOf("!"));
-JarFile jarFile=new JarFile(jarPath);
-
-// going through every entry in the jar file
-for(JarEntry entry:java.util.Collections.list(jarFile.entries()))
-{
-String name=entry.getName();
-
-// only picking .class files inside our package 
-if(name.startsWith(path) && name.endsWith(".class"))
-{
-String className=name.replace("/",".").replace(".class","");
-//System.out.println("Discovered class : "+className);	
-
-Class clazz=Class.forName(className);
-System.out.println("Class loaded : "+clazz.getName());
-handleClassMetaData(clazz,entitiesMetaMap,tableMetaDataMap,tableNameToClassMap);
-}
-} // for loop on jar entries ends here
-
-}// jar part ends here
 
 }// loop ends on resources
+scanClasspathJars(basePackage, entitiesMetaMap, tableMetaDataMap, tableNameToClassMap);
 }catch(ClassNotFoundException | IOException | URISyntaxException exception)
 {
 throw new ORMException(exception.getMessage());
