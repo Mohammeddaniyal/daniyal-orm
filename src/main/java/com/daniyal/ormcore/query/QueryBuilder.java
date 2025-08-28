@@ -99,12 +99,12 @@ public class QueryBuilder<T>
 				ph.append(",");
 			ph.append("?");
 		};
-		processFields(insertProcessor,columns,null,placeholders);
+		processFieldsOnlySQL(insertProcessor,columns,placeholders);
 		
 		String sql="INSERT INTO "+this.tableName+" ("+String.join(",",columns)+") VALUES ("+placeholders.toString()+ ")";
 		return sql;
 	}
-	public String buildUpdateQuery(String primaryKeyColumn) throws ORMException
+	public String buildUpdateSQL(String primaryKeyColumn) throws ORMException
 	{
 		List<String> setClauses=new ArrayList<>();
 		
@@ -116,7 +116,7 @@ public class QueryBuilder<T>
 			}
 			setClauses.add(fieldMetaData.getColumnName()+"=?");
 		};
-		processFields(updateProcessor,setClauses,params,dummy);
+		processFieldsOnlySQL(updateProcessor,setClauses,dummy);
 		String sql="UPDATE "+tableName+" SET "+String.join(",",setClauses)+" WHERE "+primaryKeyColumn+"=?";
 		return sql;
 	}
@@ -125,7 +125,11 @@ public class QueryBuilder<T>
 		String sql="DELETE FROM "+this.tableName+" WHERE "+primaryKeyColumn+"=?";
 		return sql;
 	}
-	
+	public String buildSelectAllSQL() throws ORMException
+	{
+		String sql="SELECT * FROM "+this.tableName;
+		return sql;
+	}
 	public Query buildInsertQuery(FieldMetaData fieldMetaDataWithAutoIncrementOnField) throws ORMException
 	{
 		List<String> columns=new ArrayList<>();
@@ -171,22 +175,23 @@ public class QueryBuilder<T>
 		params.add(primaryKeyValue[0]);
 		return new Query(sql,params);
 	}
-	public Query buildDeleteQuery()throws ORMException
+	public Query buildDeleteQuery(FieldMetaData primaryKeyFieldMetaData)throws ORMException
 	{
-		final String[] primaryKeyColumn={null};
-		final Object[] primaryKeyValue={null};
+		 String primaryKeyColumn=primaryKeyFieldMetaData.getColumnName();
+		 Field field=primaryKeyFieldMetaData.getField();
+		 Object rawValue,validatedValue;
+				try
+				{
+				rawValue=field.get(this.entityInstance);
+				}catch(IllegalAccessException exception)
+				{
+					throw new ORMException("Cannot read value of field '" + field.getName() +"' in entity '" + entityInstance.getClass().getSimpleName() +"'. Ensure the field is accessible (e.g., use @Column and allow access).");		
+				}
+				validatedValue=EntityValidator.validateAndConvert(rawValue,primaryKeyFieldMetaData,columnMetaDataMap.get(primaryKeyFieldMetaData.getColumnName()));
 		
+		String sql="DELETE FROM "+this.tableName+" WHERE "+primaryKeyColumn+"=?";
 		
-		FieldProcessor deleteProcessor=(fieldMetaData,validatedValue,cols,paramList,ph)->{
-			if(fieldMetaData.isPrimaryKey())
-			{
-				primaryKeyColumn[0]=fieldMetaData.getColumnName();
-				primaryKeyValue[0]=validatedValue;
-			}
-		};
-		processFields(deleteProcessor,null,null,null);
-		String sql="DELETE FROM "+this.tableName+" WHERE "+primaryKeyColumn[0]+"=?";
-		List<Object> params=Collections.singletonList(primaryKeyValue[0]);
+		List<Object> params=Collections.singletonList(validatedValue);
 		return new Query(sql,params);
 	}
 	public void addCondition(String condition,Object value)
