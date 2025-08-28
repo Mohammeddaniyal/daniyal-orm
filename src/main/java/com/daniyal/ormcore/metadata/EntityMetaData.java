@@ -1,4 +1,4 @@
-package com.daniyal.ormcore.pojo;
+package com.daniyal.ormcore.metadata;
 import java.lang.reflect.Constructor;
 import java.util.*;
 public class EntityMetaData

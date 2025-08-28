@@ -1,4 +1,4 @@
-package com.daniyal.ormcore.pojo;
+package com.daniyal.ormcore.metadata;
 public class ForeignKeyMetaData
 {
 private String fkTable;

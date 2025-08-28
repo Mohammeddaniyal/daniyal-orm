@@ -1,6 +1,6 @@
 package com.daniyal.ormcore.manager;
 import com.daniyal.ormcore.exceptions.*;
-import com.daniyal.ormcore.pojo.*;
+import com.daniyal.ormcore.metadata.*;
 import java.util.*;
 import java.sql.*;
 public class DatabaseMetaDataLoader

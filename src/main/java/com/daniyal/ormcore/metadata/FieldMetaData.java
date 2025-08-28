@@ -1,26 +1,29 @@
- package com.daniyal.ormcore.pojo;
-public class ColumnMetaData
+package com.daniyal.ormcore.metadata;
+import java.lang.reflect.*;
+public class FieldMetaData
 {
+private Field field;
 private String columnName;
 private boolean isPrimaryKey;
 private boolean isAutoIncrement;
-private boolean isNullable;
 private boolean isForeignKey;
 private ForeignKeyMetaData foreignKeyMetaData;
-private String dataType;
-private int size;
-private int scale;
-public ColumnMetaData()
+public FieldMetaData()
 {
+this.field=null;
 this.columnName="";
 this.isPrimaryKey=false;
 this.isAutoIncrement=false;
-this.isNullable=false;
 this.isForeignKey=false;
 this.foreignKeyMetaData=null;
-this.dataType="";
-this.size=0;
-this.scale=0;
+}
+public void setField(java.lang.reflect.Field field)
+{
+this.field=field;
+}
+public java.lang.reflect.Field getField()
+{
+return this.field;
 }
 public void setColumnName(java.lang.String columnName)
 {
@@ -30,6 +33,7 @@ public java.lang.String getColumnName()
 {
 return this.columnName;
 }
+
 public void setPrimaryKey(boolean isPrimaryKey)
 {
 this.isPrimaryKey=isPrimaryKey;
@@ -46,14 +50,6 @@ public boolean isAutoIncrement()
 {
 return this.isAutoIncrement;
 }
-public void setNullable(boolean isNullable)
-{
-this.isNullable=isNullable;
-}
-public boolean isNullable()
-{
-return this.isNullable;
-}
 public void setForeignKey(boolean isForeignKey)
 {
 this.isForeignKey=isForeignKey;
@@ -69,31 +65,6 @@ this.foreignKeyMetaData=foreignKeyMetaData;
 public ForeignKeyMetaData getForeignKeyMetaData()
 {
 return this.foreignKeyMetaData;
-}
-public void setDataType(java.lang.String dataType)
-{
-this.dataType=dataType;
-}
-public java.lang.String getDataType()
-{
-return this.dataType;
-}
-public void setSize(int size)
-{
-this.size=size;
-}
-public int getSize()
-{
-return this.size;
-}
-
-public void setScale(int Scale)
-{
-	this.scale=scale;
-}
-public int getScale()
-{
-	return this.scale;
 }
 
 }

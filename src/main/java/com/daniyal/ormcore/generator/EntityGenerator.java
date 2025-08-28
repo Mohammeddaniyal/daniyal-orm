@@ -1,5 +1,5 @@
 package com.daniyal.ormcore.generator;
-import com.daniyal.ormcore.pojo.ForeignKeyMetaData;
+import com.daniyal.ormcore.metadata.ForeignKeyMetaData;
 import com.daniyal.ormcore.connection.*;
 import com.daniyal.ormcore.utils.*;
 import com.daniyal.ormcore.config.*;

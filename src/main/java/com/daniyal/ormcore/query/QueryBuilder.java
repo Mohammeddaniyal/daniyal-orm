@@ -1,5 +1,5 @@
 package com.daniyal.ormcore.query;
-import com.daniyal.ormcore.pojo.*;
+import com.daniyal.ormcore.metadata.*;
 import com.daniyal.ormcore.exceptions.*;
 import com.daniyal.ormcore.validation.*;
 import java.util.*;

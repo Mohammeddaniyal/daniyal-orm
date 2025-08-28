@@ -1,6 +1,6 @@
 package com.daniyal.ormcore.validation;
 import com.daniyal.ormcore.exceptions.*;
-import com.daniyal.ormcore.pojo.*;
+import com.daniyal.ormcore.metadata.*;
 import java.util.*;
 import java.sql.*;
 import java.math.*;
