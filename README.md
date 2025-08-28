@@ -106,6 +106,12 @@ It’s that simple.
 * **Config File Setup**
   All DB connection info and base package are defined in `conf.json`. No code changes needed.
 
+* **Automatic Compilation & JAR Packaging**
+  After generating entity classes, the CLI can **compile them into `.class` files** and **package them into a ready-to-use JAR (`dist/pojo.jar`)**. No manual `javac` or `jar` commands needed.
+
+* **SQL Statement Caching for Faster CRUD**
+  SQL statements for each entity are **generated once at metadata load** and cached internally. This eliminates repeated SQL string generation during runtime, improving performance for CRUD operations.
+
 
 ---
 
@@ -240,13 +246,13 @@ public class ExampleUsage {
 
 ## 💻 Command Line Interface (CLI) – Entity Generator & JAR Builder
 
-The Daniyal ORM includes a **CLI tool** that can:
+Daniyal ORM includes a **CLI tool** that can:
 
 * Generate annotated Java entity classes from your database schema
-* Automatically **compile** those entities into `.class` files
-* Package them into a **ready-to-use JAR file**
+* Automatically **compile** the generated `.java` files
+* **Package compiled classes into a JAR** (`dist/pojo.jar`) ready to use in your project
 
-This eliminates the need for manual `javac` and `jar` commands.
+This removes the need for manual `javac` and `jar` commands, giving you a smooth, automated workflow.
 
 ---
 
@@ -263,52 +269,59 @@ java -cp daniyal-orm.jar com.daniyal.ormcore.generator.EntityGenerator \
 ### Arguments
 
 * `--package=` (**required**) – Java package for generated entities
-* `--output=` (**required**) – Directory to create entity files
+* `--output=` (**required**) – Directory where entity files will be created
 * `--tables=` (optional) – Comma-separated list of table names, or `*` for all tables
 * `--config=` (optional) – Path to `conf.json` (defaults to current directory)
-* *(new)* **JAR Packaging:** After generation, entities are compiled and a JAR is created (e.g., `dist/pojo.jar`).
+
+**Phase 13 Additions:**
+
+* After generation, the entities are **compiled automatically**
+* Compiled `.class` files are **packaged into a JAR** (`dist/pojo.jar`)
+* Temporary compilation files are **cleaned up**
 
 ---
 
 ### Examples
 
-Generate and package entities for `student` and `course`:
+**Generate and package entities for specific tables (`student` and `course`):**
 
 ```bash
 java -cp daniyal-orm.jar com.daniyal.ormcore.generator.EntityGenerator \
 --package=com.example.entities --output=. --tables=student,course
 ```
 
-Generate all tables with a custom config and auto-package into a JAR:
+**Generate all tables with a custom config and package into a JAR:**
 
 ```bash
 java -cp daniyal-orm.jar com.daniyal.ormcore.generator.EntityGenerator \
 --package=com.example.entities --output=src/main/java --config=../myproject/conf.json
 ```
 
+> After running these commands, the JAR (`dist/pojo.jar`) can be added directly to your **project’s classpath**.
+
 ---
 
 ### What Happens Internally
 
-1. **Loads DB config** from `conf.json`
-2. **Scans schema metadata**
-3. **Generates entity classes** annotated with `@Table`, `@Column`, etc.
-4. **Compiles** the `.java` files using the Java Compiler API
-5. **Packages** compiled `.class` files into a JAR (`dist/pojo.jar`)
-6. **Cleans up** temporary compilation files
+1. **Load DB config** from `conf.json`
+2. **Scan schema metadata** from the database
+3. **Generate Java entity classes** with proper annotations (`@Table`, `@Column`, etc.)
+4. **Compile `.java` files** programmatically using the Java Compiler API
+5. **Package compiled `.class` files into a JAR** (`dist/pojo.jar`)
+6. **Clean up** temporary compilation files
+
+> You now get fully compiled, packaged entities with **zero manual effort**.
 
 ---
 
 ### Notes
 
-* Always specify `--package` and `--output`
-* By default, the JAR is created in a `dist/` folder
-* Use the JAR directly in your project by adding it to the classpath
-* Run without arguments to see usage help
+* Always specify `--package` and `--output`.
+* By default, the CLI creates a `dist/` folder for the JAR.
+* Temporary compilation files are **removed automatically** after packaging.
+* The generated JAR can be **added directly to your classpath** for usage in your projects.
 
 ---
-
-
 
 
 
