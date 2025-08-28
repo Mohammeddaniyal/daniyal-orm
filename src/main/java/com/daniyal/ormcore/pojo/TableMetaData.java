@@ -11,6 +11,7 @@ public TableMetaData()
 this.tableName="";
 this.columnMetaDataMap=null;
 this.referenceByList=new ArrayList<>();
+this.foreignKeyList=new ArrayList<>();
 }
 public void setTableName(java.lang.String tableName)
 {
