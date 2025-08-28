@@ -7,6 +7,7 @@ private Class entityClass;
 private Constructor entityNoArgConstructor;
 private String tableName;
 private FieldMetaData primaryKeyFieldMetaData;
+private FieldMetaData autoIncrementFieldMetaData;
 private Map<String,FieldMetaData> fieldMetaDataMap;
 public EntityMetaData()
 {
@@ -40,6 +41,10 @@ return this.tableName;
 public void setPrimaryKeyFieldMetaData(FieldMetaData primaryKeyFieldMetaData)
 {
 	this.primaryKeyFieldMetaData=primaryKeyFieldMetaData;
+}
+public void setAutoIncrementFieldMetaData(FieldMetaData autoIncrementFieldMetaData)
+{
+	this.autoIncrementFieldMetaData=autoIncrementFieldMetaData;
 }
 public FieldMetaData getPrimaryKeyFieldMetaData()
 {
