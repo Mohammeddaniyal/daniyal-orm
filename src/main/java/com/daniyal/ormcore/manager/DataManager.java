@@ -27,8 +27,26 @@ this.sqlStatementsMap=null;
 this.tableNameToClassMap=new HashMap<>();
 populateDataStructures();
 }
+public void printAllSQLStatements() {
+    if (sqlStatementsMap == null || sqlStatementsMap.isEmpty()) {
+        System.out.println("No SQL statements found in the map.");
+        return;
+    }
 
-private void printTableMetaData(Map<String, TableMetaData> tablesMetaMap) {
+    for (Map.Entry<Class, SQLStatement> entry : sqlStatementsMap.entrySet()) {
+        Class<?> clazz = entry.getKey();
+        SQLStatement statement = entry.getValue();
+
+        System.out.println("Class: " + clazz.getName());
+        System.out.println("  Insert SQL:    " + statement.getInsertSQL());
+        System.out.println("  Update SQL:    " + statement.getUpdateSQL());
+        System.out.println("  Delete SQL:    " + statement.getDelete());
+        System.out.println("  SelectAll SQL: " + statement.getSelectAllSQL());
+        System.out.println("----------------------------------");
+    }
+}
+
+private static void printTableMetaData(Map<String, TableMetaData> tablesMetaMap) {
     for (Map.Entry<String, TableMetaData> entry : tablesMetaMap.entrySet()) {
         String tableKey = entry.getKey();
         TableMetaData table = entry.getValue();
@@ -118,6 +136,7 @@ this.entityMetaDataMap=EntityScanner.scanBasePackage(this.configLoader.getBasePa
 this.sqlStatementsMap=SQLStatementGenerator.generateSQLStatementMap(this.entityMetaDataMap);
 //printTableMetaData(tablesMetaMap);
 //printEntityMetaDataData();
+//printAllSQLStatements();
 }
 public static DataManager getDataManager() throws ORMException
 {
@@ -158,7 +177,39 @@ public Connection getConnection()
 return dataManager.connection;
 }
 
-
+private List<Object> getParams(String sqlType,Object entityInstance,Map<String,FieldMetaData> fieldMetaDataMap,Map<String,ColumnMetaData> columnMetaDataMap) throws ORMException
+{
+	List<Object> params=new ArrayList<>();
+		FieldMetaData fieldMetaData;
+		Field field;
+		Object rawValue=null;
+		Object validatedValue;
+		ColumnMetaData columnMetaData;
+		Object whereValue=null;
+		boolean insertMode=sqlType.equalsIgnoreCase("insert");
+		boolean updateMode=sqlType.equalsIgnoreCase("update");
+		for(Map.Entry<String,FieldMetaData> entry:fieldMetaDataMap.entrySet())
+		{
+			
+			fieldMetaData=entry.getValue();
+			if(insertMode && fieldMetaData.isAutoIncrement()) continue;
+			field=fieldMetaData.getField();
+			try
+			{
+			rawValue=field.get(entityInstance);
+			}catch(IllegalAccessException exception)
+			{
+				throw new ORMException("Cannot read value of field '" + field.getName() +"' in entity '" + entityInstance.getClass().getSimpleName() +"'. Ensure the field is accessible (e.g., use @Column and allow access).");		
+			}
+			validatedValue=EntityValidator.validateAndConvert(rawValue,fieldMetaData,columnMetaDataMap.get(fieldMetaData.getColumnName()));
+			if(updateMode && fieldMetaData.isPrimaryKey()) 
+				whereValue=validatedValue;
+			else
+				params.add(validatedValue);
+		}
+		if(updateMode) params.add(whereValue);
+	return params;
+}
 public Object save(Object entity)throws ORMException
 {
 if(connection==null)
@@ -205,11 +256,13 @@ for(Map.Entry<String,FieldMetaData> entry:fieldMetaDataMap.entrySet())
 	}
 }
 fieldMetaData=new FieldMetaData();
-String sql;
-QueryBuilder queryBuilder=new QueryBuilder(entity,tableName,fieldMetaDataMap,columnMetaDataMap);
+String sql=this.sqlStatementsMap.get(entityClass).getInsertSQL();
+params=getParams("insert",entity,fieldMetaDataMap,columnMetaDataMap);
+/*QueryBuilder queryBuilder=new QueryBuilder(entity,tableName,fieldMetaDataMap,columnMetaDataMap);
 Query query=queryBuilder.buildInsertQuery(fieldMetaData);
 params=query.getParameters();
 sql=query.getSQL();
+*/
 try
 {
 PreparedStatement preparedStatement=connection.prepareStatement(sql,Statement.RETURN_GENERATED_KEYS);
@@ -217,7 +270,7 @@ int x=1;
 
 for(Object param:params)
 {
-
+System.out.println(param);
 preparedStatement.setObject(x++,param);
 }
 int affectedRow=preparedStatement.executeUpdate();
@@ -233,7 +286,7 @@ if(affectedRow==0)
 ResultSet generatedKeysResultSet=preparedStatement.getGeneratedKeys();
 if(generatedKeysResultSet.next())
 {
-	Field fieldWithAutoIncrement=fieldMetaData.getField();
+	Field fieldWithAutoIncrement=entityMetaData.getAutoIncrementFieldMetaData().getField();
 	
 	Class fieldType=fieldWithAutoIncrement.getType();
 	try
@@ -342,7 +395,7 @@ if(!recordExists(entity,tableName,null,primaryKeyFieldMetaData,columnMetaDataMap
 {
 	throw new ORMException("No record found in table '" + tableName +
     "' for primary key '" + primaryKeyFieldMetaData.getColumnName() +
-    "' with value '" + paramValue + "'.");
+    "' with value '" + paramValue[0] + "'.");
 
 }
 
@@ -367,7 +420,7 @@ for(Map.Entry<String,FieldMetaData> entry:fieldMetaDataMap.entrySet())
 		{
 			throw new ORMException("Foreign key violation: No matching record in parent table '" + pkTbl +
     "' for primary key column '" + pkCol +
-    "' with value '" + paramValue +
+    "' with value '" + paramValue[0] +
     "' (for field '" + fkCol + "').");
 
 		}
@@ -376,16 +429,21 @@ for(Map.Entry<String,FieldMetaData> entry:fieldMetaDataMap.entrySet())
 	}
 }
 
-QueryBuilder queryBuilder=new QueryBuilder(entity,tableName,fieldMetaDataMap,columnMetaDataMap);
+/*QueryBuilder queryBuilder=new QueryBuilder(entity,tableName,fieldMetaDataMap,columnMetaDataMap);
 Query query=queryBuilder.buildUpdateQuery();
 params=query.getParameters();
 sql=query.getSQL();
-
+*/
+fieldMetaData=new FieldMetaData();
+sql=this.sqlStatementsMap.get(entityClass).getUpdateSQL();
+params=getParams("update",entity,fieldMetaDataMap,columnMetaDataMap);
+System.out.println(sql);
 PreparedStatement preparedStatement=connection.prepareStatement(sql);
 int x=1;
 
 for(Object param:params)
 {
+	System.out.println(param);
 preparedStatement.setObject(x++,param);
 }
 int affectedRow=preparedStatement.executeUpdate();
@@ -429,7 +487,7 @@ if(!recordExists(entity,tableName,null,primaryKeyFieldMetaData,columnMetaDataMap
 {
 	throw new ORMException("No record found in table '" + tableName +
     "' for primary key '" + primaryKeyFieldMetaData.getColumnName() +
-    "' with value '" + paramValue + "'.");
+    "' with value '" + paramValue[0] + "'.");
 
 }
 
@@ -454,7 +512,7 @@ for(ForeignKeyMetaData foreignKeyMetaData:tableMetaData.getReferenceByList())
 }
 String sql;
 QueryBuilder queryBuilder=new QueryBuilder(entity,tableName,fieldMetaDataMap,columnMetaDataMap);
-Query query=queryBuilder.buildDeleteQuery();
+Query query=queryBuilder.buildDeleteQuery(entityMetaData.getPrimaryKeyFieldMetaData());
 params=query.getParameters();
 sql=query.getSQL();
 
