@@ -5,6 +5,7 @@ public class SQLStatement
 	private String updateSQL;
 	private String deleteSQL;
 	private String selectAllSQL;
+	private Map<String,String> existsByColumnSQLMap;
 	public SQLStatement(){}
 	public SQLStatement(String insertSQL,String updateSQL,String deleteSQL,String selectAllSQL)
 	{
@@ -44,5 +45,13 @@ public class SQLStatement
 	public String getSelectAllSQL()
 	{
 		return this.selectAllSQL;
+	}
+	public void setExistsByColumnSQLMap(Map<String,String> existsByColumnSQLMap)
+	{
+		this.existsByColumnSQLMap=existsByColumnSQLMap;
+	}
+	public Map<String,String> getExistsByColumnSQLMap()
+	{
+		return this.existsByColumnSQLMap;
 	}
 }
