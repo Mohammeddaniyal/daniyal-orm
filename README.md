@@ -131,8 +131,8 @@ com.daniyal.ormcore
 ├───connection        # ConnectionManager.java
 ├───exceptions        # ORMException.java
 ├───generator         # CLI EntityGenerator
-├───manager           # DataManager, EntityScanner, DatabaseMetaDataLoader
-├───pojo              # Metadata classes
+├───manager           # DataManager, EntityScanner, DatabaseMetaDataLoader, SQLStatementGenerator
+├───metadata          # Metadata classes	
 ├───query             # Query, QueryBuilder, FieldProcessor
 ├───utils             # CaseConvertor, TypeMapper
 └───validation        # EntityValidator.java
@@ -234,7 +234,7 @@ public class ExampleUsage {
 
             // Query Example - fetch all courses
             List<Course> courseList = dm.query(Course.class).list();
-            System.out.println("ID  |  Name");
+				System.out.println("ID  |  Name");
             for (Course c : courseList) {
                 System.out.println(c.getId() + "   " + c.getName());
             }
@@ -270,7 +270,7 @@ java -cp daniyal-orm.jar com.daniyal.ormcore.generator.EntityGenerator \
 --package=com.example.entities \
 --output=src/main/java \
 --tables=student,course \
---views=view1,view2 \
+--views=student_summary,course_stats \
 --config=path/to/conf.json
 ```
 
@@ -279,7 +279,7 @@ java -cp daniyal-orm.jar com.daniyal.ormcore.generator.EntityGenerator \
 * `--package=` (**required**) – Java package for generated entities
 * `--output=` (**required**) – Directory where entity files will be created
 * `--tables=` (optional) – Comma-separated list of table names, or `*` for all tables
-* `--views=` (optional) – Comma-separated list of view names to generate, or `*` for all views.
+* `--views=` (optional) – Comma-separated list of view names to generate, or `*` for all views
 * `--config=` (optional) – Path to `conf.json` (defaults to current directory)
 
 **Phase 13 Additions:**
@@ -305,11 +305,14 @@ java -cp daniyal-orm.jar com.daniyal.ormcore.generator.EntityGenerator \
 java -cp daniyal-orm.jar com.daniyal.ormcore.generator.EntityGenerator \
 --package=com.example.entities --output=src/main/java --config=../myproject/conf.json
 ```
-** Generate and package entities for specific tables and views :**
+**Generate tables and views (`student`, `course` + `student_summary`, `course_stats`):**
+
+```bash
 java -cp daniyal-orm.jar com.daniyal.ormcore.generator.EntityGenerator \
 --package=com.example.entities --output=. --tables=student,course --views=student_summary,course_stats
+```
 
-> After running these commands, the JAR (`dist/pojo.jar`) can be added directly to your **project’s classpath**.
+> The resulting JAR (`dist/pojo.jar`) can be added directly to your **project’s classpath**.
 
 ---
 
