@@ -33,13 +33,18 @@ String isNullable;
 String autoIncrement;
 boolean isPrimaryKey;
 Map<String,ColumnMetaData> columnMetaDataMap;
+List<ForeignKeyMetaData> foreignKeyList;
 while(tablesResultSet.next())
 {
 
 tableName=tablesResultSet.getString("TABLE_NAME");
+// doing so, gettting from map the reason is in case if a current tableMetaData is pointing to a table which is parent
+// constraint foreign key, so in this case if the TableMetaData object is not in the Map so we created the instance
+// and put it in the map and also updated the value for referenceByList ArrayList<> which hold ForeignKeyMetaData
+// for those tables which are childs
 tableMetaData=tableMetaDataMap.get(tableName);
 if(tableMetaData==null) tableMetaData=new TableMetaData();
-
+foreignKeyList=tableMetaData.getForeignKeyList();
 tableMetaData.setTableName(tableName);
 
 keysResultSet=databaseMetaData.getPrimaryKeys(connection.getCatalog(),null,tableName);
@@ -63,7 +68,12 @@ foreignKeyMetaData.setPKTable(pkTbl);
 foreignKeyMetaData.setPKColumn(pkCol);
 foreignKeyColumnsMap.put(fkCol,foreignKeyMetaData);
 
+// update the foreignKeyList for the table
+foreignKeyList.add(foreignKeyMetaData);
+
 // now check is parent TableMetaData exists
+// updating the parent table referenceByList(which hold the ForeignKeyMetaData) pointing or meta data about
+// the childs of the table
 TableMetaData parentTableMetaData=tableMetaDataMap.get(pkTbl);
 List<ForeignKeyMetaData> referenceByList;
 
