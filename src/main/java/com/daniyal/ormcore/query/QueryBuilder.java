@@ -63,6 +63,16 @@ public class QueryBuilder<T>
 				processor.process(fieldMetaData,validatedValue,columns,params,placeholders);
 			}
 	}
+	private void processFieldsOnlySQL(FieldProcessor processor,List<String> columns,StringBuilder placeHolder)
+	{
+			FieldMetaData fieldMetaData;
+			Field field;
+			for(Map.Entry<String,FieldMetaData> entry:fieldMetaDataMap.entrySet())
+			{
+				fieldMetaData=entry.getValue();
+				processor.process(fieldMetaData,null,columns,null,placeholders);
+			}
+	}
 	public Query buildInsertQuery(FieldMetaData fieldMetaDataWithAutoIncrementOnField) throws ORMException
 	{
 		List<String> columns=new ArrayList<>();
@@ -222,4 +232,5 @@ public class QueryBuilder<T>
 		List<Object> params=Collections.singletonList(validatedValue);
 		return new Query(sql,params);
 	}
+	
 }
