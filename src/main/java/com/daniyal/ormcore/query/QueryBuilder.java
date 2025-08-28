@@ -102,7 +102,7 @@ public class QueryBuilder<T>
 		processFields(insertProcessor,columns,null,placeholders);
 		
 		String sql="INSERT INTO "+this.tableName+" ("+String.join(",",columns)+") VALUES ("+placeholders.toString()+ ")";
-		return new sql;
+		return sql;
 	}
 	public String buildUpdateQuery(String primaryKeyColumn) throws ORMException
 	{
@@ -120,7 +120,7 @@ public class QueryBuilder<T>
 		String sql="UPDATE "+tableName+" SET "+String.join(",",setClauses)+" WHERE "+primaryKeyColumn+"=?";
 		return sql;
 	}
-	public static String buildDeleteSQL(String primaryKeyColumn)throws ORMException
+	public String buildDeleteSQL(String primaryKeyColumn)throws ORMException
 	{
 		String sql="DELETE FROM "+this.tableName+" WHERE "+primaryKeyColumn+"=?";
 		return sql;
