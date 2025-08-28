@@ -17,12 +17,14 @@ private Connection connection;
 private Map<Class,EntityMetaData> entityMetaDataMap;
 private Map<String,TableMetaData> tablesMetaMap;
 private Map<Class,SQLStatement> sqlStatementsMap;
+private Map<String,Class> tableNameToClassMap;
 private DataManager() throws ORMException
 {
 this.configLoader=new ConfigLoader("conf.json");
 this.connection=null;
 this.entityMetaDataMap=null;
 this.sqlStatementsMap=null;
+this.tableNameToClassMap=new HashMap<>();
 populateDataStructures();
 }
 
@@ -112,8 +114,8 @@ System.out.println("------------------------------------------------------------
 private void populateDataStructures() throws ORMException
 {
 this.tablesMetaMap=DatabaseMetaDataLoader.loadTableMetaData(ConnectionManager.getConnection(configLoader));
-this.entityMetaDataMap=EntityScanner.scanBasePackage(this.configLoader.getBasePackage(),tablesMetaMap);
-this.sqlStatementsMap=SQLStatement.generateSQLStatementMap(this.entityMetaDataMap);
+this.entityMetaDataMap=EntityScanner.scanBasePackage(this.configLoader.getBasePackage(),tablesMetaMap,tableNameToClassMap);
+this.sqlStatementsMap=SQLStatementGenerator.generateSQLStatementMap(this.entityMetaDataMap);
 //printTableMetaData(tablesMetaMap);
 //printEntityMetaDataData();
 }
