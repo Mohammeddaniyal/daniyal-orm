@@ -16,7 +16,7 @@ public class QueryBuilder<T>
 	private final Constructor<T> entityNoArgConstructor;
 	private final List<String> conditions;
 	private final List<Object> params;
-	public QueryBuilder(String tableName,Map<String,FieldMetaData> fieldMetaData)
+	public QueryBuilder(String tableName,Map<String,FieldMetaData> fieldMetaDataMap)
 	{
 		this.tableName=tableName;
 		this.fieldMetaDataMap=fieldMetaDataMap;
@@ -75,7 +75,7 @@ public class QueryBuilder<T>
 				processor.process(fieldMetaData,validatedValue,columns,params,placeholders);
 			}
 	}
-	private void processFieldsOnlySQL(FieldProcessor processor,List<String> columns,StringBuilder placeHolder)
+	private void processFieldsOnlySQL(FieldProcessor processor,List<String> columns,StringBuilder placeholders) throws ORMException
 	{
 			FieldMetaData fieldMetaData;
 			for(Map.Entry<String,FieldMetaData> entry:fieldMetaDataMap.entrySet())
@@ -84,7 +84,23 @@ public class QueryBuilder<T>
 				processor.process(fieldMetaData,null,columns,null,placeholders);
 			}
 	}
-	public String buildInsertSQL(FieldMetaData
+	public String buildInsertSQL() throws ORMException
+	{
+		List<String> columns=new ArrayList<>();
+		StringBuilder placeholders=new StringBuilder();
+		
+		FieldProcessor insertProcessor=(fieldMetaData,validatedValue,cols,paramList,ph)->{
+			columns.add(fieldMetaData.getColumnName());
+			if(ph.length()>0) 
+				ph.append(",");
+			ph.append("?");
+		};
+		processFields(insertProcessor,columns,null,placeholders);
+		
+		String sql="INSERT INTO "+this.tableName+" ("+String.join(",",columns)+") VALUES ("+placeholders.toString()+ ")";
+		return new sql;
+	}
+	
 	public Query buildInsertQuery(FieldMetaData fieldMetaDataWithAutoIncrementOnField) throws ORMException
 	{
 		List<String> columns=new ArrayList<>();
