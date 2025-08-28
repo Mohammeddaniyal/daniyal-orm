@@ -6,12 +6,14 @@ private String tableName;
 private Map<String,ColumnMetaData> columnMetaDataMap;
 private List<ForeignKeyMetaData> referenceByList;
 private List<ForeignKeyMetaData> foreignKeyList;
+private boolean isView;
 public TableMetaData()
 {
 this.tableName="";
 this.columnMetaDataMap=null;
 this.referenceByList=new ArrayList<>();
 this.foreignKeyList=new ArrayList<>();
+this.isView=false;
 }
 public void setTableName(java.lang.String tableName)
 {
@@ -44,5 +46,13 @@ public void setForeignKeyList(List<ForeignKeyMetaData> foreignKeyList)
 public List<ForeignKeyMetaData> getForeignKeyList()
 {
 	return this.foreignKeyList;
+}
+public void setView(boolean isView)
+{
+	this.isView=isView;
+}
+public boolean isView()
+{
+	return this.isView;
 }
 }
