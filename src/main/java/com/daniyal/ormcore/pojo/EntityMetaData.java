@@ -9,11 +9,13 @@ private String tableName;
 private FieldMetaData primaryKeyFieldMetaData;
 private FieldMetaData autoIncrementFieldMetaData;
 private Map<String,FieldMetaData> fieldMetaDataMap;
+private boolean isView;
 public EntityMetaData()
 {
 this.entityClass=null;
 this.tableName="";
 this.fieldMetaDataMap=null;
+this.isView=false;
 }
 
 public void setEntityClass(Class entityClass)
@@ -65,5 +67,13 @@ public void setEntityNoArgConstructor(Constructor entityNoArgConstructor)
 public Constructor getEntityNoArgConstructor()
 {
 	return entityNoArgConstructor;
+}
+public void setView(boolean isView)
+{
+this.isView=isView;	
+}
+public boolean isView()
+{
+	return this.isView;
 }
 }
