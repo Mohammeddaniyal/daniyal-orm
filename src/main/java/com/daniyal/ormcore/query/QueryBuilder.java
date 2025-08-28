@@ -100,6 +100,33 @@ public class QueryBuilder<T>
 		String sql="INSERT INTO "+this.tableName+" ("+String.join(",",columns)+") VALUES ("+placeholders.toString()+ ")";
 		return new sql;
 	}
+	public Query buildUpdateQuery() throws ORMException
+	{
+		List<String> setClauses=new ArrayList<>();
+		List<Object> params=new ArrayList<>();
+		StringBuilder dummy=new StringBuilder();
+		final String[] primaryKeyColumn={null};
+		final Object[] primaryKeyValue={null};
+		FieldProcessor updateProcessor=(fieldMetaData,validatedValue,cols,paramList,ph)->{
+			if(fieldMetaData.isPrimaryKey())
+			{
+				primaryKeyColumn[0]=fieldMetaData.getColumnName();
+				primaryKeyValue[0]=validatedValue;
+				return;
+			}
+			setClauses.add(fieldMetaData.getColumnName()+"=?");
+			params.add(validatedValue);
+		};
+		processFields(updateProcessor,setClauses,params,dummy);
+		String sql="UPDATE "+tableName+" SET "+String.join(",",setClauses)+" WHERE "+primaryKeyColumn[0]+"=?";
+		params.add(primaryKeyValue[0]);
+		return new Query(sql,params);
+	}
+	public static String buildDeleteSQL(String primaryKeyColumn)throws ORMException
+	{
+		String sql="DELETE FROM "+this.tableName+" WHERE "+primaryKeyColumn+"=?";
+		return sql;
+	}
 	
 	public Query buildInsertQuery(FieldMetaData fieldMetaDataWithAutoIncrementOnField) throws ORMException
 	{
