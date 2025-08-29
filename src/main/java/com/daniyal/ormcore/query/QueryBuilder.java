@@ -5,7 +5,7 @@ import com.daniyal.ormcore.validation.*;
 import java.util.*;
 import java.lang.reflect.*;
 import java.sql.*;
-public class QueryBuilder<T>
+public class QueryBuilder<T> implements Queryable
 {
 	private final Connection connection;
 	private final String tableName;
@@ -217,17 +217,17 @@ public class QueryBuilder<T>
 	public Condition<T> where(String column)
 	{
 		this.conditions.add(" WHERE ");
-		return new Condition(this,column);
+		return new QueryCondition(this,column);
 	}
 	public Condition<T> or(String column)
 	{
 		this.conditions.add(" OR ");
-		return new Condition(this,column);
+		return new QueryCondition(this,column);
 	}
 	public Condition<T> and(String column)
 	{
 		this.conditions.add(" AND ");
-		return new Condition(this,column);
+		return new QueryCondition(this,column);
 	}
 	public List<T> list() throws ORMException
 	{
