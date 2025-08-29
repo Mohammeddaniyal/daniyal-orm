@@ -18,6 +18,7 @@ private Map<Class,EntityMetaData> entityMetaDataMap;
 private Map<String,TableMetaData> tablesMetaMap;
 private Map<Class,SQLStatement> sqlStatementsMap;
 private Map<String,Class> tableNameToClassMap;
+private Map<Class,List<?>> entityCacheMap;
 private DataManager() throws ORMException
 {
 this.configLoader=new ConfigLoader("conf.json");
@@ -25,6 +26,7 @@ this.connection=null;
 this.entityMetaDataMap=null;
 this.sqlStatementsMap=null;
 this.tableNameToClassMap=new HashMap<>();
+this.entityCacheMap=new HashMap<>();
 populateDataStructures();
 }
 public void printAllSQLStatements() {
@@ -57,7 +59,7 @@ public void printAllSQLStatements() {
     }
 }
 
-private static void printTableMetaData(Map<String, TableMetaData> tablesMetaMap) {
+private void printTableMetaData(Map<String, TableMetaData> tablesMetaMap) {
     for (Map.Entry<String, TableMetaData> entry : tablesMetaMap.entrySet()) {
         String tableKey = entry.getKey();
         TableMetaData table = entry.getValue();
@@ -102,8 +104,43 @@ private static void printTableMetaData(Map<String, TableMetaData> tablesMetaMap)
         System.out.println("-------------------------------------");
     }
 }
-
-private void printEntityMetaDataData()
+private  void printEntityCache()
+{
+	
+	for(Map.Entry<Class,List<?>> entry:entityCacheMap.entrySet())
+	{
+		List<?> list=entry.getValue();
+		Class clazz=entry.getKey();
+	printList(clazz,list);
+	}
+}
+private void printList(Class clazz,List<?> list)
+{
+	for(Object instance:list)
+	{
+		printInstanceValue(clazz,instance);
+	}
+}
+private void printInstanceValue(Class clazz,Object instance)
+{
+	try{
+	EntityMetaData entity=entityMetaDataMap.get(clazz);
+	System.out.println("-------------------"+entity.getTableName()+"------------------------");
+	Map<String,FieldMetaData> fieldMetaDataMap=entity.getFieldMetaDataMap();	
+	for(Map.Entry<String,FieldMetaData> entry:fieldMetaDataMap.entrySet())
+	{
+		FieldMetaData fieldMetaData=entry.getValue();
+		System.out.println(fieldMetaData.getColumnName()+" : "+fieldMetaData.getField().get(instance));
+	}
+	System.out.println("----------------------------------------------------------");
+	}catch(IllegalAccessException ex)
+	{
+		System.out.println(ex.getMessage());
+		System.exit(1);
+	}
+	
+}
+private void printEntityMetaData()
 {
 System.out.println("----------------------------------------------------------------------------------");
 System.out.println("EntityMetaDataData");
@@ -143,11 +180,19 @@ System.out.println("------------------------------------------------------------
 private void populateDataStructures() throws ORMException
 {
 this.tablesMetaMap=DatabaseMetaDataLoader.loadTableMetaData(ConnectionManager.getConnection(configLoader));
-this.entityMetaDataMap=EntityScanner.scanBasePackage(this.configLoader.getBasePackage(),tablesMetaMap,tableNameToClassMap);
+Connection connection=ConnectionManager.getConnection(configLoader);
+this.entityMetaDataMap=EntityScanner.scanBasePackage(connection,this.configLoader.getBasePackage(),tablesMetaMap,tableNameToClassMap,entityCacheMap);
+try{
+connection.close();
+}catch(SQLException sqlException)
+{
+	throw new ORMException(sqlException.getMessage());
+}
 this.sqlStatementsMap=SQLStatementGenerator.generateSQLStatementMap(this.entityMetaDataMap);
 //printTableMetaData(tablesMetaMap);
 //printEntityMetaDataData();
 //printAllSQLStatements();
+//printEntityCache();
 }
 public static DataManager getDataManager() throws ORMException
 {
@@ -595,7 +640,7 @@ throw new ORMException(sqlException.getMessage());
 }
 }
 
-public <T> QueryBuilder<T> query(Class<T> entityClass) throws ORMException
+public <T> Queryable<T> query(Class<T> entityClass) throws ORMException
 {
 if(connection==null)
 {
@@ -608,10 +653,16 @@ if(entityMetaData==null)
 {
 throw new ORMException("Entity class '" + entityClass.getName() + "' is not registered. " +"Make sure it is annotated with @Table and included in the base package defined in conf.json.");
 }
-String tableName=entityMetaData.getTableName();
-QueryBuilder<T> queryBuilder=new QueryBuilder(connection,entityClass,entityMetaData.getEntityNoArgConstructor(),entityMetaData.getFieldMetaDataMap(),tableName);
-return queryBuilder;
+Queryable<T> queryable;
+if(entityMetaData.isCacheable())
+{
+	queryable=new CachedQueryBuilder<T>(entityClass,entityMetaData.getEntityNoArgConstructor(),entityMetaData.getFieldMetaDataMap(),(List<T>)this.entityCacheMap.get(entityClass));
 }
-
-
+else
+{
+String tableName=entityMetaData.getTableName();
+queryable=new QueryBuilder(connection,entityClass,entityMetaData.getEntityNoArgConstructor(),entityMetaData.getFieldMetaDataMap(),tableName);
+}
+return queryable;
+}
 }
