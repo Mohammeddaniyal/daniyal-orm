@@ -119,6 +119,16 @@ It’s that simple.
   - Read-only: no primary key or auto-increment; insert/update/delete are disabled.
   - Supports dynamic SELECT queries with fluent API.
 
+* **Entity Caching with @Cacheable**  
+  - Mark an entity with `@Cacheable` to preload its data into memory at startup.  
+  - The ORM automatically fetches all rows of that entity during scanning and stores them in a centralized cache.  
+  - Queries on cached entities are served directly from memory, reducing DB calls.  
+  - Safe usage: cached lists are deep-cloned before being returned, preventing accidental state corruption.  
+
+* **Unified Query Abstraction**  
+  - A common `Queryable<T>` API hides the difference between **database-backed queries** and **in-memory cached queries**.  
+  - If the entity is cacheable, `query()` returns a `CachedQueryBuilder`; otherwise, it returns the standard `QueryBuilder`.  
+  - This gives a **consistent query experience** whether working with DB or cache.
 
 ---
 
@@ -126,16 +136,57 @@ It’s that simple.
 
 ```
 com.daniyal.ormcore
-├───annotations       # @Table, @Column, @PrimaryKey, @AutoIncrement, @ForeignKey
-├───config            # ConfigLoader.java
-├───connection        # ConnectionManager.java
-├───exceptions        # ORMException.java
-├───generator         # CLI EntityGenerator
-├───manager           # DataManager, EntityScanner, DatabaseMetaDataLoader, SQLStatementGenerator
-├───metadata          # Metadata classes	
-├───query             # Query, QueryBuilder, FieldProcessor
-├───utils             # CaseConvertor, TypeMapper
-└───validation        # EntityValidator.java
+├───annotations        # ORM annotations (@Table, @Column, @PrimaryKey, @AutoIncrement, @ForeignKey, @Cacheable, @View)
+│       AutoIncrement.java
+│       Cacheable.java
+│       Column.java
+│       ForeignKey.java
+│       PrimaryKey.java
+│       Table.java
+│       View.java
+│
+├───config             # Configuration loading
+│       ConfigLoader.java
+│
+├───connection         # Database connection handling
+│       ConnectionManager.java
+│
+├───exceptions         # Custom ORM exceptions
+│       ORMException.java
+│
+├───generator          # CLI: Entity generation from DB schema
+│       EntityGenerator.java
+│
+├───manager            # Core managers (scanning, metadata, SQL, data orchestration)
+│       DatabaseMetaDataLoader.java
+│       DataManager.java
+│       EntityScanner.java
+│       SQLStatementGenerator.java
+│
+├───metadata           # Metadata models (table/column/entity/SQL)
+│       ColumnMetaData.java
+│       EntityMetaData.java
+│       FieldMetaData.java
+│       ForeignKeyMetaData.java
+│       SQLStatement.java
+│       TableMetaData.java
+│
+├───query              # Query abstraction (DB vs Cache)
+│       CachedCondition.java
+│       CachedQueryBuilder.java
+│       Condition.java
+│       FieldProcessor.java
+│       Query.java
+│       Queryable.java
+│       QueryBuilder.java
+│       QueryCondition.java
+│
+├───utils              # Helper utilities
+│       CaseConvertor.java
+│       TypeMapper.java
+│
+└───validation         # Validation of entities/annotations
+        EntityValidator.java
 ```
 
 ---
@@ -325,6 +376,10 @@ java -cp daniyal-orm.jar com.daniyal.ormcore.generator.EntityGenerator \
 5. **Package compiled `.class` files into a JAR** (`dist/pojo.jar`)
 6. **Clean up** temporary compilation files
 7. Optionally **generate POJOs for views** marked with `@View` when `--views` is specified.
+8. **Preload cache for `@Cacheable` entities**  
+   - During metadata scanning, entities marked with `@Cacheable` are fetched completely from the DB.  
+   - Their rows are stored in `entityCacheMap`.  
+   - Queries on these entities are resolved from the in-memory cache instead of hitting the DB.
 
 > You now get fully compiled, packaged entities with **zero manual effort**.
 
@@ -350,6 +405,8 @@ java -cp daniyal-orm.jar com.daniyal.ormcore.generator.EntityGenerator \
 * Currently MySQL-only; other DBs can be added in the future.
 * View entities are **read-only**; insert, update, delete operations are not supported.
 * Use `@View` annotation to clearly distinguish view POJOs from table entities.
+* Currently, cached entities only support `.list()` retrieval.  
+* Advanced filtering (`where()`, `eq()`, etc.) on cached lists will be supported in future phases.  
 
 ---
 
