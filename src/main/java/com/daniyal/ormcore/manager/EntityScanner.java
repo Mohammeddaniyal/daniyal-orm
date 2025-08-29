@@ -3,15 +3,17 @@ import com.daniyal.ormcore.metadata.*;
 import com.daniyal.ormcore.utils.*;
 import com.daniyal.ormcore.exceptions.*;
 import com.daniyal.ormcore.annotations.*;
+import com.daniyal.ormcore.query.*;
 import java.lang.reflect.*;
 import java.lang.annotation.*;
 import java.util.*;
 import java.io.*;
 import java.net.*;
 import java.util.jar.*;
+import java.sql.*;
 class EntityScanner
 {
-	private static void scanClasspathJars(String basePackage,Map<Class,EntityMetaData> entitiesMetaMap,Map<String,TableMetaData> tableMetaDataMap,Map<String,Class> tableNameToClassMap) throws Exception 
+	private static void scanClasspathJars(Connection connection,String basePackage,Map<Class,EntityMetaData> entitiesMetaMap,Map<String,TableMetaData> tableMetaDataMap,Map<String,Class> tableNameToClassMap,Map<Class,List<?>> entityCacheMap) throws Exception 
 	{
 		String classpath=System.getProperty("java.class.path");
 		String[] entries=classpath.split(File.pathSeparator);
@@ -36,7 +38,7 @@ class EntityScanner
 
 							Class clazz=Class.forName(className);
 							//System.out.println("Class loaded : "+clazz.getName());
-							handleClassMetaData(clazz,entitiesMetaMap,tableMetaDataMap,tableNameToClassMap);
+							handleClassMetaData(connection,clazz,entitiesMetaMap,tableMetaDataMap,tableNameToClassMap,entityCacheMap);
 						}
 					} // for loop on jar entries ends here
 
@@ -44,13 +46,13 @@ class EntityScanner
 			}
 		}
 	}
-private static void scanDirectory(File directory,String packageName,Map<Class,EntityMetaData> entitiesMetaMap,Map<String,TableMetaData> tableMetaDataMap,Map<String,Class> tableNameToClassMap) throws Exception 
+private static void scanDirectory(Connection connection,File directory,String packageName,Map<Class,EntityMetaData> entitiesMetaMap,Map<String,TableMetaData> tableMetaDataMap,Map<String,Class> tableNameToClassMap,Map<Class,List<?>> entityCacheMap) throws Exception 
 {
 for(File file:directory.listFiles())
 {
 if(file.isDirectory())
 {
-scanDirectory(file,packageName+"."+file.getName(),entitiesMetaMap,tableMetaDataMap,tableNameToClassMap);
+scanDirectory(connection,file,packageName+"."+file.getName(),entitiesMetaMap,tableMetaDataMap,tableNameToClassMap,entityCacheMap);
 }
 else if(file.getName().endsWith(".class"))
 {
@@ -60,13 +62,13 @@ String className=packageName+"."+file.getName().replace(".class","");
 Class clazz=Class.forName(className);
 //System.out.println("Class loaded : "+clazz.getName());
 
-handleClassMetaData(clazz,entitiesMetaMap,tableMetaDataMap,tableNameToClassMap);
+handleClassMetaData(connection,clazz,entitiesMetaMap,tableMetaDataMap,tableNameToClassMap,entityCacheMap);
 }
 }// for loop ends on directory files list
 
 }
 
-public static Map<Class,EntityMetaData> scanBasePackage(String basePackage,Map<String,TableMetaData> tableMetaDataMap,Map<String,Class> tableNameToClassMap) throws ORMException
+public static Map<Class,EntityMetaData> scanBasePackage(Connection connection,String basePackage,Map<String,TableMetaData> tableMetaDataMap,Map<String,Class> tableNameToClassMap,Map<Class,List<?>> entityCacheMap) throws ORMException
 {
 Map<Class,EntityMetaData> entitiesMetaMap=new HashMap<>();
 ClassLoader classLoader=Thread.currentThread().getContextClassLoader();
@@ -93,13 +95,13 @@ if(resource.getProtocol().equals("file"))
 {
 File directory=new File(resource.toURI());
 
-scanDirectory(directory,basePackage,entitiesMetaMap,tableMetaDataMap,tableNameToClassMap);
+scanDirectory(connection,directory,basePackage,entitiesMetaMap,tableMetaDataMap,tableNameToClassMap,entityCacheMap);
 
 }// folder on disk condition ends
 
 }// loop ends on resources
 
-	scanClasspathJars(basePackage, entitiesMetaMap, tableMetaDataMap, tableNameToClassMap);
+	scanClasspathJars(connection,basePackage, entitiesMetaMap, tableMetaDataMap, tableNameToClassMap,entityCacheMap);
 }catch(ClassNotFoundException | IOException | URISyntaxException exception)
 {
 throw new ORMException(exception.getMessage());
@@ -112,7 +114,7 @@ return entitiesMetaMap;
 }// function ends
 
 
-private static void handleClassMetaData(Class clazz,Map<Class,EntityMetaData> entitiesMetaMap,Map<String,TableMetaData> tableMetaDataMap,Map<String,Class> tableNameToClassMap) throws ORMException
+private static void handleClassMetaData(Connection connection,Class clazz,Map<Class,EntityMetaData> entitiesMetaMap,Map<String,TableMetaData> tableMetaDataMap,Map<String,Class> tableNameToClassMap,Map<Class,List<?>> entityCacheMap) throws ORMException
 {
 Table tableAnnotation=(Table)clazz.getAnnotation(Table.class);
 View viewAnnotation=(View)clazz.getAnnotation(View.class);
@@ -153,6 +155,9 @@ if(isView)
 else
 	throw new ORMException("No table exists with name "+tableName);
 }	
+
+boolean isCacheable=clazz.isAnnotationPresent(Cacheable.class);
+
 Constructor entityNoArgConstructor=null;
 try
 {
@@ -333,10 +338,24 @@ entityMetaData.setPrimaryKeyFieldMetaData(primaryKeyFieldMetaData);
 entityMetaData.setAutoIncrementFieldMetaData(autoIncrementFieldMetaData);
 entityMetaData.setFieldMetaDataMap(fieldMetaDataMap);
 entityMetaData.setView(isView);
+entityMetaData.setCacheable(isCacheable);
 entitiesMetaMap.put(clazz,entityMetaData);
 tableNameToClassMap.put(tableName,clazz);
 
+
+// pre load the data from the database
+if(isCacheable)
+	putCacheList(entityCacheMap,clazz,getList(clazz,connection,entityMetaData));
 }// function ends
 
+private static <T> List<T> getList(Class<T> clazz,Connection connection,EntityMetaData entityMetaData) throws ORMException
+{
+	QueryBuilder<T> queryBuilder=new QueryBuilder(connection,clazz,entityMetaData.getEntityNoArgConstructor(),entityMetaData.getFieldMetaDataMap(),entityMetaData.getTableName());
+	return queryBuilder.list();
+}
+private static <T> void putCacheList(Map<Class,List<?>> entityCacheMap,Class<T> clazz,List<T> list)
+{
+	entityCacheMap.put(clazz,list);
+}
 }// class ends 
 
