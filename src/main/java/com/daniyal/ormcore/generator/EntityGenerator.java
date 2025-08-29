@@ -34,6 +34,7 @@ java -cp daniyal-orm.jar;. com.daniyal.ormcore.generator.EntityGenerator --packa
 	String viewsArg=null;
 	String outputDir=null;
 	String config=null;
+	String cacheableArg=null;
 	for(String arg:args)
 	{
 		if(arg.startsWith("--package="))
@@ -48,6 +49,9 @@ java -cp daniyal-orm.jar;. com.daniyal.ormcore.generator.EntityGenerator --packa
 		}else if(arg.startsWith("--views="))
 		{
 			viewsArg=arg.substring("--views=".length());
+		}else if(arg.startsWith("--cacheable="))
+		{
+			cacheableArg=arg.substring("--cacheable=".length());
 		}else if(arg.startsWith("--config="))
 		{
 			config=arg.substring("--config=".length());
@@ -127,6 +131,26 @@ java -cp daniyal-orm.jar;. com.daniyal.ormcore.generator.EntityGenerator --packa
 			System.exit(1);
 		}
 	}
+	boolean cacheAll=false;
+	Set<String> cacheableSet=null;
+	if(cacheableArg==null)
+	{
+		cacheAll=true;
+	}else if(cacheableArg.equals("*"))
+	{
+		cacheAll=true;
+	}
+	else
+	{
+		try
+		{
+		cacheableSet=new HashSet<>(Arrays.asList(cacheableArg.split(",")));
+		}catch(Exception e)
+		{
+			System.out.println("Invalid '--cacheable=' argument");
+			System.exit(1);
+		}
+	}
 Connection connection=ConnectionManager.getConnection(configLoader);
 
 DatabaseMetaData meta=connection.getMetaData();
@@ -143,6 +167,9 @@ StringBuilder classBuilder=new StringBuilder();
 StringBuilder constructorBuilder=new StringBuilder();
 StringBuilder setterGetterBuilder=new StringBuilder();
 boolean isView=false;
+String cacheableAnnotationString="@Cacheable";
+
+boolean cacheable=false;
 while(tables.next())
 {
 String tableName=tables.getString("TABLE_NAME");
@@ -163,6 +190,16 @@ if(!allTables)
 	if(!tableSet.contains(tableName)) continue;
 }
 }
+
+if(cacheAll)
+{
+	cacheable=true;
+}
+else if(cacheableSet.contains(tableName))
+{
+	cacheable=true;
+}
+
 String className=CaseConvertor.toCamelCase(tableName);
 className=className.substring(0,1).toUpperCase()+className.substring(1);
 
@@ -170,7 +207,7 @@ if(isView)
 	classBuilder.append("@View(name=\"" + tableName + "\")\r\n");
 else
 	classBuilder.append("@Table(name=\"" + tableName + "\")\r\n");
-classBuilder.append("\r\npublic class ");
+classBuilder.append("public class ");
 classBuilder.append(className+"\r\n{\r\n");
 
 constructorBuilder.append("public "+className+"()\r\n{");
@@ -276,6 +313,8 @@ columns.close();
 constructorBuilder.append("\r\n}\r\n");
 randomAccessFile.writeBytes("package "+packageName+";\r\n");
 randomAccessFile.writeBytes("import com.daniyal.ormcore.annotations.*;\r\n");
+if(cacheable)
+	randomAccessFile.writeBytes("@Cacheable\r\n");
 randomAccessFile.writeBytes(classBuilder.toString());
 randomAccessFile.writeBytes(constructorBuilder.toString());
 randomAccessFile.writeBytes(setterGetterBuilder.toString());
@@ -286,6 +325,7 @@ foreignKeyMetaDataMap.clear();
 classBuilder.setLength(0);
 constructorBuilder.setLength(0);
 setterGetterBuilder.setLength(0);
+cacheable=false;
 javaFiles.add(file);
 /* ResultSet idx=meta.getIndexInfo(connection.getCatalog(), null, tableName, false, false);
 while(idx.next()) 
