@@ -10,14 +10,14 @@ private FieldMetaData primaryKeyFieldMetaData;
 private FieldMetaData autoIncrementFieldMetaData;
 private Map<String,FieldMetaData> fieldMetaDataMap;
 private boolean isView;
-private boolean isCacheble;
+private boolean isCacheable;
 public EntityMetaData()
 {
 this.entityClass=null;
 this.tableName="";
 this.fieldMetaDataMap=null;
 this.isView=false;
-this.isCacheble=false;
+this.isCacheable=false;
 }
 
 public void setEntityClass(Class entityClass)
@@ -78,12 +78,12 @@ public boolean isView()
 {
 	return this.isView;
 }
-public void setCacheable(boolean isCacheble)
+public void setCacheable(boolean isCacheable)
 {
-this.isCacheble=isCacheble;	
+this.isCacheable=isCacheable;	
 }
-public boolean isCacheble()
+public boolean isCacheable()
 {
-	return this.isCacheble;
+	return this.isCacheable;
 }
 }
